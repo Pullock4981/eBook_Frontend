@@ -1,0 +1,35 @@
+{
+    "common": {
+        "welcome": "Welcome",
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success",
+        "save": "Save",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "edit": "Edit",
+        "add": "Add",
+        "search": "Search",
+        "filter": "Filter",
+        "clear": "Clear",
+        "submit": "Submit",
+        "back": "Back",
+        "next": "Next",
+        "previous": "Previous",
+        "close": "Close"
+    },
+    "theme": {
+        "light": "Light",
+        "dark": "Dark",
+        "toggle": "Toggle Theme"
+    },
+    "language": {
+        "english": "English",
+        "bangla": "Bangla",
+        "switch": "Switch Language"
+    },
+    "app": {
+        "name": "eBook Store",
+        "description": "Your one-stop shop for books"
+    }
+}

@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles */
+@layer base {
+
+    html,
+    body {
+        @apply transition-colors duration-300;
+        background-color: #EFECE3;
+        margin: 0;
+        padding: 0;
+    }
+
+    #root {
+        background-color: #EFECE3;
+        min-height: 100vh;
+    }
+}
+
+@layer components {
+    /* Add custom component styles here */
+}
+
+@layer utilities {
+    /* Add custom utility styles here */
+}
