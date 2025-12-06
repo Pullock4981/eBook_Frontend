@@ -43,13 +43,19 @@
         "products": "পণ্য",
         "dashboard": "ড্যাশবোর্ড",
         "admin": "অ্যাডমিন",
+        "adminDashboard": "ড্যাশবোর্ড",
         "login": "লগইন",
         "register": "নিবন্ধন",
         "logout": "লগআউট",
         "profile": "প্রোফাইল",
         "orders": "আমার অর্ডার",
         "ebooks": "আমার ই-বুক",
-        "cart": "কার্ট"
+        "addresses": "ঠিকানা",
+        "cart": "কার্ট",
+        "categories": "ক্যাটাগরি",
+        "users": "ব্যবহারকারী",
+        "affiliates": "অ্যাফিলিয়েট",
+        "coupons": "কুপন"
     },
     "footer": {
         "about": "আমাদের সম্পর্কে",
@@ -82,5 +88,77 @@
         "dashboardComingSoon": "ড্যাশবোর্ড পৃষ্ঠা শীঘ্রই আসছে...",
         "adminComingSoon": "অ্যাডমিন ড্যাশবোর্ড শীঘ্রই আসছে...",
         "pageNotFound": "পৃষ্ঠা পাওয়া যায়নি"
+    },
+    "auth": {
+        "title": "প্রমাণীকরণ",
+        "login": {
+            "title": "লগইন",
+            "subtitle": "আবার স্বাগতম! অনুগ্রহ করে লগইন করুন।",
+            "mobileLabel": "মোবাইল নম্বর",
+            "mobilePlaceholder": "আপনার মোবাইল নম্বর লিখুন",
+            "passwordLabel": "পাসওয়ার্ড",
+            "passwordPlaceholder": "আপনার পাসওয়ার্ড লিখুন (OTP লগইনের জন্য খালি রাখুন)",
+            "passwordHint": "OTP লগইনের জন্য খালি রাখুন",
+            "optional": "ঐচ্ছিক",
+            "requestOTP": "OTP অনুরোধ করুন",
+            "loginButton": "লগইন",
+            "loginWithPassword": "পাসওয়ার্ড দিয়ে লগইন",
+            "dontHaveAccount": "অ্যাকাউন্ট নেই?",
+            "registerLink": "এখানে নিবন্ধন করুন",
+            "forgotPassword": "পাসওয়ার্ড ভুলে গেছেন?"
+        },
+        "register": {
+            "title": "নিবন্ধন",
+            "subtitle": "শুরু করতে একটি নতুন অ্যাকাউন্ট তৈরি করুন।",
+            "nameLabel": "পূর্ণ নাম",
+            "namePlaceholder": "আপনার পূর্ণ নাম লিখুন",
+            "mobileLabel": "মোবাইল নম্বর",
+            "mobilePlaceholder": "আপনার মোবাইল নম্বর লিখুন",
+            "passwordLabel": "পাসওয়ার্ড",
+            "passwordPlaceholder": "আপনার পাসওয়ার্ড লিখুন",
+            "registerButton": "নিবন্ধন",
+            "haveAccount": "ইতিমধ্যে অ্যাকাউন্ট আছে?",
+            "loginLink": "এখানে লগইন করুন"
+        },
+        "otp": {
+            "title": "OTP যাচাই করুন",
+            "subtitle": "আমরা আপনার মোবাইল নম্বরে একটি OTP পাঠিয়েছি।",
+            "otpLabel": "OTP কোড",
+            "otpPlaceholder": "6-অঙ্কের OTP লিখুন",
+            "verifyButton": "OTP যাচাই করুন",
+            "resendOTP": "OTP আবার পাঠান",
+            "resendIn": "OTP আবার পাঠান",
+            "seconds": "সেকেন্ড",
+            "didntReceive": "OTP পাননি?",
+            "changeMobile": "মোবাইল নম্বর পরিবর্তন করুন"
+        },
+        "errors": {
+            "mobileRequired": "মোবাইল নম্বর প্রয়োজন",
+            "mobileInvalid": "অনুগ্রহ করে একটি বৈধ মোবাইল নম্বর লিখুন",
+            "nameRequired": "নাম প্রয়োজন",
+            "nameMinLength": "নাম কমপক্ষে 2 অক্ষর হতে হবে",
+            "otpRequired": "OTP প্রয়োজন",
+            "otpInvalid": "OTP অবশ্যই 6 অঙ্ক হতে হবে",
+            "passwordRequired": "পাসওয়ার্ড প্রয়োজন",
+            "passwordMinLength": "পাসওয়ার্ড কমপক্ষে 6 অক্ষর হতে হবে",
+            "otpExpired": "OTP মেয়াদ শেষ হয়ে গেছে। অনুগ্রহ করে একটি নতুন অনুরোধ করুন।",
+            "otpInvalidError": "অবৈধ OTP। অনুগ্রহ করে আবার চেষ্টা করুন।",
+            "mobileNotFound": "মোবাইল নম্বর পাওয়া যায়নি। অনুগ্রহ করে প্রথমে নিবন্ধন করুন।",
+            "userExists": "ইতিমধ্যে ব্যবহারকারী আছে। অনুগ্রহ করে লগইন করুন।",
+            "networkError": "নেটওয়ার্ক ত্রুটি। অনুগ্রহ করে আপনার সংযোগ পরীক্ষা করুন।",
+            "serverError": "সার্ভার ত্রুটি। অনুগ্রহ করে পরে আবার চেষ্টা করুন।"
+        },
+        "success": {
+            "otpSent": "OTP সফলভাবে আপনার মোবাইল নম্বরে পাঠানো হয়েছে",
+            "otpResent": "OTP সফলভাবে আবার পাঠানো হয়েছে",
+            "loginSuccess": "লগইন সফল! রিডাইরেক্ট করা হচ্ছে...",
+            "registerSuccess": "নিবন্ধন সফল! অনুগ্রহ করে OTP যাচাই করুন।"
+        },
+        "loading": {
+            "requestingOTP": "OTP অনুরোধ করা হচ্ছে...",
+            "verifyingOTP": "OTP যাচাই করা হচ্ছে...",
+            "loggingIn": "লগইন করা হচ্ছে...",
+            "registering": "নিবন্ধন করা হচ্ছে..."
+        }
     }
 }

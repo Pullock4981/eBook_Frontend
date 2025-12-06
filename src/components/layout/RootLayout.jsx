@@ -1,31 +1,12 @@
 /**
  * Root Layout Component
  * 
- * Main layout wrapper for the entire application.
- * Includes Header, main content area, and Footer.
- * Ensures consistent layout across all pages.
+ * Alias for PublicLayout for backward compatibility.
+ * Use PublicLayout for new code.
  */
 
-import { Outlet } from 'react-router-dom';
-import Navbar from './Navbar';
-import Footer from './Footer';
+import PublicLayout from './PublicLayout';
 
-function RootLayout() {
-    return (
-        <div className="min-h-screen flex flex-col transition-colors duration-300" style={{ backgroundColor: '#EFECE3' }}>
-            {/* Navbar */}
-            <Navbar />
-
-            {/* Main Content Area */}
-            <main className="flex-grow w-full transition-colors duration-300" style={{ backgroundColor: '#EFECE3' }}>
-                <Outlet />
-            </main>
-
-            {/* Footer */}
-            <Footer />
-        </div>
-    );
-}
-
-export default RootLayout;
+// Export PublicLayout as RootLayout for backward compatibility
+export default PublicLayout;
 

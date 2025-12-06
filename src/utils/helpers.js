@@ -89,9 +89,9 @@ export const validateMobile = (mobile) => {
 };
 
 /**
- * Format mobile number
+ * Format mobile number for display
  * @param {string} mobile - Mobile number to format
- * @returns {string} Formatted mobile number
+ * @returns {string} Formatted mobile number (for display)
  */
 export const formatMobile = (mobile) => {
     if (!mobile) return '';
@@ -104,6 +104,37 @@ export const formatMobile = (mobile) => {
     if (digits.length === 13 && digits.startsWith('880')) {
         return '+' + digits;
     }
+    return mobile;
+};
+
+/**
+ * Normalize mobile number for API (11 digits: 01XXXXXXXXX)
+ * Backend expects exactly 11 digits starting with 01
+ * @param {string} mobile - Mobile number to normalize
+ * @returns {string} Normalized mobile number (11 digits)
+ */
+export const normalizeMobileForAPI = (mobile) => {
+    if (!mobile) return '';
+    // Remove all non-digits
+    const digits = mobile.replace(/\D/g, '');
+
+    // Convert to 11-digit format (01XXXXXXXXX)
+    if (digits.length === 11 && digits.startsWith('01')) {
+        return digits; // Already in correct format
+    }
+    if (digits.length === 13 && digits.startsWith('880')) {
+        return '0' + digits.substring(2); // 8801XXXXXXXXX -> 01XXXXXXXXX
+    }
+    if (digits.length === 14 && digits.startsWith('880')) {
+        return '0' + digits.substring(3); // +8801XXXXXXXXX -> 01XXXXXXXXX
+    }
+
+    // If already 11 digits, return as is
+    if (digits.length === 11) {
+        return digits;
+    }
+
+    // Return original if can't normalize
     return mobile;
 };
 

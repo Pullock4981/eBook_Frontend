@@ -10,12 +10,13 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { useState, useEffect } from 'react';
-import { selectIsAuthenticated, selectUser, logout } from '../../store/slices/authSlice';
+import { selectIsAuthenticated, selectUser, logout, updateUser } from '../../store/slices/authSlice';
 import ThemeToggle from '../common/ThemeToggle';
 import LanguageSwitcher from '../common/LanguageSwitcher';
 import Logo from '../common/Logo';
 import { useTranslation } from 'react-i18next';
 import { getInitials } from '../../utils/helpers';
+import { getCurrentUser } from '../../services/userService';
 
 function Navbar() {
     const { t } = useTranslation();
@@ -36,6 +37,39 @@ function Navbar() {
     useEffect(() => {
         setMobileMenuOpen(false);
     }, [location.pathname]);
+
+    // Auto-refresh user data to detect role changes (e.g., manually made admin)
+    useEffect(() => {
+        if (!isAuthenticated) return;
+
+        const refreshUserData = async () => {
+            try {
+                const response = await getCurrentUser();
+                // API interceptor returns response.data, so check response structure
+                if (response?.success && response?.data) {
+                    const updatedUser = response.data;
+                    // Only update if role or other important fields changed
+                    if (user?.role !== updatedUser.role || user?.isVerified !== updatedUser.isVerified) {
+                        dispatch(updateUser(updatedUser));
+                    }
+                }
+            } catch (error) {
+                // Silently fail - user might not be authenticated or token expired
+                // Don't log in production to avoid console spam
+                if (import.meta.env.DEV) {
+                    console.log('Failed to refresh user data:', error.message);
+                }
+            }
+        };
+
+        // Refresh immediately on mount
+        refreshUserData();
+
+        // Refresh every 30 seconds to detect role changes
+        const interval = setInterval(refreshUserData, 30000);
+
+        return () => clearInterval(interval);
+    }, [isAuthenticated, dispatch, user?.role, user?.isVerified]);
 
     // Close mobile menu handler
     const closeMobileMenu = () => {
@@ -91,20 +125,24 @@ function Navbar() {
                     </li>
                     {isAuthenticated && (
                         <>
-                            <li>
-                                <Link
-                                    to="/dashboard"
-                                    className={`px-4 py-2 rounded-lg transition-colors ${isActive('/dashboard') ? 'text-white' : ''
-                                        }`}
-                                    style={
-                                        isActive('/dashboard')
-                                            ? { backgroundColor: '#1E293B', color: '#ffffff' }
-                                            : { color: '#1E293B' }
-                                    }
-                                >
-                                    {t('nav.dashboard') || 'Dashboard'}
-                                </Link>
-                            </li>
+                            {/* Show Dashboard link only for non-admin users */}
+                            {user?.role !== 'admin' && (
+                                <li>
+                                    <Link
+                                        to="/dashboard"
+                                        className={`px-4 py-2 rounded-lg transition-colors ${isActive('/dashboard') ? 'text-white' : ''
+                                            }`}
+                                        style={
+                                            isActive('/dashboard')
+                                                ? { backgroundColor: '#1E293B', color: '#ffffff' }
+                                                : { color: '#1E293B' }
+                                        }
+                                    >
+                                        {t('nav.dashboard') || 'Dashboard'}
+                                    </Link>
+                                </li>
+                            )}
+                            {/* Show Admin link only for admin users */}
                             {user?.role === 'admin' && (
                                 <li>
                                     <Link
@@ -178,21 +216,34 @@ function Navbar() {
                             className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow-lg border"
                             style={{ borderColor: '#e2e8f0' }}
                         >
-                            <li>
-                                <Link to="/dashboard" style={{ color: '#1E293B' }}>
-                                    {t('nav.profile') || 'Profile'}
-                                </Link>
-                            </li>
-                            <li>
-                                <Link to="/dashboard/orders" style={{ color: '#1E293B' }}>
-                                    {t('nav.orders') || 'My Orders'}
-                                </Link>
-                            </li>
-                            <li>
-                                <Link to="/dashboard/ebooks" style={{ color: '#1E293B' }}>
-                                    {t('nav.ebooks') || 'My eBooks'}
-                                </Link>
-                            </li>
+                            {/* Show user dashboard links only for non-admin users */}
+                            {user?.role !== 'admin' && (
+                                <>
+                                    <li>
+                                        <Link to="/dashboard" style={{ color: '#1E293B' }}>
+                                            {t('nav.profile') || 'Profile'}
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link to="/dashboard/orders" style={{ color: '#1E293B' }}>
+                                            {t('nav.orders') || 'My Orders'}
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link to="/dashboard/ebooks" style={{ color: '#1E293B' }}>
+                                            {t('nav.ebooks') || 'My eBooks'}
+                                        </Link>
+                                    </li>
+                                </>
+                            )}
+                            {/* Show admin link for admin users */}
+                            {user?.role === 'admin' && (
+                                <li>
+                                    <Link to="/admin" style={{ color: '#1E293B' }}>
+                                        {t('nav.admin') || 'Admin Dashboard'}
+                                    </Link>
+                                </li>
+                            )}
                             <li>
                                 <button onClick={handleLogout} style={{ color: '#1E293B' }}>
                                     {t('nav.logout') || 'Logout'}
@@ -228,7 +279,81 @@ function Navbar() {
                 )}
 
                 {/* Mobile Menu Button - Right Side (Only on small screens) */}
-                <div className="lg:hidden relative">
+                <div className="lg:hidden flex items-center gap-2">
+                    {/* User Icon for Small Devices */}
+                    {isAuthenticated ? (
+                        <div className="dropdown dropdown-end">
+                            <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
+                                <div
+                                    className="w-10 rounded-full flex items-center justify-center text-white text-sm font-semibold"
+                                    style={{ backgroundColor: '#1E293B' }}
+                                >
+                                    {user?.profile?.name ? getInitials(user.profile.name) : <span>U</span>}
+                                </div>
+                            </label>
+                            <ul
+                                tabIndex={0}
+                                className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow-lg border"
+                                style={{ borderColor: '#e2e8f0' }}
+                            >
+                                {/* Show user dashboard links only for non-admin users */}
+                                {user?.role !== 'admin' && (
+                                    <>
+                                        <li>
+                                            <Link to="/dashboard" style={{ color: '#1E293B' }}>
+                                                {t('nav.profile') || 'Profile'}
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <Link to="/dashboard/orders" style={{ color: '#1E293B' }}>
+                                                {t('nav.orders') || 'My Orders'}
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <Link to="/dashboard/ebooks" style={{ color: '#1E293B' }}>
+                                                {t('nav.ebooks') || 'My eBooks'}
+                                            </Link>
+                                        </li>
+                                    </>
+                                )}
+                                {/* Show admin link for admin users */}
+                                {user?.role === 'admin' && (
+                                    <li>
+                                        <Link to="/admin" style={{ color: '#1E293B' }}>
+                                            {t('nav.admin') || 'Admin Dashboard'}
+                                        </Link>
+                                    </li>
+                                )}
+                                <li>
+                                    <button onClick={handleLogout} style={{ color: '#1E293B' }}>
+                                        {t('nav.logout') || 'Logout'}
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    ) : (
+                        <Link
+                            to="/login"
+                            className="btn btn-ghost btn-circle"
+                            aria-label="Login"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-6 w-6"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                style={{ color: '#1E293B' }}
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                />
+                            </svg>
+                        </Link>
+                    )}
                     <button
                         type="button"
                         className="btn btn-ghost"
@@ -302,16 +427,20 @@ function Navbar() {
                             </li>
                             {isAuthenticated && (
                                 <>
-                                    <li>
-                                        <Link
-                                            to="/dashboard"
-                                            className={isActive('/dashboard') ? 'active' : ''}
-                                            style={isActive('/dashboard') ? {} : { color: '#1E293B' }}
-                                            onClick={closeMobileMenu}
-                                        >
-                                            {t('nav.dashboard') || 'Dashboard'}
-                                        </Link>
-                                    </li>
+                                    {/* Show Dashboard link only for non-admin users */}
+                                    {user?.role !== 'admin' && (
+                                        <li>
+                                            <Link
+                                                to="/dashboard"
+                                                className={isActive('/dashboard') ? 'active' : ''}
+                                                style={isActive('/dashboard') ? {} : { color: '#1E293B' }}
+                                                onClick={closeMobileMenu}
+                                            >
+                                                {t('nav.dashboard') || 'Dashboard'}
+                                            </Link>
+                                        </li>
+                                    )}
+                                    {/* Show Admin link only for admin users */}
                                     {user?.role === 'admin' && (
                                         <li>
                                             <Link
@@ -325,33 +454,50 @@ function Navbar() {
                                         </li>
                                     )}
                                     <li className="divider"></li>
-                                    <li>
-                                        <Link
-                                            to="/dashboard"
-                                            style={{ color: '#1E293B' }}
-                                            onClick={closeMobileMenu}
-                                        >
-                                            {t('nav.profile') || 'Profile'}
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link
-                                            to="/dashboard/orders"
-                                            style={{ color: '#1E293B' }}
-                                            onClick={closeMobileMenu}
-                                        >
-                                            {t('nav.orders') || 'My Orders'}
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link
-                                            to="/dashboard/ebooks"
-                                            style={{ color: '#1E293B' }}
-                                            onClick={closeMobileMenu}
-                                        >
-                                            {t('nav.ebooks') || 'My eBooks'}
-                                        </Link>
-                                    </li>
+                                    {/* Show user dashboard links only for non-admin users */}
+                                    {user?.role !== 'admin' && (
+                                        <>
+                                            <li>
+                                                <Link
+                                                    to="/dashboard"
+                                                    style={{ color: '#1E293B' }}
+                                                    onClick={closeMobileMenu}
+                                                >
+                                                    {t('nav.profile') || 'Profile'}
+                                                </Link>
+                                            </li>
+                                            <li>
+                                                <Link
+                                                    to="/dashboard/orders"
+                                                    style={{ color: '#1E293B' }}
+                                                    onClick={closeMobileMenu}
+                                                >
+                                                    {t('nav.orders') || 'My Orders'}
+                                                </Link>
+                                            </li>
+                                            <li>
+                                                <Link
+                                                    to="/dashboard/ebooks"
+                                                    style={{ color: '#1E293B' }}
+                                                    onClick={closeMobileMenu}
+                                                >
+                                                    {t('nav.ebooks') || 'My eBooks'}
+                                                </Link>
+                                            </li>
+                                        </>
+                                    )}
+                                    {/* Show admin link for admin users in dropdown */}
+                                    {user?.role === 'admin' && (
+                                        <li>
+                                            <Link
+                                                to="/admin"
+                                                style={{ color: '#1E293B' }}
+                                                onClick={closeMobileMenu}
+                                            >
+                                                {t('nav.admin') || 'Admin Dashboard'}
+                                            </Link>
+                                        </li>
+                                    )}
                                     <li>
                                         <button
                                             onClick={handleLogout}

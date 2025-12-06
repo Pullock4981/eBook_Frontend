@@ -92,11 +92,12 @@ api.interceptors.response.use(
                 console.error('Server error:', data.message || 'Internal server error');
             }
 
-            // Return error with message
+            // Return error with message and errors array
             return Promise.reject({
                 message: data.message || 'An error occurred',
                 status: status,
                 data: data,
+                errors: data.errors || [],
             });
         } else if (error.request) {
             // Request was made but no response received

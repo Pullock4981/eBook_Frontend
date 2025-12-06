@@ -20,10 +20,10 @@ export const API_ENDPOINTS = {
     },
     // User endpoints
     USER: {
-        PROFILE: '/user/profile',
-        UPDATE_PROFILE: '/user/profile',
-        ADDRESSES: '/user/addresses',
-        ADDRESS: '/user/address',
+        PROFILE: '/user/me',
+        UPDATE_PROFILE: '/user/me',
+        ADDRESSES: '/user/me/addresses',
+        ADDRESS: '/user/me/addresses',
     },
     // Product endpoints
     PRODUCTS: {

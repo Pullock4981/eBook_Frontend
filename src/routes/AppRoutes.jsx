@@ -7,10 +7,20 @@
 
 import { Routes, Route, Navigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useSelector, useDispatch } from 'react-redux';
+import { useEffect, useState } from 'react';
 import ProtectedRoute from '../components/common/ProtectedRoute';
 import AdminRoute from '../components/common/AdminRoute';
+import GuestRoute from '../components/common/GuestRoute';
 import ErrorBoundary from '../components/common/ErrorBoundary';
-import RootLayout from '../components/layout/RootLayout';
+import PublicLayout from '../components/layout/PublicLayout';
+import UserLayout from '../components/layout/UserLayout';
+import AdminLayout from '../components/layout/AdminLayout';
+import Login from '../pages/auth/Login';
+import Register from '../pages/auth/Register';
+import OTPVerification from '../pages/auth/OTPVerification';
+import { selectUser, updateUser } from '../store/slices/authSlice';
+import { getCurrentUser } from '../services/userService';
 
 // Pages (will be created in later parts)
 // For now, we'll create placeholder components
@@ -84,28 +94,67 @@ function Products() {
     );
 }
 
-function Login() {
-    const { t } = useTranslation();
-    return (
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8" style={{ backgroundColor: '#EFECE3' }}>
-            <h1 className="text-3xl sm:text-4xl font-bold mb-4" style={{ color: '#1E293B' }}>{t('nav.login') || 'Login'}</h1>
-            <p className="text-base sm:text-lg" style={{ color: '#2d3748' }}>{t('pages.loginComingSoon') || 'Login page coming soon...'}</p>
-        </div>
-    );
-}
-
-function Register() {
-    const { t } = useTranslation();
-    return (
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8" style={{ backgroundColor: '#EFECE3' }}>
-            <h1 className="text-3xl sm:text-4xl font-bold mb-4" style={{ color: '#1E293B' }}>{t('nav.register') || 'Register'}</h1>
-            <p className="text-base sm:text-lg" style={{ color: '#2d3748' }}>{t('pages.registerComingSoon') || 'Register page coming soon...'}</p>
-        </div>
-    );
-}
 
 function Dashboard() {
     const { t } = useTranslation();
+    const dispatch = useDispatch();
+    const user = useSelector(selectUser);
+    const [isChecking, setIsChecking] = useState(true);
+    const [shouldRedirect, setShouldRedirect] = useState(false);
+
+    // Check user role and redirect admin to admin dashboard
+    useEffect(() => {
+        const checkUserRole = async () => {
+            try {
+                // Refresh user data to get latest role
+                const response = await getCurrentUser();
+                if (response?.success && response?.data) {
+                    const updatedUser = response.data;
+                    dispatch(updateUser(updatedUser));
+
+                    // If user is admin, redirect to admin dashboard
+                    if (updatedUser.role === 'admin') {
+                        setShouldRedirect(true);
+                        return;
+                    }
+                }
+
+                // Check current user role in store
+                if (user?.role === 'admin') {
+                    setShouldRedirect(true);
+                    return;
+                }
+            } catch (error) {
+                // If error, check current user role
+                if (user?.role === 'admin') {
+                    setShouldRedirect(true);
+                    return;
+                }
+            } finally {
+                setIsChecking(false);
+            }
+        };
+
+        checkUserRole();
+    }, [dispatch, user?.role]);
+
+    // Redirect admin to admin dashboard
+    if (shouldRedirect) {
+        return <Navigate to="/admin" replace />;
+    }
+
+    // Show loading while checking
+    if (isChecking) {
+        return (
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex items-center justify-center min-h-screen">
+                <div className="text-center">
+                    <span className="loading loading-spinner loading-lg" style={{ color: '#1E293B' }}></span>
+                    <p className="mt-4" style={{ color: '#2d3748' }}>Loading dashboard...</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8" style={{ backgroundColor: '#EFECE3' }}>
             <h1 className="text-3xl sm:text-4xl font-bold mb-4" style={{ color: '#1E293B' }}>{t('nav.dashboard') || 'Dashboard'}</h1>
@@ -143,42 +192,78 @@ function NotFound() {
 
 /**
  * App Routes Component
- * Wraps all routes with ErrorBoundary and RootLayout
+ * Wraps all routes with ErrorBoundary and appropriate layouts
  */
 function AppRoutes() {
     return (
         <ErrorBoundary>
             <Routes>
-                {/* Root Layout with Header and Footer */}
-                <Route element={<RootLayout />}>
+                {/* Public Layout (Header + Footer) */}
+                <Route element={<PublicLayout />}>
                     {/* Public Routes */}
                     <Route path="/" element={<Home />} />
                     <Route path="/products" element={<Products />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/register" element={<Register />} />
 
-                    {/* Protected Routes (User) */}
+                    {/* Guest Routes (Login, Register, OTP) */}
                     <Route
-                        path="/dashboard"
+                        path="/login"
                         element={
-                            <ProtectedRoute>
-                                <Dashboard />
-                            </ProtectedRoute>
+                            <GuestRoute>
+                                <Login />
+                            </GuestRoute>
                         }
                     />
-
-                    {/* Protected Routes (Admin) */}
                     <Route
-                        path="/admin"
+                        path="/register"
                         element={
-                            <AdminRoute>
-                                <AdminDashboard />
-                            </AdminRoute>
+                            <GuestRoute>
+                                <Register />
+                            </GuestRoute>
+                        }
+                    />
+                    <Route
+                        path="/verify-otp"
+                        element={
+                            <GuestRoute>
+                                <OTPVerification />
+                            </GuestRoute>
                         }
                     />
 
                     {/* 404 Route */}
                     <Route path="*" element={<NotFound />} />
+                </Route>
+
+                {/* User Layout (Header + Sidebar) */}
+                <Route
+                    element={
+                        <ProtectedRoute>
+                            <UserLayout />
+                        </ProtectedRoute>
+                    }
+                >
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/dashboard/profile" element={<Dashboard />} />
+                    <Route path="/dashboard/orders" element={<Dashboard />} />
+                    <Route path="/dashboard/ebooks" element={<Dashboard />} />
+                    <Route path="/dashboard/addresses" element={<Dashboard />} />
+                </Route>
+
+                {/* Admin Layout (Header + Sidebar) */}
+                <Route
+                    element={
+                        <AdminRoute>
+                            <AdminLayout />
+                        </AdminRoute>
+                    }
+                >
+                    <Route path="/admin" element={<AdminDashboard />} />
+                    <Route path="/admin/products" element={<AdminDashboard />} />
+                    <Route path="/admin/categories" element={<AdminDashboard />} />
+                    <Route path="/admin/orders" element={<AdminDashboard />} />
+                    <Route path="/admin/users" element={<AdminDashboard />} />
+                    <Route path="/admin/affiliates" element={<AdminDashboard />} />
+                    <Route path="/admin/coupons" element={<AdminDashboard />} />
                 </Route>
             </Routes>
         </ErrorBoundary>
