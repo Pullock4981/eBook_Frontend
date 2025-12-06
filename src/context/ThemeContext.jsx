@@ -1,4 +1,6 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { selectTheme, toggleTheme as toggleReduxTheme, setTheme as setReduxTheme } from '../store/slices/themeSlice';
 
 const ThemeContext = createContext();
 
@@ -11,15 +13,11 @@ export const useTheme = () => {
 };
 
 export const ThemeProvider = ({ children }) => {
-    // Get initial theme from localStorage or default to 'light'
-    const [theme, setTheme] = useState(() => {
-        const savedTheme = localStorage.getItem('theme');
-        return savedTheme || 'light';
-    });
+    const dispatch = useDispatch();
+    const theme = useSelector(selectTheme);
 
-    // Update theme in localStorage and apply to document
+    // Apply theme to document on mount and when theme changes
     useEffect(() => {
-        localStorage.setItem('theme', theme);
         const html = document.documentElement;
 
         if (theme === 'dark') {
@@ -31,9 +29,14 @@ export const ThemeProvider = ({ children }) => {
         }
     }, [theme]);
 
-    // Toggle theme function
+    // Toggle theme function - syncs with Redux
     const toggleTheme = () => {
-        setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
+        dispatch(toggleReduxTheme());
+    };
+
+    // Set theme function - syncs with Redux
+    const setTheme = (newTheme) => {
+        dispatch(setReduxTheme(newTheme));
     };
 
     const value = {

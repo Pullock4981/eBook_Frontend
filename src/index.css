@@ -14,8 +14,8 @@
     }
 
     #root {
+        @apply min-h-screen transition-colors duration-300;
         background-color: #EFECE3;
-        min-height: 100vh;
     }
 }
 

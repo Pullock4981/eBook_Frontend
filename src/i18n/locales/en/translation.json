@@ -3,6 +3,9 @@
         "welcome": "Welcome",
         "loading": "Loading...",
         "error": "Error",
+        "errorMessage": "We encountered an unexpected error. Please try again.",
+        "tryAgain": "Try Again",
+        "goHome": "Go Home",
         "success": "Success",
         "save": "Save",
         "cancel": "Cancel",
@@ -16,7 +19,10 @@
         "back": "Back",
         "next": "Next",
         "previous": "Previous",
-        "close": "Close"
+        "close": "Close",
+        "itemsPerPage": "Items per page:",
+        "showing": "Showing",
+        "of": "of"
     },
     "theme": {
         "light": "Light",
@@ -31,5 +37,50 @@
     "app": {
         "name": "eBook Store",
         "description": "Your one-stop shop for books"
+    },
+    "nav": {
+        "home": "Home",
+        "products": "Products",
+        "dashboard": "Dashboard",
+        "admin": "Admin",
+        "login": "Login",
+        "register": "Register",
+        "logout": "Logout",
+        "profile": "Profile",
+        "orders": "My Orders",
+        "ebooks": "My eBooks",
+        "cart": "Cart"
+    },
+    "footer": {
+        "about": "About Us",
+        "description": "Your one-stop shop for books, both physical and digital.",
+        "quickLinks": "Quick Links",
+        "categories": "Categories",
+        "aboutUs": "About Us",
+        "contact": "Contact",
+        "customerService": "Customer Service",
+        "help": "Help Center",
+        "shipping": "Shipping Info",
+        "returns": "Returns",
+        "faq": "FAQ",
+        "allRightsReserved": "All rights reserved."
+    },
+    "home": {
+        "discoverYourNext": "Discover Your Next",
+        "greatRead": "Great Read",
+        "description": "Explore thousands of books, both physical and digital. From bestsellers to hidden gems, find your perfect story.",
+        "browseBooks": "Browse Books",
+        "getStarted": "Get Started",
+        "booksAvailable": "Books Available",
+        "happyReaders": "Happy Readers",
+        "averageRating": "Average Rating"
+    },
+    "pages": {
+        "productsComingSoon": "Products page coming soon...",
+        "loginComingSoon": "Login page coming soon...",
+        "registerComingSoon": "Register page coming soon...",
+        "dashboardComingSoon": "Dashboard page coming soon...",
+        "adminComingSoon": "Admin dashboard coming soon...",
+        "pageNotFound": "Page Not Found"
     }
 }
