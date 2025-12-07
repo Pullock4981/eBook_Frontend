@@ -11,7 +11,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { useState, useEffect } from 'react';
 import { selectIsAuthenticated, selectUser, logout, updateUser } from '../../store/slices/authSlice';
-import { selectCartItemCount } from '../../store/slices/cartSlice';
+import { selectCartItemCount, fetchCart, clearCartState } from '../../store/slices/cartSlice';
 import ThemeToggle from '../common/ThemeToggle';
 import LanguageSwitcher from '../common/LanguageSwitcher';
 import Logo from '../common/Logo';
@@ -31,6 +31,7 @@ function Navbar() {
 
     const handleLogout = () => {
         dispatch(logout());
+        dispatch(clearCartState()); // Clear cart on logout
         navigate('/');
         setMobileMenuOpen(false);
     };
@@ -72,6 +73,13 @@ function Navbar() {
 
         return () => clearInterval(interval);
     }, [isAuthenticated, dispatch, user?.role, user?.isVerified]);
+
+    // Fetch cart when user is authenticated (on app load and login)
+    useEffect(() => {
+        if (isAuthenticated) {
+            dispatch(fetchCart());
+        }
+    }, [isAuthenticated, dispatch]);
 
     // Close mobile menu handler
     const closeMobileMenu = () => {

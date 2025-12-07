@@ -23,6 +23,12 @@ import Products from '../pages/Products';
 import ProductDetail from '../pages/ProductDetail';
 import Categories from '../pages/Categories';
 import Cart from '../pages/Cart';
+import Checkout from '../pages/Checkout';
+import Orders from '../pages/Orders';
+import OrderDetail from '../pages/OrderDetail';
+import UserDashboard from '../pages/user/Dashboard';
+import UserProfile from '../pages/user/Profile';
+import UserAddresses from '../pages/user/Addresses';
 import AdminProductList from '../pages/admin/Products/ProductList';
 import AdminProductCreate from '../pages/admin/Products/ProductCreate';
 import AdminProductEdit from '../pages/admin/Products/ProductEdit';
@@ -201,6 +207,14 @@ function AppRoutes() {
                     <Route path="/products/:id" element={<ProductDetail />} />
                     <Route path="/categories" element={<Categories />} />
                     <Route path="/cart" element={<Cart />} />
+                    <Route
+                        path="/checkout"
+                        element={
+                            <ProtectedRoute>
+                                <Checkout />
+                            </ProtectedRoute>
+                        }
+                    />
 
                     {/* Guest Routes (Login, Register, OTP) */}
                     <Route
@@ -240,11 +254,13 @@ function AppRoutes() {
                         </ProtectedRoute>
                     }
                 >
-                    <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/dashboard/profile" element={<Dashboard />} />
-                    <Route path="/dashboard/orders" element={<Dashboard />} />
-                    <Route path="/dashboard/ebooks" element={<Dashboard />} />
-                    <Route path="/dashboard/addresses" element={<Dashboard />} />
+                    <Route path="/dashboard" element={<UserDashboard />} />
+                    <Route path="/dashboard/profile" element={<UserProfile />} />
+                    <Route path="/dashboard/orders" element={<Orders />} />
+                    <Route path="/dashboard/ebooks" element={<UserDashboard />} />
+                    <Route path="/dashboard/addresses" element={<UserAddresses />} />
+                    <Route path="/orders" element={<Orders />} />
+                    <Route path="/orders/:id" element={<OrderDetail />} />
                 </Route>
 
                 {/* Admin Layout (Header + Sidebar) */}

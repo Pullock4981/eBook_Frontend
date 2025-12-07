@@ -81,3 +81,13 @@ export const deleteAddress = async (addressId) => {
     return response;
 };
 
+/**
+ * Set default address
+ * @param {string} addressId - Address ID
+ * @returns {Promise} API response
+ */
+export const setDefaultAddress = async (addressId) => {
+    const response = await api.put(`${API_ENDPOINTS.USER.ADDRESSES}/${addressId}/default`);
+    return response.data;
+};
+
