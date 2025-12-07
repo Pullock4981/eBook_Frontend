@@ -34,7 +34,7 @@ export const updateProfile = async (data) => {
  * @returns {Promise} API response
  */
 export const changePassword = async (currentPassword, newPassword) => {
-    const response = await api.put('/user/me/password', {
+    const response = await api.put('/users/me/password', {
         currentPassword,
         newPassword,
     });

@@ -20,10 +20,10 @@ export const API_ENDPOINTS = {
     },
     // User endpoints
     USER: {
-        PROFILE: '/user/me',
-        UPDATE_PROFILE: '/user/me',
-        ADDRESSES: '/user/me/addresses',
-        ADDRESS: '/user/me/addresses',
+        PROFILE: '/users/me',
+        UPDATE_PROFILE: '/users/me',
+        ADDRESSES: '/users/me/addresses',
+        ADDRESS: '/users/me/addresses',
     },
     // Product endpoints
     PRODUCTS: {
@@ -39,10 +39,12 @@ export const API_ENDPOINTS = {
     // Cart endpoints
     CART: {
         GET: '/cart',
-        ADD: '/cart/add',
-        UPDATE: '/cart/update',
-        REMOVE: '/cart/remove',
-        CLEAR: '/cart/clear',
+        ADD: '/cart/items',
+        UPDATE: '/cart/items',
+        REMOVE: '/cart/items',
+        CLEAR: '/cart',
+        APPLY_COUPON: '/cart/coupon',
+        REMOVE_COUPON: '/cart/coupon',
     },
     // Order endpoints
     ORDERS: {

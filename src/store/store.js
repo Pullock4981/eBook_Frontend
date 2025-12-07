@@ -10,6 +10,7 @@ import appReducer from './slices/appSlice';
 import themeReducer from './slices/themeSlice';
 import productReducer from './slices/productSlice';
 import categoryReducer from './slices/categorySlice';
+import cartReducer from './slices/cartSlice';
 
 // Configure store
 export const store = configureStore({
@@ -19,6 +20,7 @@ export const store = configureStore({
         theme: themeReducer,
         products: productReducer,
         categories: categoryReducer,
+        cart: cartReducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({

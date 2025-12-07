@@ -22,6 +22,7 @@ import OTPVerification from '../pages/auth/OTPVerification';
 import Products from '../pages/Products';
 import ProductDetail from '../pages/ProductDetail';
 import Categories from '../pages/Categories';
+import Cart from '../pages/Cart';
 import AdminProductList from '../pages/admin/Products/ProductList';
 import AdminProductCreate from '../pages/admin/Products/ProductCreate';
 import AdminProductEdit from '../pages/admin/Products/ProductEdit';
@@ -199,6 +200,7 @@ function AppRoutes() {
                     <Route path="/products" element={<Products />} />
                     <Route path="/products/:id" element={<ProductDetail />} />
                     <Route path="/categories" element={<Categories />} />
+                    <Route path="/cart" element={<Cart />} />
 
                     {/* Guest Routes (Login, Register, OTP) */}
                     <Route

@@ -9,7 +9,8 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProductById, fetchProductBySlug, selectCurrentProduct, selectIsLoading, selectError, clearCurrentProduct } from '../store/slices/productSlice';
-import { selectUser } from '../store/slices/authSlice';
+import { selectUser, selectIsAuthenticated } from '../store/slices/authSlice';
+import { addItemToCart } from '../store/slices/cartSlice';
 import { deleteProduct } from '../services/adminService';
 import ProductGallery from '../components/products/ProductGallery';
 import Loading from '../components/common/Loading';
@@ -26,9 +27,13 @@ function ProductDetail() {
     const isLoading = useSelector(selectIsLoading);
     const error = useSelector(selectError);
     const user = useSelector(selectUser);
+    const isAuthenticated = useSelector(selectIsAuthenticated);
 
     const [isDeleting, setIsDeleting] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [isAddingToCart, setIsAddingToCart] = useState(false);
+    const [addToCartError, setAddToCartError] = useState(null);
+    const [addToCartSuccess, setAddToCartSuccess] = useState(false);
 
     // Check if user is admin
     const isAdmin = user?.role === 'admin';
@@ -326,11 +331,62 @@ function ProductDetail() {
                             <>
                                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
                                     <button
-                                        className="btn btn-primary btn-md sm:btn-lg flex-grow text-white"
+                                        className="btn btn-primary btn-md sm:btn-lg flex-grow text-white shadow-lg hover:shadow-xl transition-all"
                                         style={{ backgroundColor: '#1E293B' }}
-                                        disabled={isPhysical && product.stock === 0}
+                                        disabled={isAddingToCart || !isAuthenticated}
+                                        onClick={async () => {
+                                            if (!isAuthenticated) {
+                                                navigate('/login');
+                                                return;
+                                            }
+
+                                            // Check stock before adding
+                                            if (isPhysical && product.stock === 0) {
+                                                setAddToCartError(t('products.outOfStockMessage') || 'This product is currently out of stock.');
+                                                return;
+                                            }
+
+                                            if (!product?._id) {
+                                                setAddToCartError(t('cart.productNotFound') || 'Product not found');
+                                                return;
+                                            }
+
+                                            setIsAddingToCart(true);
+                                            setAddToCartError(null);
+                                            setAddToCartSuccess(false);
+                                            try {
+                                                await dispatch(addItemToCart({ productId: product._id, quantity: 1 })).unwrap();
+                                                setAddToCartSuccess(true);
+                                                setTimeout(() => setAddToCartSuccess(false), 3000);
+                                            } catch (error) {
+                                                // Handle specific error messages
+                                                const errorMessage = error?.message || error || t('cart.addToCartError') || 'Failed to add to cart';
+                                                setAddToCartError(errorMessage);
+                                            } finally {
+                                                setIsAddingToCart(false);
+                                            }
+                                        }}
                                     >
-                                        {t('products.addToCart') || 'Add to Cart'}
+                                        {isAddingToCart ? (
+                                            <>
+                                                <span className="loading loading-spinner loading-sm"></span>
+                                                <span className="ml-2">{t('cart.adding') || 'Adding...'}</span>
+                                            </>
+                                        ) : addToCartSuccess ? (
+                                            <>
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                </svg>
+                                                <span className="ml-2">{t('cart.addedToCart') || 'Added to Cart!'}</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                                </svg>
+                                                <span className="ml-2">{t('products.addToCart') || 'Add to Cart'}</span>
+                                            </>
+                                        )}
                                     </button>
                                     <button
                                         className="btn btn-outline btn-md sm:btn-lg"
@@ -339,11 +395,35 @@ function ProductDetail() {
                                         {t('products.wishlist') || 'Wishlist'}
                                     </button>
                                 </div>
-                                {/* Note: Add to Cart will be implemented in Part 6 */}
+
+                                {/* Success Message */}
+                                {addToCartSuccess && (
+                                    <div className="alert alert-success">
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        <span>{t('cart.addedToCartSuccess') || 'Product added to cart successfully!'}</span>
+                                        <Link to="/cart" className="btn btn-sm btn-success text-white">
+                                            {t('cart.viewCart') || 'View Cart'}
+                                        </Link>
+                                    </div>
+                                )}
+
+                                {/* Error Message */}
+                                {addToCartError && (
+                                    <div className="alert alert-error mt-2">
+                                        <svg className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                        <span className="text-sm sm:text-base">{addToCartError}</span>
+                                    </div>
+                                )}
+
+                                {/* Out of Stock Message */}
                                 {isPhysical && product.stock === 0 && (
-                                    <div className="alert alert-warning">
+                                    <div className="alert alert-warning mt-2">
                                         <svg
-                                            className="w-6 h-6"
+                                            className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0"
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
@@ -355,7 +435,7 @@ function ProductDetail() {
                                                 d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                                             />
                                         </svg>
-                                        <span>{t('products.outOfStockMessage') || 'This product is currently out of stock.'}</span>
+                                        <span className="text-sm sm:text-base">{t('products.outOfStockMessage') || 'This product is currently out of stock.'}</span>
                                     </div>
                                 )}
                             </>

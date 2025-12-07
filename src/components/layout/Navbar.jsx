@@ -11,6 +11,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { useState, useEffect } from 'react';
 import { selectIsAuthenticated, selectUser, logout, updateUser } from '../../store/slices/authSlice';
+import { selectCartItemCount } from '../../store/slices/cartSlice';
 import ThemeToggle from '../common/ThemeToggle';
 import LanguageSwitcher from '../common/LanguageSwitcher';
 import Logo from '../common/Logo';
@@ -25,6 +26,7 @@ function Navbar() {
     const dispatch = useDispatch();
     const isAuthenticated = useSelector(selectIsAuthenticated);
     const user = useSelector(selectUser);
+    const cartItemCount = useSelector(selectCartItemCount);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     const handleLogout = () => {
@@ -189,8 +191,11 @@ function Navbar() {
                             d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
                         />
                     </svg>
-                    {/* Cart Badge - You can add cart count here later */}
-                    {/* <span className="badge badge-sm badge-primary absolute -top-1 -right-1">0</span> */}
+                    {cartItemCount > 0 && (
+                        <span className="absolute -top-1 -right-1 badge badge-sm badge-primary text-white" style={{ backgroundColor: '#1E293B' }}>
+                            {cartItemCount > 99 ? '99+' : cartItemCount}
+                        </span>
+                    )}
                 </Link>
 
                 {/* Theme Toggle - Hidden on mobile */}

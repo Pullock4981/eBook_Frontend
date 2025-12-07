@@ -285,5 +285,38 @@
             "digitalFileRequired": "Digital file URL is required for digital products",
             "imagesRequired": "At least one image is required"
         }
+    },
+    "cart": {
+        "title": "Shopping Cart",
+        "orderSummary": "Order Summary",
+        "subtotal": "Subtotal",
+        "discount": "Discount",
+        "total": "Total",
+        "itemsInCart": "{{count}} item(s) in your cart",
+        "emptyCart": "Your Cart is Empty",
+        "emptyCartMessage": "Your cart is empty",
+        "emptyCartDescription": "Add some products to your cart to get started!",
+        "startShopping": "Start Shopping",
+        "continueShopping": "Continue Shopping",
+        "proceedToCheckout": "Proceed to Checkout",
+        "viewCart": "View Cart",
+        "addToCart": "Add to Cart",
+        "adding": "Adding...",
+        "addedToCart": "Added to Cart!",
+        "addedToCartSuccess": "Product added to cart successfully!",
+        "addToCartError": "Failed to add to cart",
+        "productNotFound": "Product not found",
+        "remove": "Remove",
+        "updateQuantity": "Update Quantity",
+        "loginRequired": "Login Required",
+        "loginRequiredMessage": "Please login to view your cart",
+        "enterCouponCode": "Enter coupon code",
+        "apply": "Apply",
+        "couponApplied": "Coupon Applied",
+        "invalidCoupon": "Invalid coupon code",
+        "couponCodeRequired": "Coupon code is required",
+        "increaseQuantity": "Increase quantity",
+        "decreaseQuantity": "Decrease quantity",
+        "totalItems": "{{count}} item(s) total"
     }
 }

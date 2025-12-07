@@ -285,5 +285,38 @@
             "digitalFileRequired": "ডিজিটাল পণ্যের জন্য ডিজিটাল ফাইল URL প্রয়োজন",
             "imagesRequired": "অন্তত একটি ছবি প্রয়োজন"
         }
+    },
+    "cart": {
+        "title": "শপিং কার্ট",
+        "orderSummary": "অর্ডার সারাংশ",
+        "subtotal": "উপমোট",
+        "discount": "ছাড়",
+        "total": "মোট",
+        "itemsInCart": "আপনার কার্টে {{count}}টি আইটেম",
+        "emptyCart": "আপনার কার্ট খালি",
+        "emptyCartMessage": "আপনার কার্ট খালি",
+        "emptyCartDescription": "শুরু করতে আপনার কার্টে কিছু পণ্য যোগ করুন!",
+        "startShopping": "কেনাকাটা শুরু করুন",
+        "continueShopping": "কেনাকাটা চালিয়ে যান",
+        "proceedToCheckout": "চেকআউটে যান",
+        "viewCart": "কার্ট দেখুন",
+        "addToCart": "কার্টে যোগ করুন",
+        "adding": "যোগ করা হচ্ছে...",
+        "addedToCart": "কার্টে যোগ করা হয়েছে!",
+        "addedToCartSuccess": "পণ্য সফলভাবে কার্টে যোগ করা হয়েছে!",
+        "addToCartError": "কার্টে যোগ করতে ব্যর্থ",
+        "productNotFound": "পণ্য পাওয়া যায়নি",
+        "remove": "সরান",
+        "updateQuantity": "পরিমাণ আপডেট করুন",
+        "loginRequired": "লগইন প্রয়োজন",
+        "loginRequiredMessage": "আপনার কার্ট দেখতে অনুগ্রহ করে লগইন করুন",
+        "enterCouponCode": "কুপন কোড লিখুন",
+        "apply": "প্রয়োগ করুন",
+        "couponApplied": "কুপন প্রয়োগ করা হয়েছে",
+        "invalidCoupon": "অবৈধ কুপন কোড",
+        "couponCodeRequired": "কুপন কোড প্রয়োজন",
+        "increaseQuantity": "পরিমাণ বৃদ্ধি করুন",
+        "decreaseQuantity": "পরিমাণ কমান",
+        "totalItems": "মোট {{count}}টি আইটেম"
     }
 }
