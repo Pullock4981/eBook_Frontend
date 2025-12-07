@@ -31,10 +31,19 @@ function CartSummary() {
         setIsApplyingCoupon(true);
         setCouponError(null);
         try {
-            await dispatch(applyCouponCode(couponCode.trim())).unwrap();
+            await dispatch(applyCouponCode(couponCode.trim().toUpperCase())).unwrap();
             setCouponCode('');
         } catch (error) {
-            setCouponError(error || t('cart.invalidCoupon') || 'Invalid coupon code');
+            // Extract error message from different error formats
+            let errorMessage = t('cart.invalidCoupon') || 'Invalid coupon code';
+            if (typeof error === 'string') {
+                errorMessage = error;
+            } else if (error?.message) {
+                errorMessage = error.message;
+            } else if (error?.response?.data?.message) {
+                errorMessage = error.response.data.message;
+            }
+            setCouponError(errorMessage);
         } finally {
             setIsApplyingCoupon(false);
         }
@@ -92,18 +101,24 @@ function CartSummary() {
                 ) : (
                     <div className="mb-4 p-3 rounded-lg bg-success/10 border border-success/20">
                         <div className="flex items-center justify-between">
-                            <div>
+                            <div className="flex-1">
                                 <p className="text-sm font-medium text-success">
                                     {t('cart.couponApplied') || 'Coupon Applied'}
                                 </p>
                                 <p className="text-xs opacity-70" style={{ color: '#2d3748' }}>
-                                    {coupon.code || coupon}
+                                    {coupon?.code || (typeof coupon === 'string' ? coupon : 'N/A')}
                                 </p>
+                                {discount > 0 && (
+                                    <p className="text-xs font-semibold text-success mt-1">
+                                        {t('cart.savings') || 'Savings'}: {formatCurrency(discount)}
+                                    </p>
+                                )}
                             </div>
                             <button
                                 className="btn btn-sm btn-ghost text-error px-3 sm:px-4"
                                 onClick={handleRemoveCoupon}
                                 disabled={isLoading}
+                                title={t('cart.removeCoupon') || 'Remove coupon'}
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -123,13 +138,18 @@ function CartSummary() {
                             {formatCurrency(subtotal)}
                         </span>
                     </div>
-                    {discount > 0 && (
+                    {(discount > 0 || coupon) && (
                         <div className="flex justify-between items-center">
                             <span className="text-sm sm:text-base text-success">
                                 {t('cart.discount') || 'Discount'}
+                                {coupon && (
+                                    <span className="text-xs opacity-70 ml-1">
+                                        ({coupon?.code || (typeof coupon === 'string' ? coupon : '')})
+                                    </span>
+                                )}
                             </span>
                             <span className="text-sm sm:text-base font-semibold text-success">
-                                -{formatCurrency(discount)}
+                                -{formatCurrency(discount || 0)}
                             </span>
                         </div>
                     )}

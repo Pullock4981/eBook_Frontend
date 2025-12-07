@@ -131,13 +131,22 @@ const cartSlice = createSlice({
             })
             .addCase(fetchCart.fulfilled, (state, action) => {
                 state.isLoading = false;
-                const cartData = action.payload?.data || action.payload || {};
+                const response = action.payload;
+                const cartData = response?.data || response || {};
+
                 state.items = cartData.items || [];
-                state.subtotal = cartData.subtotal || 0;
-                state.discount = cartData.discount || 0;
-                state.total = cartData.total || 0;
+
+                // Ensure numbers are properly converted
+                const subtotal = Number(cartData.subtotal) || 0;
+                const discount = Number(cartData.discount) || 0;
+                const total = Number(cartData.total) || 0;
+
+                state.subtotal = subtotal;
+                state.discount = discount;
+                // Use backend total if available, otherwise calculate
+                state.total = total > 0 ? total : (subtotal - discount);
                 state.coupon = cartData.coupon || null;
-                state.itemCount = state.items.reduce((sum, item) => sum + item.quantity, 0);
+                state.itemCount = state.items.reduce((sum, item) => sum + (item.quantity || 0), 0);
                 state.lastUpdated = cartData.lastUpdated || new Date().toISOString();
             })
             .addCase(fetchCart.rejected, (state, action) => {
@@ -151,13 +160,22 @@ const cartSlice = createSlice({
             })
             .addCase(addItemToCart.fulfilled, (state, action) => {
                 state.isLoading = false;
-                const cartData = action.payload?.data || action.payload || {};
+                const response = action.payload;
+                const cartData = response?.data || response || {};
+
                 state.items = cartData.items || [];
-                state.subtotal = cartData.subtotal || 0;
-                state.discount = cartData.discount || 0;
-                state.total = cartData.total || 0;
+
+                // Ensure numbers are properly converted
+                const subtotal = Number(cartData.subtotal) || 0;
+                const discount = Number(cartData.discount) || 0;
+                const total = Number(cartData.total) || 0;
+
+                state.subtotal = subtotal;
+                state.discount = discount;
+                // Use backend total if available, otherwise calculate
+                state.total = total > 0 ? total : (subtotal - discount);
                 state.coupon = cartData.coupon || null;
-                state.itemCount = state.items.reduce((sum, item) => sum + item.quantity, 0);
+                state.itemCount = state.items.reduce((sum, item) => sum + (item.quantity || 0), 0);
                 state.lastUpdated = cartData.lastUpdated || new Date().toISOString();
             })
             .addCase(addItemToCart.rejected, (state, action) => {
@@ -171,13 +189,22 @@ const cartSlice = createSlice({
             })
             .addCase(updateItemQuantity.fulfilled, (state, action) => {
                 state.isLoading = false;
-                const cartData = action.payload?.data || action.payload || {};
+                const response = action.payload;
+                const cartData = response?.data || response || {};
+
                 state.items = cartData.items || [];
-                state.subtotal = cartData.subtotal || 0;
-                state.discount = cartData.discount || 0;
-                state.total = cartData.total || 0;
+
+                // Ensure numbers are properly converted
+                const subtotal = Number(cartData.subtotal) || 0;
+                const discount = Number(cartData.discount) || 0;
+                const total = Number(cartData.total) || 0;
+
+                state.subtotal = subtotal;
+                state.discount = discount;
+                // Use backend total if available, otherwise calculate
+                state.total = total > 0 ? total : (subtotal - discount);
                 state.coupon = cartData.coupon || null;
-                state.itemCount = state.items.reduce((sum, item) => sum + item.quantity, 0);
+                state.itemCount = state.items.reduce((sum, item) => sum + (item.quantity || 0), 0);
                 state.lastUpdated = cartData.lastUpdated || new Date().toISOString();
             })
             .addCase(updateItemQuantity.rejected, (state, action) => {
@@ -191,13 +218,22 @@ const cartSlice = createSlice({
             })
             .addCase(removeItemFromCart.fulfilled, (state, action) => {
                 state.isLoading = false;
-                const cartData = action.payload?.data || action.payload || {};
+                const response = action.payload;
+                const cartData = response?.data || response || {};
+
                 state.items = cartData.items || [];
-                state.subtotal = cartData.subtotal || 0;
-                state.discount = cartData.discount || 0;
-                state.total = cartData.total || 0;
+
+                // Ensure numbers are properly converted
+                const subtotal = Number(cartData.subtotal) || 0;
+                const discount = Number(cartData.discount) || 0;
+                const total = Number(cartData.total) || 0;
+
+                state.subtotal = subtotal;
+                state.discount = discount;
+                // Use backend total if available, otherwise calculate
+                state.total = total > 0 ? total : (subtotal - discount);
                 state.coupon = cartData.coupon || null;
-                state.itemCount = state.items.reduce((sum, item) => sum + item.quantity, 0);
+                state.itemCount = state.items.reduce((sum, item) => sum + (item.quantity || 0), 0);
                 state.lastUpdated = cartData.lastUpdated || new Date().toISOString();
             })
             .addCase(removeItemFromCart.rejected, (state, action) => {
@@ -230,13 +266,23 @@ const cartSlice = createSlice({
             })
             .addCase(applyCouponCode.fulfilled, (state, action) => {
                 state.isLoading = false;
-                const cartData = action.payload?.data || action.payload || {};
+                // Handle response structure: response.data or direct response
+                const response = action.payload;
+                const cartData = response?.data || response || {};
+
                 state.items = cartData.items || [];
-                state.subtotal = cartData.subtotal || 0;
-                state.discount = cartData.discount || 0;
-                state.total = cartData.total || 0;
+
+                // Ensure numbers are properly converted
+                const subtotal = Number(cartData.subtotal) || 0;
+                const discount = Number(cartData.discount) || 0;
+                const total = Number(cartData.total) || 0;
+
+                state.subtotal = subtotal;
+                state.discount = discount;
+                // Use backend total if available, otherwise calculate
+                state.total = total > 0 ? total : (subtotal - discount);
                 state.coupon = cartData.coupon || null;
-                state.itemCount = state.items.reduce((sum, item) => sum + item.quantity, 0);
+                state.itemCount = state.items.reduce((sum, item) => sum + (item.quantity || 0), 0);
                 state.lastUpdated = cartData.lastUpdated || new Date().toISOString();
             })
             .addCase(applyCouponCode.rejected, (state, action) => {
@@ -250,13 +296,22 @@ const cartSlice = createSlice({
             })
             .addCase(removeCouponCode.fulfilled, (state, action) => {
                 state.isLoading = false;
-                const cartData = action.payload?.data || action.payload || {};
+                const response = action.payload;
+                const cartData = response?.data || response || {};
+
                 state.items = cartData.items || [];
-                state.subtotal = cartData.subtotal || 0;
-                state.discount = cartData.discount || 0;
-                state.total = cartData.total || 0;
+
+                // Ensure numbers are properly converted
+                const subtotal = Number(cartData.subtotal) || 0;
+                const discount = Number(cartData.discount) || 0;
+                const total = Number(cartData.total) || 0;
+
+                state.subtotal = subtotal;
+                state.discount = discount;
+                // Use backend total if available, otherwise calculate
+                state.total = total > 0 ? total : (subtotal - discount);
                 state.coupon = null;
-                state.itemCount = state.items.reduce((sum, item) => sum + item.quantity, 0);
+                state.itemCount = state.items.reduce((sum, item) => sum + (item.quantity || 0), 0);
                 state.lastUpdated = cartData.lastUpdated || new Date().toISOString();
             })
             .addCase(removeCouponCode.rejected, (state, action) => {
