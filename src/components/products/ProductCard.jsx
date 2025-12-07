@@ -31,71 +31,41 @@ function ProductCard({ product }) {
     const productUrl = product.slug ? `/products/${product.slug}` : `/products/${product._id}`;
 
     return (
-        <div className="card bg-base-100 shadow-md hover:shadow-xl transition-shadow duration-300 h-full flex flex-col">
+        <div className="card bg-base-100 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col border border-base-200">
             {/* Product Image */}
             <Link to={productUrl} className="relative overflow-hidden group">
-                <figure className="relative w-full h-64 bg-base-200">
+                <figure className="relative w-full h-48 sm:h-56 bg-base-200">
                     <img
                         src={productImage}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         loading="lazy"
+                        onError={(e) => {
+                            e.target.src = 'https://via.placeholder.com/300x400?text=No+Image';
+                        }}
                     />
-                    {/* Discount Badge */}
+                    {/* Discount Badge - Minimal */}
                     {discountPercentage > 0 && (
-                        <div className="absolute top-2 right-2 badge badge-error text-white font-bold">
+                        <div className="absolute top-2 right-2 badge badge-error badge-sm text-white">
                             -{discountPercentage}%
-                        </div>
-                    )}
-                    {/* Type Badge */}
-                    <div className="absolute top-2 left-2">
-                        {isPhysical && (
-                            <div className="badge badge-primary text-white">
-                                {t('products.physical') || 'Physical'}
-                            </div>
-                        )}
-                        {isDigital && (
-                            <div className="badge badge-secondary text-white">
-                                {t('products.digital') || 'Digital'}
-                            </div>
-                        )}
-                    </div>
-                    {/* Featured Badge */}
-                    {product.isFeatured && (
-                        <div className="absolute bottom-2 left-2 badge badge-warning text-white">
-                            {t('products.featured') || 'Featured'}
                         </div>
                     )}
                 </figure>
             </Link>
 
-            {/* Card Body */}
-            <div className="card-body flex-grow flex flex-col p-4">
-                {/* Category */}
-                {product.category?.name && (
-                    <div className="text-xs opacity-70 mb-1" style={{ color: '#6B8E6B' }}>
-                        {product.category.name}
-                    </div>
-                )}
-
+            {/* Card Body - Minimal */}
+            <div className="card-body flex-grow flex flex-col p-4 sm:p-5">
                 {/* Product Name */}
-                <Link to={productUrl}>
-                    <h2 className="card-title text-base font-semibold line-clamp-2 hover:text-primary transition-colors" style={{ color: '#1E293B' }}>
+                <Link to={productUrl} className="flex-grow">
+                    <h2 className="text-base sm:text-lg font-semibold line-clamp-2 hover:text-primary transition-colors mb-2" style={{ color: '#1E293B' }}>
                         {product.name}
                     </h2>
                 </Link>
 
-                {/* Description */}
-                {product.description && (
-                    <p className="text-sm opacity-70 line-clamp-2 mt-1" style={{ color: '#2d3748' }}>
-                        {product.description}
-                    </p>
-                )}
-
                 {/* Price Section */}
-                <div className="mt-auto pt-3">
-                    <div className="flex items-center gap-2">
-                        <span className="text-lg font-bold" style={{ color: '#1E293B' }}>
+                <div className="mt-auto pt-2">
+                    <div className="flex items-center gap-2 mb-2">
+                        <span className="text-lg sm:text-xl font-bold" style={{ color: '#1E293B' }}>
                             {formatCurrency(displayPrice)}
                         </span>
                         {product.discountPrice && (
@@ -105,25 +75,19 @@ function ProductCard({ product }) {
                         )}
                     </div>
 
-                    {/* Stock Info (Physical products only) */}
-                    {isPhysical && product.stock !== undefined && (
-                        <div className="text-xs mt-1" style={{ color: product.stock > 0 ? '#6B8E6B' : '#EF4444' }}>
-                            {product.stock > 0
-                                ? `${t('products.inStock') || 'In Stock'} (${product.stock})`
-                                : t('products.outOfStock') || 'Out of Stock'}
-                        </div>
-                    )}
+                    {/* Type and Stock - Minimal */}
+                    <div className="flex items-center gap-2 flex-wrap mb-3">
+                        <span className={`badge badge-sm ${isPhysical ? 'badge-primary' : 'badge-secondary'}`}>
+                            {isPhysical ? t('products.physical') : t('products.digital')}
+                        </span>
+                        {isPhysical && product.stock !== undefined && (
+                            <span className={`text-xs ${product.stock > 0 ? 'text-success' : 'text-error'}`}>
+                                {product.stock > 0 ? `${t('products.inStock') || 'In Stock'}` : t('products.outOfStock') || 'Out of Stock'}
+                            </span>
+                        )}
+                    </div>
 
-                    {/* Views Count */}
-                    {product.views > 0 && (
-                        <div className="text-xs opacity-50 mt-1" style={{ color: '#2d3748' }}>
-                            {product.views} {t('products.views') || 'views'}
-                        </div>
-                    )}
-                </div>
-
-                {/* Action Button */}
-                <div className="card-actions justify-end mt-3">
+                    {/* Action Button */}
                     <Link
                         to={productUrl}
                         className="btn btn-sm btn-primary w-full text-white"

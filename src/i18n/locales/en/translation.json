@@ -24,7 +24,8 @@
         "itemsPerPage": "Items per page:",
         "showing": "Showing",
         "of": "of",
-        "optional": "Optional"
+        "optional": "Optional",
+        "view": "View"
     },
     "theme": {
         "light": "Light",

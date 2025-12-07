@@ -44,7 +44,10 @@ function ProductFilter({ onFilterChange }) {
         const newFilters = { ...localFilters, [key]: value };
         setLocalFilters(newFilters);
         dispatch(setFilters(newFilters));
-        if (onFilterChange) onFilterChange(newFilters);
+        // Trigger filter update in parent
+        if (onFilterChange) {
+            onFilterChange(newFilters);
+        }
     };
 
     // Handle price range change

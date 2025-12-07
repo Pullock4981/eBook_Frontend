@@ -59,10 +59,15 @@ export const useProducts = () => {
             }
 
             // Otherwise, fetch all products with filters
+            // Don't include page and limit in filters - they're separate params
             const activeFilters = {
-                ...filters,
-                page,
-                limit,
+                ...(filters.type && { type: filters.type }),
+                ...(filters.category && { category: filters.category }),
+                ...(filters.minPrice && { minPrice: filters.minPrice }),
+                ...(filters.maxPrice && { maxPrice: filters.maxPrice }),
+                ...(filters.isFeatured !== undefined && { isFeatured: filters.isFeatured }),
+                ...(filters.sortBy && { sortBy: filters.sortBy }),
+                ...(filters.sortOrder && { sortOrder: filters.sortOrder }),
             };
             dispatch(fetchProducts({ filters: activeFilters, page, limit }));
         };

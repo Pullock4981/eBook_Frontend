@@ -30,13 +30,14 @@ function ProductList() {
     const [deleteLoading, setDeleteLoading] = useState(null);
 
     useEffect(() => {
-        dispatch(fetchProducts({ filters: {}, page: 1, limit: 12 }));
+        // Admin can see all products including inactive ones
+        dispatch(fetchProducts({ filters: { includeInactive: true }, page: 1, limit: 12 }));
     }, [dispatch]);
 
     const handleSearch = (e) => {
         e.preventDefault();
         // Search will be implemented with backend
-        dispatch(fetchProducts({ filters: { search: searchQuery }, page: 1, limit: 12 }));
+        dispatch(fetchProducts({ filters: { search: searchQuery, includeInactive: true }, page: 1, limit: 12 }));
     };
 
     const handleDelete = async (id) => {
@@ -47,8 +48,8 @@ function ProductList() {
         setDeleteLoading(id);
         try {
             await deleteProduct(id);
-            // Refresh list
-            dispatch(fetchProducts({ filters: {}, page: pagination.currentPage, limit: pagination.itemsPerPage }));
+            // Refresh list - include inactive products for admin
+            dispatch(fetchProducts({ filters: { includeInactive: true }, page: pagination.currentPage, limit: pagination.itemsPerPage }));
         } catch (error) {
             alert(error.message || t('admin.deleteError') || 'Failed to delete product');
         } finally {
@@ -57,11 +58,11 @@ function ProductList() {
     };
 
     const handlePageChange = (page) => {
-        dispatch(fetchProducts({ filters: {}, page, limit: pagination.itemsPerPage }));
+        dispatch(fetchProducts({ filters: { includeInactive: true }, page, limit: pagination.itemsPerPage }));
     };
 
     const handleItemsPerPageChange = (limit) => {
-        dispatch(fetchProducts({ filters: {}, page: 1, limit }));
+        dispatch(fetchProducts({ filters: { includeInactive: true }, page: 1, limit }));
     };
 
     return (
@@ -99,17 +100,35 @@ function ProductList() {
             </div>
 
             {/* Search and Filters */}
-            <div className="card bg-base-100 shadow-sm p-4">
-                <form onSubmit={handleSearch} className="flex gap-4">
+            <div className="card bg-base-100 shadow-sm border-2 p-3 sm:p-4" style={{ borderColor: '#e2e8f0' }}>
+                <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                     <input
                         type="text"
                         placeholder={t('admin.searchProducts') || 'Search products...'}
-                        className="input input-bordered flex-grow"
+                        className="input input-bordered flex-grow border-2 text-sm sm:text-base"
+                        style={{ borderColor: '#cbd5e1' }}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
-                    <button type="submit" className="btn btn-primary text-white px-6" style={{ backgroundColor: '#1E293B' }}>
-                        {t('common.search') || 'Search'}
+                    <button
+                        type="submit"
+                        className="btn btn-primary text-white px-4 sm:px-6 text-sm sm:text-base font-semibold"
+                        style={{ backgroundColor: '#1E293B' }}
+                    >
+                        <svg
+                            className="w-4 h-4 sm:w-5 sm:h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                            />
+                        </svg>
+                        <span>{t('common.search') || 'Search'}</span>
                     </button>
                 </form>
             </div>
@@ -178,15 +197,15 @@ function ProductList() {
                 </div>
             ) : (
                 /* Products Table - Only show when products exist */
-                <div className="card bg-base-100 shadow-sm">
+                <div className="card bg-base-100 shadow-sm border-2" style={{ borderColor: '#e2e8f0' }}>
                     <div className="overflow-x-auto">
                         <table className="table">
                             <thead>
-                                <tr>
-                                    <th>
+                                <tr className="bg-base-200">
+                                    <th className="hidden sm:table-cell">
                                         <input
                                             type="checkbox"
-                                            className="checkbox"
+                                            className="checkbox checkbox-sm"
                                             checked={selectedProducts.length === products.length && products.length > 0}
                                             onChange={(e) => {
                                                 if (e.target.checked) {
@@ -197,23 +216,23 @@ function ProductList() {
                                             }}
                                         />
                                     </th>
-                                    <th>{t('admin.image') || 'Image'}</th>
-                                    <th>{t('admin.name') || 'Name'}</th>
-                                    <th>{t('admin.type') || 'Type'}</th>
-                                    <th>{t('admin.category') || 'Category'}</th>
-                                    <th>{t('admin.price') || 'Price'}</th>
-                                    <th>{t('admin.stock') || 'Stock'}</th>
-                                    <th>{t('admin.status') || 'Status'}</th>
-                                    <th>{t('admin.actions') || 'Actions'}</th>
+                                    <th className="text-xs sm:text-sm font-semibold" style={{ color: '#1E293B' }}>{t('admin.image') || 'Image'}</th>
+                                    <th className="text-xs sm:text-sm font-semibold" style={{ color: '#1E293B' }}>{t('admin.name') || 'Name'}</th>
+                                    <th className="hidden md:table-cell text-xs sm:text-sm font-semibold" style={{ color: '#1E293B' }}>{t('admin.type') || 'Type'}</th>
+                                    <th className="hidden lg:table-cell text-xs sm:text-sm font-semibold" style={{ color: '#1E293B' }}>{t('admin.category') || 'Category'}</th>
+                                    <th className="text-xs sm:text-sm font-semibold" style={{ color: '#1E293B' }}>{t('admin.price') || 'Price'}</th>
+                                    <th className="hidden md:table-cell text-xs sm:text-sm font-semibold" style={{ color: '#1E293B' }}>{t('admin.stock') || 'Stock'}</th>
+                                    <th className="hidden lg:table-cell text-xs sm:text-sm font-semibold" style={{ color: '#1E293B' }}>{t('admin.status') || 'Status'}</th>
+                                    <th className="text-xs sm:text-sm font-semibold" style={{ color: '#1E293B' }}>{t('admin.actions') || 'Actions'}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {products.map((product) => (
-                                    <tr key={product._id}>
-                                        <th>
+                                    <tr key={product._id} className="hover:bg-base-200 transition-colors">
+                                        <th className="hidden sm:table-cell">
                                             <input
                                                 type="checkbox"
-                                                className="checkbox"
+                                                className="checkbox checkbox-sm"
                                                 checked={selectedProducts.includes(product._id)}
                                                 onChange={(e) => {
                                                     if (e.target.checked) {
@@ -226,28 +245,38 @@ function ProductList() {
                                         </th>
                                         <td>
                                             <div className="avatar">
-                                                <div className="w-12 h-12 rounded">
+                                                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded overflow-hidden">
                                                     <img
                                                         src={product.images?.[0] || 'https://via.placeholder.com/100?text=No+Image'}
                                                         alt={product.name}
+                                                        className="w-full h-full object-cover"
                                                     />
                                                 </div>
                                             </div>
                                         </td>
                                         <td>
-                                            <div className="font-medium" style={{ color: '#1E293B' }}>
-                                                {product.name}
+                                            <div className="font-medium text-xs sm:text-sm" style={{ color: '#1E293B' }}>
+                                                <div className="line-clamp-1">{product.name}</div>
+                                                <div className="md:hidden mt-1">
+                                                    <span className={`badge badge-xs ${product.type === PRODUCT_TYPES.PHYSICAL ? 'badge-primary' : 'badge-secondary'}`}>
+                                                        {product.type === PRODUCT_TYPES.PHYSICAL ? t('products.physical') : t('products.digital')}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </td>
-                                        <td>
-                                            <span className={`badge ${product.type === PRODUCT_TYPES.PHYSICAL ? 'badge-primary' : 'badge-secondary'}`}>
+                                        <td className="hidden md:table-cell">
+                                            <span className={`badge badge-sm ${product.type === PRODUCT_TYPES.PHYSICAL ? 'badge-primary' : 'badge-secondary'}`}>
                                                 {product.type === PRODUCT_TYPES.PHYSICAL ? t('products.physical') : t('products.digital')}
                                             </span>
                                         </td>
-                                        <td>{product.category?.name || '-'}</td>
+                                        <td className="hidden lg:table-cell">
+                                            <span className="text-xs sm:text-sm opacity-70">{product.category?.name || '-'}</span>
+                                        </td>
                                         <td>
                                             <div>
-                                                <div className="font-medium">{formatCurrency(product.discountPrice || product.price)}</div>
+                                                <div className="font-medium text-xs sm:text-sm" style={{ color: '#1E293B' }}>
+                                                    {formatCurrency(product.discountPrice || product.price)}
+                                                </div>
                                                 {product.discountPrice && (
                                                     <div className="text-xs line-through opacity-50">
                                                         {formatCurrency(product.price)}
@@ -255,42 +284,102 @@ function ProductList() {
                                                 )}
                                             </div>
                                         </td>
-                                        <td>
+                                        <td className="hidden md:table-cell">
                                             {product.type === PRODUCT_TYPES.PHYSICAL ? (
-                                                <span className={product.stock > 0 ? 'text-success' : 'text-error'}>
+                                                <span className={`text-xs sm:text-sm font-medium ${product.stock > 0 ? 'text-success' : 'text-error'}`}>
                                                     {product.stock || 0}
                                                 </span>
                                             ) : (
-                                                <span className="opacity-50">-</span>
+                                                <span className="text-xs opacity-50">-</span>
                                             )}
                                         </td>
-                                        <td>
-                                            <span className={`badge ${product.isActive ? 'badge-success' : 'badge-error'}`}>
-                                                {product.isActive ? t('admin.active') : t('admin.inactive')}
-                                            </span>
-                                            {product.isFeatured && (
-                                                <span className="badge badge-warning ml-1">
-                                                    {t('admin.featured')}
+                                        <td className="hidden lg:table-cell">
+                                            <div className="flex flex-col gap-1">
+                                                <span className={`badge badge-xs ${product.isActive ? 'badge-success' : 'badge-error'}`}>
+                                                    {product.isActive ? t('admin.active') : t('admin.inactive')}
                                                 </span>
-                                            )}
+                                                {product.isFeatured && (
+                                                    <span className="badge badge-xs badge-warning">
+                                                        {t('admin.featured')}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </td>
                                         <td>
-                                            <div className="flex gap-2">
+                                            <div className="flex flex-col sm:flex-row gap-2">
+                                                <Link
+                                                    to={`/products/${product._id}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="btn btn-sm btn-primary text-white flex-1 sm:flex-initial"
+                                                    style={{ backgroundColor: '#1E293B' }}
+                                                >
+                                                    <svg
+                                                        className="w-4 h-4"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        viewBox="0 0 24 24"
+                                                    >
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth={2}
+                                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                                        />
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth={2}
+                                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                                        />
+                                                    </svg>
+                                                    <span className="hidden sm:inline">{t('common.view') || 'View'}</span>
+                                                </Link>
                                                 <Link
                                                     to={`/admin/products/${product._id}/edit`}
-                                                    className="btn btn-sm btn-ghost"
+                                                    className="btn btn-sm btn-outline flex-1 sm:flex-initial"
+                                                    style={{ borderColor: '#1E293B', color: '#1E293B' }}
                                                 >
-                                                    {t('common.edit') || 'Edit'}
+                                                    <svg
+                                                        className="w-4 h-4"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        viewBox="0 0 24 24"
+                                                    >
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth={2}
+                                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                                        />
+                                                    </svg>
+                                                    <span className="hidden sm:inline">{t('common.edit') || 'Edit'}</span>
                                                 </Link>
                                                 <button
                                                     onClick={() => handleDelete(product._id)}
-                                                    className="btn btn-sm btn-error text-white"
+                                                    className="btn btn-sm text-white flex-1 sm:flex-initial"
+                                                    style={{ backgroundColor: '#dc2626' }}
                                                     disabled={deleteLoading === product._id}
                                                 >
                                                     {deleteLoading === product._id ? (
                                                         <span className="loading loading-spinner loading-xs"></span>
                                                     ) : (
-                                                        t('common.delete') || 'Delete'
+                                                        <>
+                                                            <svg
+                                                                className="w-4 h-4"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                viewBox="0 0 24 24"
+                                                            >
+                                                                <path
+                                                                    strokeLinecap="round"
+                                                                    strokeLinejoin="round"
+                                                                    strokeWidth={2}
+                                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                                                />
+                                                            </svg>
+                                                            <span className="hidden sm:inline">{t('common.delete') || 'Delete'}</span>
+                                                        </>
                                                     )}
                                                 </button>
                                             </div>

@@ -18,7 +18,13 @@ export const getAllProducts = async (filters = {}, page = 1, limit = 12) => {
         const params = {
             page,
             limit,
-            ...filters,
+            sortBy: filters.sortBy || 'createdAt',
+            sortOrder: filters.sortOrder || 'desc',
+            ...(filters.type && { type: filters.type }),
+            ...(filters.category && { category: filters.category }),
+            ...(filters.minPrice && { minPrice: filters.minPrice }),
+            ...(filters.maxPrice && { maxPrice: filters.maxPrice }),
+            ...(filters.isFeatured !== undefined && { isFeatured: filters.isFeatured }),
         };
 
         const response = await api.get(API_ENDPOINTS.PRODUCTS.LIST, { params });

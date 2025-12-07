@@ -139,7 +139,9 @@ function Products() {
                 <div className="flex flex-col lg:flex-row gap-6">
                     {/* Filters Sidebar */}
                     <div className={`lg:w-64 flex-shrink-0 ${showFilters ? 'block' : 'hidden lg:block'}`}>
-                        <ProductFilter onFilterChange={updateFilters} />
+                        <ProductFilter onFilterChange={(newFilters) => {
+                            updateFilters(newFilters);
+                        }} />
                     </div>
 
                     {/* Products List */}

@@ -24,7 +24,8 @@
         "itemsPerPage": "প্রতি পৃষ্ঠায় আইটেম:",
         "showing": "দেখাচ্ছে",
         "of": "এর",
-        "optional": "ঐচ্ছিক"
+        "optional": "ঐচ্ছিক",
+        "view": "দেখুন"
     },
     "theme": {
         "light": "হালকা",
