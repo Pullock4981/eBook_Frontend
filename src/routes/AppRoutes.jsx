@@ -36,6 +36,9 @@ import AdminProductList from '../pages/admin/Products/ProductList';
 import AdminProductCreate from '../pages/admin/Products/ProductCreate';
 import AdminProductEdit from '../pages/admin/Products/ProductEdit';
 import AdminOrderList from '../pages/admin/Orders/OrderList';
+import AdminCouponList from '../pages/admin/Coupons/CouponList';
+import AdminCouponCreate from '../pages/admin/Coupons/CouponCreate';
+import AdminCouponEdit from '../pages/admin/Coupons/CouponEdit';
 import { selectUser, updateUser } from '../store/slices/authSlice';
 import { getCurrentUser } from '../services/userService';
 
@@ -285,7 +288,9 @@ function AppRoutes() {
                     <Route path="/admin/orders" element={<AdminOrderList />} />
                     <Route path="/admin/users" element={<AdminDashboard />} />
                     <Route path="/admin/affiliates" element={<AdminDashboard />} />
-                    <Route path="/admin/coupons" element={<AdminDashboard />} />
+                    <Route path="/admin/coupons" element={<AdminCouponList />} />
+                    <Route path="/admin/coupons/create" element={<AdminCouponCreate />} />
+                    <Route path="/admin/coupons/edit/:id" element={<AdminCouponEdit />} />
                 </Route>
             </Routes>
         </ErrorBoundary>

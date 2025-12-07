@@ -56,7 +56,12 @@ export const API_ENDPOINTS = {
     // Coupon endpoints
     COUPONS: {
         VALIDATE: '/coupons/validate',
-        APPLY: '/coupons/apply',
+        GET_BY_CODE: '/coupons/code',
+        LIST: '/coupons',
+        GET: '/coupons',
+        CREATE: '/coupons',
+        UPDATE: '/coupons',
+        DELETE: '/coupons',
     },
     // Payment endpoints
     PAYMENT: {

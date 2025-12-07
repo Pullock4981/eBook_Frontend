@@ -12,6 +12,7 @@ import ProductSearch from '../components/products/ProductSearch';
 import ProductFilter from '../components/products/ProductFilter';
 import Pagination from '../components/common/Pagination';
 import Loading from '../components/common/Loading';
+import CouponBanner from '../components/coupons/CouponBanner';
 
 function Products() {
     const { t } = useTranslation();
@@ -51,6 +52,9 @@ function Products() {
                         {t('products.description') || 'Browse our collection of books'}
                     </p>
                 </div>
+
+                {/* Coupon Banner */}
+                <CouponBanner />
 
                 {/* Search and View Toggle */}
                 <div className="flex flex-col sm:flex-row gap-4 mb-6">
