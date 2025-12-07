@@ -9,7 +9,7 @@ import * as productService from '../../services/productService';
 // Async thunks
 export const fetchProducts = createAsyncThunk(
     'products/fetchProducts',
-    async ({ filters = {}, page = 1, limit = 12 }, { rejectWithValue }) => {
+    async ({ filters = {}, page = 1, limit = 100 }, { rejectWithValue }) => {
         try {
             const response = await productService.getAllProducts(filters, page, limit);
             return response;
@@ -31,9 +31,21 @@ export const fetchProductById = createAsyncThunk(
     }
 );
 
+export const fetchProductBySlug = createAsyncThunk(
+    'products/fetchProductBySlug',
+    async ({ slug, incrementViews = true }, { rejectWithValue }) => {
+        try {
+            const response = await productService.getProductBySlug(slug, incrementViews);
+            return response;
+        } catch (error) {
+            return rejectWithValue(error.message || 'Failed to fetch product by slug');
+        }
+    }
+);
+
 export const searchProducts = createAsyncThunk(
     'products/searchProducts',
-    async ({ query, page = 1, limit = 12 }, { rejectWithValue }) => {
+    async ({ query, page = 1, limit = 100 }, { rejectWithValue }) => {
         try {
             const response = await productService.searchProducts(query, page, limit);
             return response;
@@ -57,7 +69,7 @@ export const fetchFeaturedProducts = createAsyncThunk(
 
 export const fetchProductsByCategory = createAsyncThunk(
     'products/fetchProductsByCategory',
-    async ({ categoryId, page = 1, limit = 12 }, { rejectWithValue }) => {
+    async ({ categoryId, page = 1, limit = 100 }, { rejectWithValue }) => {
         try {
             const response = await productService.getProductsByCategory(categoryId, page, limit);
             return response;
@@ -128,8 +140,19 @@ const productSlice = createSlice({
             })
             .addCase(fetchProducts.fulfilled, (state, action) => {
                 state.isLoading = false;
-                state.products = action.payload.data || [];
-                state.pagination = action.payload.pagination || state.pagination;
+                // API interceptor returns response.data directly, so action.payload is the response object
+                // Response structure: { success: true, data: [...], pagination: {...} }
+                const responseData = action.payload;
+                const products = responseData?.data || responseData || [];
+                state.products = Array.isArray(products) ? products : [];
+                state.pagination = responseData?.pagination || state.pagination;
+                // Debug log in development
+                if (import.meta.env.DEV) {
+                    console.log('🔍 fetchProducts.fulfilled - Full payload:', action.payload);
+                    console.log('🔍 fetchProducts.fulfilled - Products array:', products);
+                    console.log('🔍 fetchProducts.fulfilled - Products count:', products.length);
+                    console.log('🔍 fetchProducts.fulfilled - Pagination:', state.pagination);
+                }
             })
             .addCase(fetchProducts.rejected, (state, action) => {
                 state.isLoading = false;
@@ -142,11 +165,54 @@ const productSlice = createSlice({
             })
             .addCase(fetchProductById.fulfilled, (state, action) => {
                 state.isLoading = false;
-                state.currentProduct = action.payload.data || null;
+                // API interceptor returns response.data directly, so action.payload is the response object
+                // Response structure: { success: true, data: {...} }
+                const responseData = action.payload;
+                state.currentProduct = responseData?.data || responseData || null;
+                state.error = null;
+                // Debug log in development
+                if (import.meta.env.DEV) {
+                    console.log('🔍 fetchProductById.fulfilled - Full payload:', action.payload);
+                    console.log('🔍 fetchProductById.fulfilled - Product:', state.currentProduct);
+                }
             })
             .addCase(fetchProductById.rejected, (state, action) => {
                 state.isLoading = false;
-                state.error = action.payload;
+                state.error = action.payload || action.error?.message || 'Failed to fetch product';
+                state.currentProduct = null;
+                // Debug log in development
+                if (import.meta.env.DEV) {
+                    console.error('❌ fetchProductById.rejected - Error:', action.payload);
+                    console.error('❌ fetchProductById.rejected - Full action:', action);
+                }
+            })
+            // Fetch product by slug
+            .addCase(fetchProductBySlug.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(fetchProductBySlug.fulfilled, (state, action) => {
+                state.isLoading = false;
+                // API interceptor returns response.data directly, so action.payload is the response object
+                // Response structure: { success: true, data: {...} }
+                const responseData = action.payload;
+                state.currentProduct = responseData?.data || responseData || null;
+                state.error = null;
+                // Debug log in development
+                if (import.meta.env.DEV) {
+                    console.log('🔍 fetchProductBySlug.fulfilled - Full payload:', action.payload);
+                    console.log('🔍 fetchProductBySlug.fulfilled - Product:', state.currentProduct);
+                }
+            })
+            .addCase(fetchProductBySlug.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.payload || action.error?.message || 'Failed to fetch product by slug';
+                state.currentProduct = null;
+                // Debug log in development
+                if (import.meta.env.DEV) {
+                    console.error('❌ fetchProductBySlug.rejected - Error:', action.payload);
+                    console.error('❌ fetchProductBySlug.rejected - Full action:', action);
+                }
             })
             // Search products
             .addCase(searchProducts.pending, (state) => {

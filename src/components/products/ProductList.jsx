@@ -12,6 +12,12 @@ import Loading from '../common/Loading';
 function ProductList({ products, isLoading, viewMode = 'grid' }) {
     const { t } = useTranslation();
 
+    // Debug log in development
+    if (import.meta.env.DEV) {
+        console.log('ProductList - Products count:', products?.length || 0);
+        console.log('ProductList - Products:', products);
+    }
+
     if (isLoading) {
         return (
             <div className="flex justify-center items-center py-12">
@@ -39,7 +45,7 @@ function ProductList({ products, isLoading, viewMode = 'grid' }) {
         return (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                 {products.map((product) => (
-                    <ProductCard key={product._id} product={product} />
+                    <ProductCard key={product._id || product.id} product={product} />
                 ))}
             </div>
         );

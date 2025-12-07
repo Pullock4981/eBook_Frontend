@@ -4,11 +4,13 @@
  * Detailed product information page
  */
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchProductById, selectCurrentProduct, selectIsLoading, selectError, clearCurrentProduct } from '../store/slices/productSlice';
+import { fetchProductById, fetchProductBySlug, selectCurrentProduct, selectIsLoading, selectError, clearCurrentProduct } from '../store/slices/productSlice';
+import { selectUser } from '../store/slices/authSlice';
+import { deleteProduct } from '../services/adminService';
 import ProductGallery from '../components/products/ProductGallery';
 import Loading from '../components/common/Loading';
 import { formatCurrency, calculateDiscount } from '../utils/helpers';
@@ -23,10 +25,39 @@ function ProductDetail() {
     const product = useSelector(selectCurrentProduct);
     const isLoading = useSelector(selectIsLoading);
     const error = useSelector(selectError);
+    const user = useSelector(selectUser);
+
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+    // Check if user is admin
+    const isAdmin = user?.role === 'admin';
 
     useEffect(() => {
         if (id) {
-            dispatch(fetchProductById({ id, incrementViews: true }));
+            // Clean ID
+            const cleanId = String(id).trim();
+
+            // Debug log
+            if (import.meta.env.DEV) {
+                console.log('🔍 ProductDetail - ID from URL:', id);
+                console.log('🔍 ProductDetail - Clean ID:', cleanId);
+                console.log('🔍 ProductDetail - ID Length:', cleanId.length);
+                console.log('🔍 ProductDetail - Is ObjectId:', /^[0-9a-fA-F]{24}$/.test(cleanId));
+            }
+
+            // Check if it's a MongoDB ObjectId (24 hex characters) or a slug
+            const isObjectId = /^[0-9a-fA-F]{24}$/.test(cleanId);
+
+            if (isObjectId) {
+                // It's an ObjectId, fetch by ID
+                dispatch(fetchProductById({ id: cleanId, incrementViews: true }));
+            } else {
+                // It's a slug, fetch by slug
+                dispatch(fetchProductBySlug({ slug: cleanId, incrementViews: true }));
+            }
+        } else {
+            console.error('❌ No product ID in URL');
         }
 
         return () => {
@@ -42,7 +73,18 @@ function ProductDetail() {
         );
     }
 
-    if (error || !product) {
+    // Debug logs
+    if (import.meta.env.DEV) {
+        console.log('🔍 ProductDetail - Current State:', {
+            id,
+            isLoading,
+            error,
+            hasProduct: !!product,
+            product: product ? { _id: product._id, name: product.name } : null
+        });
+    }
+
+    if (error || (!isLoading && !product)) {
         return (
             <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#EFECE3' }}>
                 <div className="text-center">
@@ -53,6 +95,11 @@ function ProductDetail() {
                     <p className="text-base opacity-70 mb-4" style={{ color: '#2d3748' }}>
                         {error || t('products.notFoundDescription') || 'The product you are looking for does not exist.'}
                     </p>
+                    {import.meta.env.DEV && (
+                        <div className="text-xs opacity-50 mb-4" style={{ color: '#2d3748' }}>
+                            ID: {id} | Error: {error || 'No error message'}
+                        </div>
+                    )}
                     <Link
                         to="/products"
                         className="btn btn-primary text-white"
@@ -75,9 +122,9 @@ function ProductDetail() {
 
     return (
         <div className="min-h-screen" style={{ backgroundColor: '#EFECE3' }}>
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+            <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
                 {/* Breadcrumb */}
-                <div className="breadcrumbs text-sm mb-6">
+                <div className="breadcrumbs text-xs sm:text-sm mb-4 sm:mb-6">
                     <ul>
                         <li>
                             <Link to="/" style={{ color: '#1E293B' }}>
@@ -103,14 +150,14 @@ function ProductDetail() {
                     </ul>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 items-stretch">
                     {/* Left Column - Images */}
-                    <div>
+                    <div className="w-full flex">
                         <ProductGallery images={product.images || []} productName={product.name} />
                     </div>
 
                     {/* Right Column - Product Info */}
-                    <div className="space-y-6">
+                    <div className="space-y-4 sm:space-y-5 md:space-y-6 w-full flex flex-col">
                         {/* Category */}
                         {product.category && (
                             <div className="badge badge-outline" style={{ borderColor: '#6B8E6B', color: '#6B8E6B' }}>
@@ -119,21 +166,21 @@ function ProductDetail() {
                         )}
 
                         {/* Product Name */}
-                        <h1 className="text-3xl sm:text-4xl font-bold" style={{ color: '#1E293B' }}>
+                        <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold leading-tight" style={{ color: '#1E293B' }}>
                             {product.name}
                         </h1>
 
                         {/* Price Section */}
-                        <div className="flex items-center gap-4">
-                            <span className="text-3xl font-bold" style={{ color: '#1E293B' }}>
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4">
+                            <span className="text-2xl sm:text-3xl font-bold" style={{ color: '#1E293B' }}>
                                 {formatCurrency(displayPrice)}
                             </span>
                             {product.discountPrice && (
                                 <>
-                                    <span className="text-xl line-through opacity-50" style={{ color: '#2d3748' }}>
+                                    <span className="text-lg sm:text-xl line-through opacity-50" style={{ color: '#2d3748' }}>
                                         {formatCurrency(product.price)}
                                     </span>
-                                    <span className="badge badge-error text-white">
+                                    <span className="badge badge-error badge-sm sm:badge-md text-white">
                                         -{discountPercentage}% {t('products.off') || 'OFF'}
                                     </span>
                                 </>
@@ -171,10 +218,10 @@ function ProductDetail() {
                         {/* Description */}
                         {product.description && (
                             <div>
-                                <h2 className="text-xl font-semibold mb-2" style={{ color: '#1E293B' }}>
+                                <h2 className="text-lg sm:text-xl font-semibold mb-2" style={{ color: '#1E293B' }}>
                                     {t('products.description') || 'Description'}
                                 </h2>
-                                <p className="text-base leading-relaxed whitespace-pre-line" style={{ color: '#2d3748' }}>
+                                <p className="text-sm sm:text-base leading-relaxed whitespace-pre-line" style={{ color: '#2d3748' }}>
                                     {product.description}
                                 </p>
                             </div>
@@ -220,39 +267,155 @@ function ProductDetail() {
                         )}
 
                         {/* Action Buttons */}
-                        <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                            <button
-                                className="btn btn-primary btn-lg flex-grow text-white"
-                                style={{ backgroundColor: '#1E293B' }}
-                                disabled={isPhysical && product.stock === 0}
-                            >
-                                {t('products.addToCart') || 'Add to Cart'}
-                            </button>
-                            <button
-                                className="btn btn-outline btn-lg"
-                                style={{ borderColor: '#1E293B', color: '#1E293B' }}
-                            >
-                                {t('products.wishlist') || 'Wishlist'}
-                            </button>
-                        </div>
-
-                        {/* Note: Add to Cart will be implemented in Part 6 */}
-                        {isPhysical && product.stock === 0 && (
-                            <div className="alert alert-warning">
-                                <svg
-                                    className="w-6 h-6"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
+                        {isAdmin && product?._id ? (
+                            /* Admin Actions */
+                            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
+                                <Link
+                                    to={`/admin/products/${product._id}/edit`}
+                                    className="btn btn-primary btn-md sm:btn-lg flex-grow text-white shadow-lg hover:shadow-xl transition-all"
+                                    style={{ backgroundColor: '#1E293B' }}
                                 >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                                    />
-                                </svg>
-                                <span>{t('products.outOfStockMessage') || 'This product is currently out of stock.'}</span>
+                                    <svg
+                                        className="w-5 h-5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                        />
+                                    </svg>
+                                    {t('common.edit') || 'Edit Product'}
+                                </Link>
+                                <button
+                                    className="btn btn-error btn-md sm:btn-lg text-white shadow-lg hover:shadow-xl transition-all flex-shrink-0"
+                                    style={{ backgroundColor: '#dc2626', minWidth: '140px' }}
+                                    onClick={() => setShowDeleteConfirm(true)}
+                                    disabled={isDeleting}
+                                >
+                                    {isDeleting ? (
+                                        <>
+                                            <span className="loading loading-spinner loading-sm"></span>
+                                            <span className="ml-2">{t('common.deleting') || 'Deleting...'}</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <svg
+                                                className="w-5 h-5"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                                />
+                                            </svg>
+                                            <span className="ml-2">{t('common.delete') || 'Delete Product'}</span>
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        ) : (
+                            /* User Actions */
+                            <>
+                                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
+                                    <button
+                                        className="btn btn-primary btn-md sm:btn-lg flex-grow text-white"
+                                        style={{ backgroundColor: '#1E293B' }}
+                                        disabled={isPhysical && product.stock === 0}
+                                    >
+                                        {t('products.addToCart') || 'Add to Cart'}
+                                    </button>
+                                    <button
+                                        className="btn btn-outline btn-md sm:btn-lg"
+                                        style={{ borderColor: '#1E293B', color: '#1E293B' }}
+                                    >
+                                        {t('products.wishlist') || 'Wishlist'}
+                                    </button>
+                                </div>
+                                {/* Note: Add to Cart will be implemented in Part 6 */}
+                                {isPhysical && product.stock === 0 && (
+                                    <div className="alert alert-warning">
+                                        <svg
+                                            className="w-6 h-6"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                                            />
+                                        </svg>
+                                        <span>{t('products.outOfStockMessage') || 'This product is currently out of stock.'}</span>
+                                    </div>
+                                )}
+                            </>
+                        )}
+
+                        {/* Delete Confirmation Modal */}
+                        {showDeleteConfirm && (
+                            <div className="modal modal-open">
+                                <div className="modal-box">
+                                    <h3 className="font-bold text-lg mb-4" style={{ color: '#1E293B' }}>
+                                        {t('admin.confirmDelete') || 'Confirm Delete'}
+                                    </h3>
+                                    <p className="py-4" style={{ color: '#2d3748' }}>
+                                        {t('admin.confirmDeleteMessage') || 'Are you sure you want to delete this product? This action cannot be undone.'}
+                                    </p>
+                                    <div className="modal-action">
+                                        <button
+                                            className="btn btn-outline"
+                                            onClick={() => setShowDeleteConfirm(false)}
+                                            disabled={isDeleting}
+                                            style={{ borderColor: '#1E293B', color: '#1E293B' }}
+                                        >
+                                            {t('common.cancel') || 'Cancel'}
+                                        </button>
+                                        <button
+                                            className="btn btn-error text-white"
+                                            onClick={async () => {
+                                                if (!product?._id) {
+                                                    alert(t('admin.productNotFound') || 'Product not found');
+                                                    return;
+                                                }
+                                                try {
+                                                    setIsDeleting(true);
+                                                    await deleteProduct(product._id);
+                                                    // Show success message
+                                                    alert(t('admin.deleteSuccess') || 'Product deleted successfully');
+                                                    // Navigate to products list
+                                                    navigate('/admin/products');
+                                                } catch (error) {
+                                                    console.error('Delete error:', error);
+                                                    const errorMessage = error?.response?.data?.message || error?.message || t('admin.deleteError') || 'Failed to delete product';
+                                                    alert(errorMessage);
+                                                    setIsDeleting(false);
+                                                    setShowDeleteConfirm(false);
+                                                }
+                                            }}
+                                            disabled={isDeleting}
+                                        >
+                                            {isDeleting ? (
+                                                <>
+                                                    <span className="loading loading-spinner loading-sm"></span>
+                                                    {t('common.deleting') || 'Deleting...'}
+                                                </>
+                                            ) : (
+                                                t('common.delete') || 'Delete'
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="modal-backdrop" onClick={() => !isDeleting && setShowDeleteConfirm(false)}></div>
                             </div>
                         )}
                     </div>

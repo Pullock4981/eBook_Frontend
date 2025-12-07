@@ -31,13 +31,14 @@ function ProductList() {
 
     useEffect(() => {
         // Admin can see all products including inactive ones
-        dispatch(fetchProducts({ filters: { includeInactive: true }, page: 1, limit: 12 }));
+        // Use limit 100 to show all products
+        dispatch(fetchProducts({ filters: { includeInactive: true }, page: 1, limit: 100 }));
     }, [dispatch]);
 
     const handleSearch = (e) => {
         e.preventDefault();
         // Search will be implemented with backend
-        dispatch(fetchProducts({ filters: { search: searchQuery, includeInactive: true }, page: 1, limit: 12 }));
+        dispatch(fetchProducts({ filters: { search: searchQuery, includeInactive: true }, page: 1, limit: 100 }));
     };
 
     const handleDelete = async (id) => {
@@ -49,7 +50,7 @@ function ProductList() {
         try {
             await deleteProduct(id);
             // Refresh list - include inactive products for admin
-            dispatch(fetchProducts({ filters: { includeInactive: true }, page: pagination.currentPage, limit: pagination.itemsPerPage }));
+            dispatch(fetchProducts({ filters: { includeInactive: true }, page: pagination.currentPage, limit: 100 }));
         } catch (error) {
             alert(error.message || t('admin.deleteError') || 'Failed to delete product');
         } finally {
@@ -58,11 +59,11 @@ function ProductList() {
     };
 
     const handlePageChange = (page) => {
-        dispatch(fetchProducts({ filters: { includeInactive: true }, page, limit: pagination.itemsPerPage }));
+        dispatch(fetchProducts({ filters: { includeInactive: true }, page, limit: 100 }));
     };
 
     const handleItemsPerPageChange = (limit) => {
-        dispatch(fetchProducts({ filters: { includeInactive: true }, page: 1, limit }));
+        dispatch(fetchProducts({ filters: { includeInactive: true }, page: 1, limit: 100 }));
     };
 
     return (

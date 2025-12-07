@@ -4,7 +4,7 @@
  * Custom hook for product-related operations
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 import {
@@ -39,37 +39,71 @@ export const useProducts = () => {
 
     // Get params from URL
     const page = parseInt(searchParams.get('page')) || 1;
-    const limit = parseInt(searchParams.get('limit')) || PAGINATION.DEFAULT_LIMIT;
+    // Always use 100 as limit to show all products
+    const limit = useMemo(() => {
+        const urlLimit = parseInt(searchParams.get('limit'));
+        return urlLimit || 100;
+    }, [searchParams]);
     const categoryId = searchParams.get('category');
     const search = searchParams.get('search');
+
+    // Set limit in URL if not present (only once on mount)
+    useEffect(() => {
+        if (!searchParams.get('limit')) {
+            const newParams = new URLSearchParams(searchParams);
+            newParams.set('limit', '100');
+            setSearchParams(newParams, { replace: true });
+        }
+    }, []); // Empty dependency array - only run once
 
     // Load products based on URL params
     useEffect(() => {
         const loadProducts = () => {
             // If search query exists, search products
             if (search) {
-                dispatch(searchProducts({ query: search, page, limit }));
+                dispatch(searchProducts({ query: search, page, limit: limit || 100 }));
                 return;
             }
 
             // If category ID exists, fetch by category
             if (categoryId) {
-                dispatch(fetchProductsByCategory({ categoryId, page, limit }));
+                dispatch(fetchProductsByCategory({ categoryId, page, limit: limit || 100 }));
                 return;
             }
 
             // Otherwise, fetch all products with filters
+            // Initially show all products, then apply filters if any are set
             // Don't include page and limit in filters - they're separate params
-            const activeFilters = {
-                ...(filters.type && { type: filters.type }),
-                ...(filters.category && { category: filters.category }),
-                ...(filters.minPrice && { minPrice: filters.minPrice }),
-                ...(filters.maxPrice && { maxPrice: filters.maxPrice }),
-                ...(filters.isFeatured !== undefined && { isFeatured: filters.isFeatured }),
-                ...(filters.sortBy && { sortBy: filters.sortBy }),
-                ...(filters.sortOrder && { sortOrder: filters.sortOrder }),
-            };
-            dispatch(fetchProducts({ filters: activeFilters, page, limit }));
+            const activeFilters = {};
+
+            // Only apply filters if they are explicitly set (not empty/undefined)
+            if (filters.type) {
+                activeFilters.type = filters.type;
+            }
+            if (filters.category) {
+                activeFilters.category = filters.category;
+            }
+            if (filters.minPrice) {
+                activeFilters.minPrice = filters.minPrice;
+            }
+            if (filters.maxPrice) {
+                activeFilters.maxPrice = filters.maxPrice;
+            }
+            // Only apply isFeatured filter if it's explicitly set to true
+            // If undefined or false, show all products
+            if (filters.isFeatured === true) {
+                activeFilters.isFeatured = true;
+            }
+            if (filters.sortBy) {
+                activeFilters.sortBy = filters.sortBy;
+            }
+            if (filters.sortOrder) {
+                activeFilters.sortOrder = filters.sortOrder;
+            }
+
+            // Ensure limit is at least 100 to show all products
+            const finalLimit = limit || PAGINATION.DEFAULT_LIMIT || 100;
+            dispatch(fetchProducts({ filters: activeFilters, page, limit: finalLimit }));
         };
 
         loadProducts();

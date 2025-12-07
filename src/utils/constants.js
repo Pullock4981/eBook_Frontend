@@ -107,7 +107,7 @@ export const USER_ROLES = {
 // Pagination
 export const PAGINATION = {
     DEFAULT_PAGE: 1,
-    DEFAULT_LIMIT: 12,
+    DEFAULT_LIMIT: 100, // Show all products at once
     MAX_LIMIT: 100,
 };
 

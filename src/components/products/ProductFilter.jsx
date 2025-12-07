@@ -65,7 +65,7 @@ function ProductFilter({ onFilterChange }) {
             category: '',
             minPrice: '',
             maxPrice: '',
-            isFeatured: false,
+            isFeatured: undefined, // Changed to undefined to show all products
             sortBy: 'createdAt',
             sortOrder: 'desc',
         });
@@ -162,19 +162,45 @@ function ProductFilter({ onFilterChange }) {
                     </div>
                 </div>
 
-                {/* Featured Products Toggle */}
-                <div className="form-control">
-                    <label className="label cursor-pointer">
+                {/* Featured Products Filter */}
+                <div>
+                    <label className="label">
                         <span className="label-text font-medium" style={{ color: '#1E293B' }}>
-                            {t('products.featuredOnly') || 'Featured Only'}
+                            {t('products.showProducts') || 'Show Products'}
                         </span>
-                        <input
-                            type="checkbox"
-                            className="toggle toggle-primary"
-                            checked={localFilters.isFeatured || false}
-                            onChange={(e) => handleFilterChange('isFeatured', e.target.checked)}
-                        />
                     </label>
+                    <div className="space-y-2">
+                        <label className="label cursor-pointer p-3 rounded-lg border-2 hover:bg-base-200 transition-colors" style={{ borderColor: localFilters.isFeatured === undefined || localFilters.isFeatured === false ? '#1E293B' : '#e2e8f0' }}>
+                            <div className="flex items-center gap-3">
+                                <input
+                                    type="radio"
+                                    name="featuredFilter"
+                                    className="radio radio-primary"
+                                    checked={localFilters.isFeatured === undefined || localFilters.isFeatured === false}
+                                    onChange={() => handleFilterChange('isFeatured', undefined)}
+                                    style={{ accentColor: '#1E293B' }}
+                                />
+                                <span className="label-text font-medium" style={{ color: '#1E293B' }}>
+                                    {t('products.allProducts') || 'All Products'}
+                                </span>
+                            </div>
+                        </label>
+                        <label className="label cursor-pointer p-3 rounded-lg border-2 hover:bg-base-200 transition-colors" style={{ borderColor: localFilters.isFeatured === true ? '#1E293B' : '#e2e8f0' }}>
+                            <div className="flex items-center gap-3">
+                                <input
+                                    type="radio"
+                                    name="featuredFilter"
+                                    className="radio radio-primary"
+                                    checked={localFilters.isFeatured === true}
+                                    onChange={() => handleFilterChange('isFeatured', true)}
+                                    style={{ accentColor: '#1E293B' }}
+                                />
+                                <span className="label-text font-medium" style={{ color: '#1E293B' }}>
+                                    {t('products.featuredOnly') || 'Featured Only'}
+                                </span>
+                            </div>
+                        </label>
+                    </div>
                 </div>
 
                 {/* Sort By */}

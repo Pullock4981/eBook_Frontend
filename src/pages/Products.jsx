@@ -30,6 +30,13 @@ function Products() {
         handleSearch,
     } = useProducts();
 
+    // Debug log in development
+    if (import.meta.env.DEV) {
+        console.log('Products Page - Products count:', products?.length || 0);
+        console.log('Products Page - Products:', products);
+        console.log('Products Page - Pagination:', pagination);
+    }
+
     const [showFilters, setShowFilters] = useState(false);
 
     return (

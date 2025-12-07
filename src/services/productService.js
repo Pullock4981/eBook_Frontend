@@ -13,11 +13,14 @@ import { API_ENDPOINTS } from '../utils/constants';
  * @param {number} limit - Items per page
  * @returns {Promise} API response
  */
-export const getAllProducts = async (filters = {}, page = 1, limit = 12) => {
+export const getAllProducts = async (filters = {}, page = 1, limit = 100) => {
     try {
+        // Ensure limit is at least 100
+        const finalLimit = limit || 100;
+
         const params = {
             page,
-            limit,
+            limit: finalLimit,
             sortBy: filters.sortBy || 'createdAt',
             sortOrder: filters.sortOrder || 'desc',
             ...(filters.type && { type: filters.type }),
@@ -27,9 +30,24 @@ export const getAllProducts = async (filters = {}, page = 1, limit = 12) => {
             ...(filters.isFeatured !== undefined && { isFeatured: filters.isFeatured }),
         };
 
+        // Debug log in development
+        if (import.meta.env.DEV) {
+            console.log('getAllProducts - Params:', params);
+        }
+
         const response = await api.get(API_ENDPOINTS.PRODUCTS.LIST, { params });
+
+        // Debug log in development
+        if (import.meta.env.DEV) {
+            console.log('🔍 getAllProducts - Full Response:', response);
+            console.log('🔍 getAllProducts - Response.data:', response?.data);
+            console.log('🔍 getAllProducts - Response.data length:', Array.isArray(response?.data) ? response?.data.length : 'Not an array');
+            console.log('🔍 getAllProducts - Response.pagination:', response?.pagination);
+        }
+
         return response;
     } catch (error) {
+        console.error('getAllProducts - Error:', error);
         throw error;
     }
 };
@@ -42,10 +60,37 @@ export const getAllProducts = async (filters = {}, page = 1, limit = 12) => {
  */
 export const getProductById = async (id, incrementViews = true) => {
     try {
+        // Clean and validate ID
+        const cleanId = String(id).trim();
+
+        // Validate MongoDB ObjectId format
+        if (!/^[0-9a-fA-F]{24}$/.test(cleanId)) {
+            const error = new Error('Invalid product ID format');
+            if (import.meta.env.DEV) {
+                console.error('❌ Invalid product ID:', cleanId, 'Length:', cleanId.length);
+            }
+            throw error;
+        }
+
         const params = incrementViews ? { views: 'true' } : { views: 'false' };
-        const response = await api.get(`${API_ENDPOINTS.PRODUCTS.DETAIL}/${id}`, { params });
+
+        // Debug log in development
+        if (import.meta.env.DEV) {
+            console.log('🔍 getProductById - ID:', cleanId, 'Length:', cleanId.length);
+        }
+
+        const response = await api.get(`${API_ENDPOINTS.PRODUCTS.DETAIL}/${cleanId}`, { params });
+
+        // Debug log in development
+        if (import.meta.env.DEV) {
+            console.log('🔍 getProductById - Response:', response);
+        }
+
         return response;
     } catch (error) {
+        if (import.meta.env.DEV) {
+            console.error('❌ getProductById - Error:', error);
+        }
         throw error;
     }
 };
@@ -73,7 +118,7 @@ export const getProductBySlug = async (slug, incrementViews = true) => {
  * @param {number} limit - Items per page
  * @returns {Promise} API response
  */
-export const searchProducts = async (query, page = 1, limit = 12) => {
+export const searchProducts = async (query, page = 1, limit = 100) => {
     try {
         const params = {
             q: query,
@@ -110,7 +155,7 @@ export const getFeaturedProducts = async (limit = 10) => {
  * @param {number} limit - Items per page
  * @returns {Promise} API response
  */
-export const getProductsByCategory = async (categoryId, page = 1, limit = 12) => {
+export const getProductsByCategory = async (categoryId, page = 1, limit = 100) => {
     try {
         const params = { page, limit };
         const response = await api.get(`${API_ENDPOINTS.PRODUCTS.LIST}/category/${categoryId}`, { params });

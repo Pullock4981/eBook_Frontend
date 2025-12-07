@@ -23,25 +23,36 @@ function ProductCard({ product }) {
     const isDigital = product.type === PRODUCT_TYPES.DIGITAL;
 
     // Get product image (first image or placeholder)
+    // Use a data URI for placeholder to avoid network errors
     const productImage = product.images && product.images.length > 0
         ? product.images[0]
-        : 'https://via.placeholder.com/300x400?text=No+Image';
+        : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2U1ZTdlYSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5Y2EzYWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4=';
 
     // Get product URL (use slug if available, otherwise ID)
-    const productUrl = product.slug ? `/products/${product.slug}` : `/products/${product._id}`;
+    // Ensure we have a valid ID and convert to string
+    const productId = product._id || product.id;
+    if (!productId) {
+        console.error('Product missing ID:', product);
+        return null;
+    }
+    // Convert to string
+    const productIdString = String(productId).trim();
+    // Use slug if available, otherwise use ID
+    // Slug is preferred for SEO-friendly URLs
+    const productUrl = product.slug ? `/products/${product.slug}` : `/products/${productIdString}`;
 
     return (
         <div className="card bg-base-100 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col border border-base-200">
             {/* Product Image */}
             <Link to={productUrl} className="relative overflow-hidden group">
-                <figure className="relative w-full h-48 sm:h-56 bg-base-200">
+                <figure className="relative w-full aspect-[3/4] sm:aspect-[4/5] bg-base-200">
                     <img
                         src={productImage}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         loading="lazy"
                         onError={(e) => {
-                            e.target.src = 'https://via.placeholder.com/300x400?text=No+Image';
+                            e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2U1ZTdlYSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5Y2EzYWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4=';
                         }}
                     />
                     {/* Discount Badge - Minimal */}
