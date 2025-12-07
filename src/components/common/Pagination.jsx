@@ -75,57 +75,84 @@ function Pagination({
     }
 
     return (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 mt-6 sm:mt-8 py-4 px-4 sm:px-6 rounded-lg border" style={{ borderColor: '#e2e8f0', backgroundColor: '#ffffff' }}>
             {/* Items per page selector */}
             {onItemsPerPageChange && (
-                <div className="flex items-center gap-2">
-                    <label className="text-sm text-base-content/70">
+                <div className="flex items-center gap-3">
+                    <label className="text-sm font-medium" style={{ color: '#64748b' }}>
                         {t('common.itemsPerPage') || 'Items per page:'}
                     </label>
-                    <select
-                        value={itemsPerPage}
-                        onChange={handleItemsPerPageChange}
-                        className="select select-bordered select-sm"
-                    >
-                        <option value={12}>12</option>
-                        <option value={24}>24</option>
-                        <option value={48}>48</option>
-                        <option value={96}>96</option>
-                    </select>
+                    <div className="relative">
+                        <select
+                            value={itemsPerPage}
+                            onChange={handleItemsPerPageChange}
+                            className="appearance-none bg-white border-2 rounded-md pl-3 pr-8 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 cursor-pointer"
+                            style={{ borderColor: '#cbd5e1', color: '#1E293B' }}
+                        >
+                            <option value={8}>8</option>
+                            <option value={12}>12</option>
+                            <option value={24}>24</option>
+                            <option value={48}>48</option>
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2" style={{ color: '#64748b' }}>
+                            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                            </svg>
+                        </div>
+                    </div>
                 </div>
             )}
 
             {/* Page info */}
-            <div className="text-sm text-base-content/70">
-                {t('common.showing') || 'Showing'} {startItem} - {endItem} {t('common.of') || 'of'} {totalItems}
+            <div className="text-sm font-medium" style={{ color: '#64748b' }}>
+                {t('common.showing') || 'Showing'} <span style={{ color: '#1E293B', fontWeight: '600' }}>{startItem}</span> - <span style={{ color: '#1E293B', fontWeight: '600' }}>{endItem}</span> {t('common.of') || 'of'} <span style={{ color: '#1E293B', fontWeight: '600' }}>{totalItems}</span>
             </div>
 
             {/* Pagination buttons */}
-            <div className="join">
+            <div className="flex items-center gap-1">
                 {/* First page */}
                 <button
-                    className="join-item btn btn-sm"
+                    className="px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
+                    style={{
+                        color: currentPage === 1 ? '#94a3b8' : '#1E293B',
+                        backgroundColor: 'transparent'
+                    }}
                     onClick={() => handlePageChange(1)}
                     disabled={currentPage === 1}
+                    title="First page"
                 >
-                    ««
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                    </svg>
                 </button>
 
                 {/* Previous page */}
                 <button
-                    className="join-item btn btn-sm"
+                    className="px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
+                    style={{
+                        color: currentPage === 1 ? '#94a3b8' : '#1E293B',
+                        backgroundColor: 'transparent'
+                    }}
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
+                    title="Previous page"
                 >
-                    «
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
                 </button>
 
                 {/* Page numbers */}
                 {pageNumbers.map((page) => (
                     <button
                         key={page}
-                        className={`join-item btn btn-sm ${page === currentPage ? 'btn-active' : ''
+                        className={`px-3.5 py-2 rounded-md text-sm font-medium transition-all duration-200 ${page === currentPage ? '' : 'hover:bg-gray-100'
                             }`}
+                        style={{
+                            backgroundColor: page === currentPage ? '#1E293B' : 'transparent',
+                            color: page === currentPage ? '#ffffff' : '#1E293B',
+                            fontWeight: page === currentPage ? '600' : '500'
+                        }}
                         onClick={() => handlePageChange(page)}
                     >
                         {page}
@@ -134,20 +161,34 @@ function Pagination({
 
                 {/* Next page */}
                 <button
-                    className="join-item btn btn-sm"
+                    className="px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
+                    style={{
+                        color: currentPage === totalPages ? '#94a3b8' : '#1E293B',
+                        backgroundColor: 'transparent'
+                    }}
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
+                    title="Next page"
                 >
-                    »
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
                 </button>
 
                 {/* Last page */}
                 <button
-                    className="join-item btn btn-sm"
+                    className="px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
+                    style={{
+                        color: currentPage === totalPages ? '#94a3b8' : '#1E293B',
+                        backgroundColor: 'transparent'
+                    }}
                     onClick={() => handlePageChange(totalPages)}
                     disabled={currentPage === totalPages}
+                    title="Last page"
                 >
-                    »»
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                    </svg>
                 </button>
             </div>
         </div>

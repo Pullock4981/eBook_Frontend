@@ -98,11 +98,11 @@ function AddressForm({ address = null, onSubmit, onCancel, isLoading = false }) 
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Label */}
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+            {/* Address Label - Full Width */}
             <div className="form-control w-full">
-                <label className="label pb-2">
-                    <span className="label-text text-sm sm:text-base font-semibold" style={{ color: '#1E293B' }}>
+                <label className="label pb-1.5">
+                    <span className="label-text text-sm font-medium" style={{ color: '#1E293B' }}>
                         {t('user.addressLabel') || 'Address Label'}
                         <span className="text-error ml-1">*</span>
                     </span>
@@ -111,11 +111,13 @@ function AddressForm({ address = null, onSubmit, onCancel, isLoading = false }) 
                     name="label"
                     value={formData.label}
                     onChange={handleChange}
-                    className="select select-bordered w-full h-12 text-base border-2"
+                    className="select select-bordered w-full h-11 text-sm border-2 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-blue-500"
                     style={{
                         backgroundColor: '#ffffff',
                         color: '#1E293B',
-                        borderColor: '#cbd5e1'
+                        borderColor: '#cbd5e1',
+                        paddingLeft: '16px',
+                        paddingRight: '16px'
                     }}
                 >
                     <option value="Home">{t('user.labelHome') || 'Home'}</option>
@@ -124,68 +126,75 @@ function AddressForm({ address = null, onSubmit, onCancel, isLoading = false }) 
                 </select>
             </div>
 
-            {/* Recipient Name */}
-            <div className="form-control w-full">
-                <label className="label pb-2">
-                    <span className="label-text text-sm sm:text-base font-semibold" style={{ color: '#1E293B' }}>
-                        {t('user.recipientName') || 'Recipient Name'}
-                        <span className="text-error ml-1">*</span>
-                    </span>
-                </label>
-                <input
-                    type="text"
-                    name="recipientName"
-                    value={formData.recipientName}
-                    onChange={handleChange}
-                    className={`input input-bordered w-full h-12 text-base border-2 px-4 ${errors.recipientName ? 'input-error border-error' : ''
-                        }`}
-                    style={{
-                        backgroundColor: '#ffffff',
-                        color: '#1E293B',
-                        borderColor: errors.recipientName ? '#EF4444' : '#cbd5e1'
-                    }}
-                    placeholder={t('user.enterRecipientName') || 'Enter recipient name'}
-                />
-                {errors.recipientName && (
-                    <label className="label pt-1">
-                        <span className="label-text-alt text-error text-sm">{errors.recipientName}</span>
+            {/* Recipient Name & Mobile - 2 Columns */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Recipient Name */}
+                <div className="form-control w-full">
+                    <label className="label pb-1.5">
+                        <span className="label-text text-sm font-medium" style={{ color: '#1E293B' }}>
+                            {t('user.recipientName') || 'Recipient Name'}
+                            <span className="text-error ml-1">*</span>
+                        </span>
                     </label>
-                )}
+                    <input
+                        type="text"
+                        name="recipientName"
+                        value={formData.recipientName}
+                        onChange={handleChange}
+                        className={`input input-bordered w-full h-11 text-sm border-2 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-blue-500 ${errors.recipientName ? 'input-error border-error' : ''
+                            }`}
+                        style={{
+                            backgroundColor: '#ffffff',
+                            color: '#1E293B',
+                            borderColor: errors.recipientName ? '#EF4444' : '#cbd5e1',
+                            paddingLeft: '16px',
+                            paddingRight: '16px'
+                        }}
+                        placeholder={t('user.enterRecipientName') || 'Enter recipient name'}
+                    />
+                    {errors.recipientName && (
+                        <label className="label pt-1">
+                            <span className="label-text-alt text-error text-xs">{errors.recipientName}</span>
+                        </label>
+                    )}
+                </div>
+
+                {/* Recipient Mobile */}
+                <div className="form-control w-full">
+                    <label className="label pb-1.5">
+                        <span className="label-text text-sm font-medium" style={{ color: '#1E293B' }}>
+                            {t('user.recipientMobile') || 'Recipient Mobile'}
+                            <span className="text-error ml-1">*</span>
+                        </span>
+                    </label>
+                    <input
+                        type="tel"
+                        name="recipientMobile"
+                        value={formData.recipientMobile}
+                        onChange={handleChange}
+                        className={`input input-bordered w-full h-11 text-sm border-2 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-blue-500 ${errors.recipientMobile ? 'input-error border-error' : ''
+                            }`}
+                        style={{
+                            backgroundColor: '#ffffff',
+                            color: '#1E293B',
+                            borderColor: errors.recipientMobile ? '#EF4444' : '#cbd5e1',
+                            paddingLeft: '16px',
+                            paddingRight: '16px'
+                        }}
+                        placeholder="01XXXXXXXXX"
+                    />
+                    {errors.recipientMobile && (
+                        <label className="label pt-1">
+                            <span className="label-text-alt text-error text-xs">{errors.recipientMobile}</span>
+                        </label>
+                    )}
+                </div>
             </div>
 
-            {/* Recipient Mobile */}
+            {/* Address Line 1 - Full Width */}
             <div className="form-control w-full">
-                <label className="label pb-2">
-                    <span className="label-text text-sm sm:text-base font-semibold" style={{ color: '#1E293B' }}>
-                        {t('user.recipientMobile') || 'Recipient Mobile'}
-                        <span className="text-error ml-1">*</span>
-                    </span>
-                </label>
-                <input
-                    type="tel"
-                    name="recipientMobile"
-                    value={formData.recipientMobile}
-                    onChange={handleChange}
-                    className={`input input-bordered w-full h-12 text-base border-2 px-4 ${errors.recipientMobile ? 'input-error border-error' : ''
-                        }`}
-                    style={{
-                        backgroundColor: '#ffffff',
-                        color: '#1E293B',
-                        borderColor: errors.recipientMobile ? '#EF4444' : '#cbd5e1'
-                    }}
-                    placeholder="01XXXXXXXXX"
-                />
-                {errors.recipientMobile && (
-                    <label className="label pt-1">
-                        <span className="label-text-alt text-error text-sm">{errors.recipientMobile}</span>
-                    </label>
-                )}
-            </div>
-
-            {/* Address Line 1 */}
-            <div className="form-control w-full">
-                <label className="label pb-2">
-                    <span className="label-text text-sm sm:text-base font-semibold" style={{ color: '#1E293B' }}>
+                <label className="label pb-1.5">
+                    <span className="label-text text-sm font-medium" style={{ color: '#1E293B' }}>
                         {t('user.addressLine1') || 'Address Line 1'}
                         <span className="text-error ml-1">*</span>
                     </span>
@@ -195,28 +204,30 @@ function AddressForm({ address = null, onSubmit, onCancel, isLoading = false }) 
                     name="addressLine1"
                     value={formData.addressLine1}
                     onChange={handleChange}
-                    className={`input input-bordered w-full h-12 text-base border-2 px-4 ${errors.addressLine1 ? 'input-error border-error' : ''
+                    className={`input input-bordered w-full h-11 text-sm border-2 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-blue-500 ${errors.addressLine1 ? 'input-error border-error' : ''
                         }`}
                     style={{
                         backgroundColor: '#ffffff',
                         color: '#1E293B',
-                        borderColor: errors.addressLine1 ? '#EF4444' : '#cbd5e1'
+                        borderColor: errors.addressLine1 ? '#EF4444' : '#cbd5e1',
+                        paddingLeft: '16px',
+                        paddingRight: '16px'
                     }}
                     placeholder={t('user.enterAddressLine1') || 'Street address, house number'}
                 />
                 {errors.addressLine1 && (
                     <label className="label pt-1">
-                        <span className="label-text-alt text-error text-sm">{errors.addressLine1}</span>
+                        <span className="label-text-alt text-error text-xs">{errors.addressLine1}</span>
                     </label>
                 )}
             </div>
 
-            {/* Address Line 2 */}
+            {/* Address Line 2 - Full Width */}
             <div className="form-control w-full">
-                <label className="label pb-2">
-                    <span className="label-text text-sm sm:text-base font-semibold" style={{ color: '#1E293B' }}>
+                <label className="label pb-1.5">
+                    <span className="label-text text-sm font-medium" style={{ color: '#1E293B' }}>
                         {t('user.addressLine2') || 'Address Line 2'}
-                        <span className="label-text-alt text-xs opacity-70 ml-2" style={{ color: '#2d3748' }}>
+                        <span className="label-text-alt text-xs opacity-70 ml-2" style={{ color: '#64748b' }}>
                             {t('common.optional') || 'Optional'}
                         </span>
                     </span>
@@ -226,51 +237,85 @@ function AddressForm({ address = null, onSubmit, onCancel, isLoading = false }) 
                     name="addressLine2"
                     value={formData.addressLine2}
                     onChange={handleChange}
-                    className="input input-bordered w-full h-12 text-base border-2 px-4"
+                    className="input input-bordered w-full h-11 text-sm border-2 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-blue-500"
                     style={{
                         backgroundColor: '#ffffff',
                         color: '#1E293B',
-                        borderColor: '#cbd5e1'
+                        borderColor: '#cbd5e1',
+                        paddingLeft: '16px',
+                        paddingRight: '16px'
                     }}
                     placeholder={t('user.enterAddressLine2') || 'Apartment, suite, unit, etc.'}
                 />
             </div>
 
-            {/* Area */}
-            <div className="form-control w-full">
-                <label className="label pb-2">
-                    <span className="label-text text-sm sm:text-base font-semibold" style={{ color: '#1E293B' }}>
-                        {t('user.area') || 'Area'}
-                        <span className="text-error ml-1">*</span>
-                    </span>
-                </label>
-                <input
-                    type="text"
-                    name="area"
-                    value={formData.area}
-                    onChange={handleChange}
-                    className={`input input-bordered w-full h-12 text-base border-2 px-4 ${errors.area ? 'input-error border-error' : ''
-                        }`}
-                    style={{
-                        backgroundColor: '#ffffff',
-                        color: '#1E293B',
-                        borderColor: errors.area ? '#EF4444' : '#cbd5e1'
-                    }}
-                    placeholder={t('user.enterArea') || 'Enter area'}
-                />
-                {errors.area && (
-                    <label className="label pt-1">
-                        <span className="label-text-alt text-error text-sm">{errors.area}</span>
+            {/* Area & Postal Code - 2 Columns */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Area */}
+                <div className="form-control w-full">
+                    <label className="label pb-1.5">
+                        <span className="label-text text-sm font-medium" style={{ color: '#1E293B' }}>
+                            {t('user.area') || 'Area'}
+                            <span className="text-error ml-1">*</span>
+                        </span>
                     </label>
-                )}
+                    <input
+                        type="text"
+                        name="area"
+                        value={formData.area}
+                        onChange={handleChange}
+                        className={`input input-bordered w-full h-11 text-sm border-2 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-blue-500 ${errors.area ? 'input-error border-error' : ''
+                            }`}
+                        style={{
+                            backgroundColor: '#ffffff',
+                            color: '#1E293B',
+                            borderColor: errors.area ? '#EF4444' : '#cbd5e1',
+                            paddingLeft: '16px',
+                            paddingRight: '16px'
+                        }}
+                        placeholder={t('user.enterArea') || 'Enter area'}
+                    />
+                    {errors.area && (
+                        <label className="label pt-1">
+                            <span className="label-text-alt text-error text-xs">{errors.area}</span>
+                        </label>
+                    )}
+                </div>
+
+                {/* Postal Code */}
+                <div className="form-control w-full">
+                    <label className="label pb-1.5">
+                        <span className="label-text text-sm font-medium" style={{ color: '#1E293B' }}>
+                            {t('user.postalCode') || 'Postal Code'}
+                            <span className="label-text-alt text-xs opacity-70 ml-2" style={{ color: '#64748b' }}>
+                                {t('common.optional') || 'Optional'}
+                            </span>
+                        </span>
+                    </label>
+                    <input
+                        type="text"
+                        name="postalCode"
+                        value={formData.postalCode}
+                        onChange={handleChange}
+                        className="input input-bordered w-full h-11 text-sm border-2 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-blue-500"
+                        style={{
+                            backgroundColor: '#ffffff',
+                            color: '#1E293B',
+                            borderColor: '#cbd5e1',
+                            paddingLeft: '16px',
+                            paddingRight: '16px'
+                        }}
+                        placeholder={t('user.enterPostalCode') || 'Enter postal code'}
+                    />
+                </div>
             </div>
 
-            {/* City & District */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* City & District - 2 Columns */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* City */}
                 <div className="form-control w-full">
-                    <label className="label pb-2">
-                        <span className="label-text text-sm sm:text-base font-semibold" style={{ color: '#1E293B' }}>
+                    <label className="label pb-1.5">
+                        <span className="label-text text-sm font-medium" style={{ color: '#1E293B' }}>
                             {t('user.city') || 'City'}
                             <span className="text-error ml-1">*</span>
                         </span>
@@ -280,26 +325,28 @@ function AddressForm({ address = null, onSubmit, onCancel, isLoading = false }) 
                         name="city"
                         value={formData.city}
                         onChange={handleChange}
-                        className={`input input-bordered w-full h-12 text-base border-2 px-4 ${errors.city ? 'input-error border-error' : ''
+                        className={`input input-bordered w-full h-11 text-sm border-2 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-blue-500 ${errors.city ? 'input-error border-error' : ''
                             }`}
                         style={{
                             backgroundColor: '#ffffff',
                             color: '#1E293B',
-                            borderColor: errors.city ? '#EF4444' : '#cbd5e1'
+                            borderColor: errors.city ? '#EF4444' : '#cbd5e1',
+                            paddingLeft: '16px',
+                            paddingRight: '16px'
                         }}
                         placeholder={t('user.enterCity') || 'Enter city'}
                     />
                     {errors.city && (
                         <label className="label pt-1">
-                            <span className="label-text-alt text-error text-sm">{errors.city}</span>
+                            <span className="label-text-alt text-error text-xs">{errors.city}</span>
                         </label>
                     )}
                 </div>
 
                 {/* District */}
                 <div className="form-control w-full">
-                    <label className="label pb-2">
-                        <span className="label-text text-sm sm:text-base font-semibold" style={{ color: '#1E293B' }}>
+                    <label className="label pb-1.5">
+                        <span className="label-text text-sm font-medium" style={{ color: '#1E293B' }}>
                             {t('user.district') || 'District'}
                             <span className="text-error ml-1">*</span>
                         </span>
@@ -309,77 +356,61 @@ function AddressForm({ address = null, onSubmit, onCancel, isLoading = false }) 
                         name="district"
                         value={formData.district}
                         onChange={handleChange}
-                        className={`input input-bordered w-full h-12 text-base border-2 px-4 ${errors.district ? 'input-error border-error' : ''
+                        className={`input input-bordered w-full h-11 text-sm border-2 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-blue-500 ${errors.district ? 'input-error border-error' : ''
                             }`}
                         style={{
                             backgroundColor: '#ffffff',
                             color: '#1E293B',
-                            borderColor: errors.district ? '#EF4444' : '#cbd5e1'
+                            borderColor: errors.district ? '#EF4444' : '#cbd5e1',
+                            paddingLeft: '16px',
+                            paddingRight: '16px'
                         }}
                         placeholder={t('user.enterDistrict') || 'Enter district'}
                     />
                     {errors.district && (
                         <label className="label pt-1">
-                            <span className="label-text-alt text-error text-sm">{errors.district}</span>
+                            <span className="label-text-alt text-error text-xs">{errors.district}</span>
                         </label>
                     )}
                 </div>
             </div>
 
-            {/* Postal Code */}
-            <div className="form-control w-full">
-                <label className="label pb-2">
-                    <span className="label-text text-sm sm:text-base font-semibold" style={{ color: '#1E293B' }}>
-                        {t('user.postalCode') || 'Postal Code'}
-                        <span className="label-text-alt text-xs opacity-70 ml-2" style={{ color: '#2d3748' }}>
-                            {t('common.optional') || 'Optional'}
-                        </span>
-                    </span>
-                </label>
-                <input
-                    type="text"
-                    name="postalCode"
-                    value={formData.postalCode}
-                    onChange={handleChange}
-                    className="input input-bordered w-full h-12 text-base border-2 px-4"
-                    style={{
-                        backgroundColor: '#ffffff',
-                        color: '#1E293B',
-                        borderColor: '#cbd5e1'
-                    }}
-                    placeholder={t('user.enterPostalCode') || 'Enter postal code'}
-                />
-            </div>
-
             {/* Set as Default */}
-            <div className="form-control">
-                <label className="label cursor-pointer p-4 rounded-lg border-2 hover:bg-base-200 transition-colors justify-between" style={{ borderColor: '#e2e8f0' }}>
-                    <div className="flex flex-col">
-                        <span className="label-text text-sm sm:text-base font-semibold" style={{ color: '#1E293B' }}>
+            <div className="form-control pt-2">
+                <label className="label cursor-pointer p-3 sm:p-4 rounded-lg border-2 hover:bg-gray-50 transition-colors flex-col sm:flex-row sm:justify-between gap-3 sm:gap-0" style={{ borderColor: '#e2e8f0', backgroundColor: '#ffffff' }}>
+                    <div className="flex flex-col items-start flex-1 min-w-0">
+                        <span className="label-text text-sm font-medium mb-1 break-words" style={{ color: '#1E293B' }}>
                             {t('user.setAsDefault') || 'Set as Default Address'}
                         </span>
-                        <span className="label-text-alt text-xs opacity-70" style={{ color: '#2d3748' }}>
+                        <span className="label-text-alt text-xs opacity-70 break-words" style={{ color: '#64748b' }}>
                             {t('user.defaultAddressHint') || 'Use this address as default for future orders'}
                         </span>
                     </div>
-                    <input
-                        type="checkbox"
-                        name="isDefault"
-                        checked={formData.isDefault}
-                        onChange={handleChange}
-                        className="toggle toggle-primary"
-                    />
+                    <div className="flex-shrink-0 self-start sm:self-center">
+                        <input
+                            type="checkbox"
+                            name="isDefault"
+                            checked={formData.isDefault}
+                            onChange={handleChange}
+                            className="toggle toggle-primary toggle-sm sm:toggle-md"
+                            style={{ backgroundColor: formData.isDefault ? '#1E293B' : '#cbd5e1' }}
+                        />
+                    </div>
                 </label>
             </div>
 
             {/* Form Actions */}
-            <div className="flex justify-end gap-3 pt-4">
+            <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 sm:pt-6 border-t" style={{ borderColor: '#e2e8f0' }}>
                 {onCancel && (
                     <button
                         type="button"
                         onClick={onCancel}
-                        className="btn btn-outline"
-                        style={{ borderColor: '#1E293B', color: '#1E293B' }}
+                        className="btn btn-outline w-full sm:w-auto order-2 sm:order-1 px-6 py-2.5 text-sm font-medium hover:bg-gray-50 transition-all"
+                        style={{
+                            borderColor: '#cbd5e1',
+                            color: '#1E293B',
+                            backgroundColor: '#ffffff'
+                        }}
                         disabled={isLoading}
                     >
                         {t('common.cancel') || 'Cancel'}
@@ -387,14 +418,17 @@ function AddressForm({ address = null, onSubmit, onCancel, isLoading = false }) 
                 )}
                 <button
                     type="submit"
-                    className="btn btn-primary text-white"
-                    style={{ backgroundColor: '#1E293B' }}
+                    className="btn btn-primary text-white w-full sm:w-auto order-1 sm:order-2 px-6 py-2.5 text-sm font-medium shadow-sm hover:shadow-md transition-all"
+                    style={{
+                        backgroundColor: '#1E293B',
+                        borderColor: '#1E293B'
+                    }}
                     disabled={isLoading}
                 >
                     {isLoading ? (
                         <>
                             <span className="loading loading-spinner loading-sm"></span>
-                            <span>{t('common.saving') || 'Saving...'}</span>
+                            <span className="ml-2">{t('common.saving') || 'Saving...'}</span>
                         </>
                     ) : (
                         <span>{address ? (t('common.update') || 'Update') : (t('common.add') || 'Add')}</span>

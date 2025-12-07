@@ -39,10 +39,10 @@ export const useProducts = () => {
 
     // Get params from URL
     const page = parseInt(searchParams.get('page')) || 1;
-    // Always use 100 as limit to show all products
+    // Default to 8 items per page
     const limit = useMemo(() => {
         const urlLimit = parseInt(searchParams.get('limit'));
-        return urlLimit || 100;
+        return urlLimit || 8;
     }, [searchParams]);
     const categoryId = searchParams.get('category');
     const search = searchParams.get('search');
@@ -51,7 +51,7 @@ export const useProducts = () => {
     useEffect(() => {
         if (!searchParams.get('limit')) {
             const newParams = new URLSearchParams(searchParams);
-            newParams.set('limit', '100');
+            newParams.set('limit', '8');
             setSearchParams(newParams, { replace: true });
         }
     }, []); // Empty dependency array - only run once
@@ -61,13 +61,13 @@ export const useProducts = () => {
         const loadProducts = () => {
             // If search query exists, search products
             if (search) {
-                dispatch(searchProducts({ query: search, page, limit: limit || 100 }));
+                dispatch(searchProducts({ query: search, page, limit: limit || 8 }));
                 return;
             }
 
             // If category ID exists, fetch by category
             if (categoryId) {
-                dispatch(fetchProductsByCategory({ categoryId, page, limit: limit || 100 }));
+                dispatch(fetchProductsByCategory({ categoryId, page, limit: limit || 8 }));
                 return;
             }
 
@@ -101,8 +101,8 @@ export const useProducts = () => {
                 activeFilters.sortOrder = filters.sortOrder;
             }
 
-            // Ensure limit is at least 100 to show all products
-            const finalLimit = limit || PAGINATION.DEFAULT_LIMIT || 100;
+            // Default to 8 items per page
+            const finalLimit = limit || 8;
             dispatch(fetchProducts({ filters: activeFilters, page, limit: finalLimit }));
         };
 

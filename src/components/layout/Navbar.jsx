@@ -12,6 +12,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useState, useEffect } from 'react';
 import { selectIsAuthenticated, selectUser, logout, updateUser } from '../../store/slices/authSlice';
 import { selectCartItemCount, fetchCart, clearCartState } from '../../store/slices/cartSlice';
+import { fetchUserProfile, selectUserProfile } from '../../store/slices/userSlice';
 import ThemeToggle from '../common/ThemeToggle';
 import LanguageSwitcher from '../common/LanguageSwitcher';
 import Logo from '../common/Logo';
@@ -26,6 +27,7 @@ function Navbar() {
     const dispatch = useDispatch();
     const isAuthenticated = useSelector(selectIsAuthenticated);
     const user = useSelector(selectUser);
+    const profile = useSelector(selectUserProfile);
     const cartItemCount = useSelector(selectCartItemCount);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -34,6 +36,18 @@ function Navbar() {
         dispatch(clearCartState()); // Clear cart on logout
         navigate('/');
         setMobileMenuOpen(false);
+    };
+
+    // Get user name from profile (database) or authSlice user
+    const getUserName = () => {
+        const userName = profile?.profile?.name || profile?.name || user?.profile?.name || '';
+        return userName || 'User';
+    };
+
+    // Get user initial for avatar
+    const getUserInitial = () => {
+        const userName = profile?.profile?.name || profile?.name || user?.profile?.name || '';
+        return userName ? getInitials(userName) : 'U';
     };
 
     // Close mobile menu when route changes
@@ -74,6 +88,13 @@ function Navbar() {
         return () => clearInterval(interval);
     }, [isAuthenticated, dispatch, user?.role, user?.isVerified]);
 
+    // Fetch user profile data from database
+    useEffect(() => {
+        if (isAuthenticated) {
+            dispatch(fetchUserProfile());
+        }
+    }, [dispatch, isAuthenticated]);
+
     // Fetch cart when user is authenticated (on app load and login)
     useEffect(() => {
         if (isAuthenticated) {
@@ -106,8 +127,8 @@ function Navbar() {
             </div>
 
             {/* Navbar Center - Desktop Navigation */}
-            <div className="navbar-center hidden lg:flex flex-shrink-0">
-                <ul className="menu menu-horizontal px-1 gap-1 flex-nowrap whitespace-nowrap">
+            <div className="navbar-center hidden lg:flex">
+                <ul className="menu menu-horizontal px-1 gap-2 flex-nowrap whitespace-nowrap items-center">
                     <li className="flex-shrink-0">
                         <Link
                             to="/"
@@ -122,34 +143,40 @@ function Navbar() {
                             {t('nav.home') || 'Home'}
                         </Link>
                     </li>
-                    <li className="flex-shrink-0">
-                        <Link
-                            to="/products"
-                            className={`px-3 xl:px-4 py-2 rounded-lg transition-colors text-sm xl:text-base ${isActive('/products') ? 'text-white' : ''
-                                }`}
-                            style={
-                                isActive('/products')
-                                    ? { backgroundColor: '#1E293B', color: '#ffffff' }
-                                    : { color: '#1E293B' }
-                            }
-                        >
-                            {t('nav.products') || 'Products'}
-                        </Link>
-                    </li>
-                    <li className="flex-shrink-0">
-                        <Link
-                            to="/ebooks"
-                            className={`px-3 xl:px-4 py-2 rounded-lg transition-colors text-sm xl:text-base ${isActive('/ebooks') ? 'text-white' : ''
-                                }`}
-                            style={
-                                isActive('/ebooks')
-                                    ? { backgroundColor: '#1E293B', color: '#ffffff' }
-                                    : { color: '#1E293B' }
-                            }
-                        >
-                            {t('nav.readPDF') || 'Read PDF'}
-                        </Link>
-                    </li>
+                    {/* Show Products only for non-admin users */}
+                    {user?.role !== 'admin' && (
+                        <li className="flex-shrink-0">
+                            <Link
+                                to="/products"
+                                className={`px-3 xl:px-4 py-2 rounded-lg transition-colors text-sm xl:text-base ${isActive('/products') ? 'text-white' : ''
+                                    }`}
+                                style={
+                                    isActive('/products')
+                                        ? { backgroundColor: '#1E293B', color: '#ffffff' }
+                                        : { color: '#1E293B' }
+                                }
+                            >
+                                {t('nav.products') || 'Products'}
+                            </Link>
+                        </li>
+                    )}
+                    {/* Show Read PDF only for non-admin users */}
+                    {user?.role !== 'admin' && (
+                        <li className="flex-shrink-0">
+                            <Link
+                                to="/ebooks"
+                                className={`px-3 xl:px-4 py-2 rounded-lg transition-colors text-sm xl:text-base ${isActive('/ebooks') ? 'text-white' : ''
+                                    }`}
+                                style={
+                                    isActive('/ebooks')
+                                        ? { backgroundColor: '#1E293B', color: '#ffffff' }
+                                        : { color: '#1E293B' }
+                                }
+                            >
+                                {t('nav.readPDF') || 'Read PDF'}
+                            </Link>
+                        </li>
+                    )}
                     {isAuthenticated && (
                         <>
                             {/* Show Dashboard link only for non-admin users */}
@@ -171,10 +198,10 @@ function Navbar() {
                             )}
                             {/* Show Admin link only for admin users */}
                             {user?.role === 'admin' && (
-                                <li>
+                                <li className="flex-shrink-0">
                                     <Link
                                         to="/admin"
-                                        className={`px-4 py-2 rounded-lg transition-colors ${isActive('/admin') ? 'text-white' : ''
+                                        className={`px-3 xl:px-4 py-2 rounded-lg transition-colors text-sm xl:text-base ${isActive('/admin') ? 'text-white' : ''
                                             }`}
                                         style={
                                             isActive('/admin')
@@ -182,7 +209,7 @@ function Navbar() {
                                                 : { color: '#1E293B' }
                                         }
                                     >
-                                        {t('nav.admin') || 'Admin'}
+                                        {t('nav.adminDashboard') || 'Admin Dashboard'}
                                     </Link>
                                 </li>
                             )}
@@ -255,11 +282,11 @@ function Navbar() {
                                         className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-semibold flex-shrink-0"
                                         style={{ backgroundColor: '#1E293B' }}
                                     >
-                                        {user?.profile?.name ? getInitials(user.profile.name) : <span>U</span>}
+                                        {getUserInitial()}
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className="font-semibold text-sm truncate" style={{ color: '#1E293B' }}>
-                                            {user?.profile?.name || 'User'}
+                                            {getUserName()}
                                         </p>
                                         <p className="text-xs truncate opacity-70" style={{ color: '#64748b' }}>
                                             {user?.mobile || user?.email || ''}
@@ -374,11 +401,11 @@ function Navbar() {
                                             className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-semibold flex-shrink-0"
                                             style={{ backgroundColor: '#1E293B' }}
                                         >
-                                            {user?.profile?.name ? getInitials(user.profile.name) : <span>U</span>}
+                                            {getUserInitial()}
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <p className="font-semibold text-sm truncate" style={{ color: '#1E293B' }}>
-                                                {user?.profile?.name || 'User'}
+                                                {getUserName()}
                                             </p>
                                             <p className="text-xs truncate opacity-70" style={{ color: '#64748b' }}>
                                                 {user?.mobile || user?.email || ''}
@@ -513,11 +540,11 @@ function Navbar() {
                                             className="w-12 h-12 rounded-full flex items-center justify-center text-white text-base font-semibold flex-shrink-0"
                                             style={{ backgroundColor: '#1E293B' }}
                                         >
-                                            {user?.profile?.name ? getInitials(user.profile.name) : <span>U</span>}
+                                            {getUserInitial()}
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <p className="font-semibold text-sm truncate" style={{ color: '#1E293B' }}>
-                                                {user?.profile?.name || 'User'}
+                                                {getUserName()}
                                             </p>
                                             <p className="text-xs truncate opacity-70" style={{ color: '#64748b' }}>
                                                 {user?.mobile || user?.email || ''}
@@ -538,26 +565,32 @@ function Navbar() {
                                     {t('nav.home') || 'Home'}
                                 </Link>
                             </li>
-                            <li>
-                                <Link
-                                    to="/products"
-                                    className={`px-4 py-2.5 rounded-lg transition-colors ${isActive('/products') ? 'bg-primary text-white font-semibold' : 'hover:bg-base-200'}`}
-                                    style={isActive('/products') ? { backgroundColor: '#1E293B', color: '#ffffff' } : { color: '#1E293B' }}
-                                    onClick={closeMobileMenu}
-                                >
-                                    {t('nav.products') || 'Products'}
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="/ebooks"
-                                    className={`px-4 py-2.5 rounded-lg transition-colors ${isActive('/ebooks') ? 'bg-primary text-white font-semibold' : 'hover:bg-base-200'}`}
-                                    style={isActive('/ebooks') ? { backgroundColor: '#1E293B', color: '#ffffff' } : { color: '#1E293B' }}
-                                    onClick={closeMobileMenu}
-                                >
-                                    {t('nav.readPDF') || 'Read PDF'}
-                                </Link>
-                            </li>
+                            {/* Show Products only for non-admin users */}
+                            {user?.role !== 'admin' && (
+                                <li>
+                                    <Link
+                                        to="/products"
+                                        className={`px-4 py-2.5 rounded-lg transition-colors ${isActive('/products') ? 'bg-primary text-white font-semibold' : 'hover:bg-base-200'}`}
+                                        style={isActive('/products') ? { backgroundColor: '#1E293B', color: '#ffffff' } : { color: '#1E293B' }}
+                                        onClick={closeMobileMenu}
+                                    >
+                                        {t('nav.products') || 'Products'}
+                                    </Link>
+                                </li>
+                            )}
+                            {/* Show Read PDF only for non-admin users */}
+                            {user?.role !== 'admin' && (
+                                <li>
+                                    <Link
+                                        to="/ebooks"
+                                        className={`px-4 py-2.5 rounded-lg transition-colors ${isActive('/ebooks') ? 'bg-primary text-white font-semibold' : 'hover:bg-base-200'}`}
+                                        style={isActive('/ebooks') ? { backgroundColor: '#1E293B', color: '#ffffff' } : { color: '#1E293B' }}
+                                        onClick={closeMobileMenu}
+                                    >
+                                        {t('nav.readPDF') || 'Read PDF'}
+                                    </Link>
+                                </li>
+                            )}
                             {/* Cart - Only visible for non-admin users */}
                             {user?.role !== 'admin' && (
                                 <li>
@@ -595,7 +628,7 @@ function Navbar() {
                                                 style={isActive('/admin') ? { backgroundColor: '#1E293B', color: '#ffffff' } : { color: '#1E293B' }}
                                                 onClick={closeMobileMenu}
                                             >
-                                                {t('nav.admin') || 'Admin'}
+                                                {t('nav.adminDashboard') || 'Admin Dashboard'}
                                             </Link>
                                         </li>
                                     )}

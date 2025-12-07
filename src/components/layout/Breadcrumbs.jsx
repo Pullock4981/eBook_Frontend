@@ -34,25 +34,31 @@ function Breadcrumbs() {
 
             // Translate common paths
             let label = path;
-            const translations = {
-                dashboard: t('nav.dashboard') || 'Dashboard',
-                profile: t('nav.profile') || 'Profile',
-                orders: t('nav.orders') || 'Orders',
-                ebooks: t('nav.ebooks') || 'eBooks',
-                addresses: t('nav.addresses') || 'Addresses',
-                products: t('nav.products') || 'Products',
-                admin: t('nav.admin') || 'Admin',
-                categories: t('nav.categories') || 'Categories',
-                users: t('nav.users') || 'Users',
-                affiliates: t('nav.affiliates') || 'Affiliates',
-                coupons: t('nav.coupons') || 'Coupons',
-            };
 
-            if (translations[path]) {
-                label = translations[path];
+            // Special handling for admin orders page
+            if (path === 'orders' && currentPath.startsWith('/admin')) {
+                label = 'All Orders';
             } else {
-                // Capitalize first letter
-                label = path.charAt(0).toUpperCase() + path.slice(1);
+                const translations = {
+                    dashboard: t('nav.dashboard') || 'Dashboard',
+                    profile: t('nav.profile') || 'Profile',
+                    orders: t('nav.orders') || 'Orders',
+                    ebooks: t('nav.ebooks') || 'eBooks',
+                    addresses: t('nav.addresses') || 'Addresses',
+                    products: t('nav.products') || 'Products',
+                    admin: t('nav.admin') || 'Admin',
+                    categories: t('nav.categories') || 'Categories',
+                    users: t('nav.users') || 'Users',
+                    affiliates: t('nav.affiliates') || 'Affiliates',
+                    coupons: t('nav.coupons') || 'Coupons',
+                };
+
+                if (translations[path]) {
+                    label = translations[path];
+                } else {
+                    // Capitalize first letter
+                    label = path.charAt(0).toUpperCase() + path.slice(1);
+                }
             }
 
             breadcrumbs.push({

@@ -100,38 +100,62 @@ function eBooksList() {
                 </div>
 
                 {/* Filters and Sort */}
-                <div className="card bg-base-100 shadow-sm border-2 mb-6" style={{ borderColor: '#e2e8f0' }}>
-                    <div className="card-body p-4 sm:p-6">
-                        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                <div className="bg-white rounded-lg shadow-sm border mb-6" style={{ borderColor: '#e2e8f0' }}>
+                    <div className="p-4 sm:p-5">
+                        <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start sm:items-center justify-between">
                             {/* Featured Filter */}
-                            <label className="label cursor-pointer gap-3">
-                                <input
-                                    type="checkbox"
-                                    checked={filterFeatured}
-                                    onChange={(e) => setFilterFeatured(e.target.checked)}
-                                    className="checkbox checkbox-primary"
-                                    style={{ accentColor: '#1E293B' }}
-                                />
-                                <span className="label-text text-sm sm:text-base" style={{ color: '#1E293B' }}>
+                            <label className="flex items-center cursor-pointer group">
+                                <div className="relative">
+                                    <input
+                                        type="checkbox"
+                                        checked={filterFeatured}
+                                        onChange={(e) => setFilterFeatured(e.target.checked)}
+                                        className="sr-only"
+                                    />
+                                    <div
+                                        className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${filterFeatured
+                                            ? 'bg-[#1E293B] border-[#1E293B]'
+                                            : 'bg-white border-gray-300 group-hover:border-[#1E293B]'
+                                            }`}
+                                    >
+                                        {filterFeatured && (
+                                            <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        )}
+                                    </div>
+                                </div>
+                                <span className="ml-3 text-sm font-medium" style={{ color: '#1E293B' }}>
                                     {t('ebooks.showFeaturedOnly') || 'Show Featured Only'}
                                 </span>
                             </label>
 
                             {/* Sort Options */}
-                            <div className="flex items-center gap-3">
-                                <span className="text-sm font-semibold" style={{ color: '#1E293B' }}>
+                            <div className="flex items-center gap-3 w-full sm:w-auto">
+                                <span className="text-sm font-medium whitespace-nowrap" style={{ color: '#64748b' }}>
                                     {t('ebooks.sortBy') || 'Sort By:'}
                                 </span>
-                                <select
-                                    value={sortBy}
-                                    onChange={(e) => setSortBy(e.target.value)}
-                                    className="select select-bordered select-sm sm:select-md"
-                                    style={{ borderColor: '#cbd5e1', color: '#1E293B' }}
-                                >
-                                    <option value="name">{t('ebooks.sortByName') || 'Name (A-Z)'}</option>
-                                    <option value="price">{t('ebooks.sortByPriceLow') || 'Price (Low to High)'}</option>
-                                    <option value="priceDesc">{t('ebooks.sortByPriceHigh') || 'Price (High to Low)'}</option>
-                                </select>
+                                <div className="relative flex-1 sm:flex-none">
+                                    <select
+                                        value={sortBy}
+                                        onChange={(e) => setSortBy(e.target.value)}
+                                        className="w-full sm:w-auto appearance-none bg-white border-2 rounded-lg px-4 py-2.5 pr-10 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#1E293B] focus:border-[#1E293B]"
+                                        style={{
+                                            borderColor: '#cbd5e1',
+                                            color: '#1E293B',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        <option value="name">{t('ebooks.sortByName') || 'Name (A-Z)'}</option>
+                                        <option value="price">{t('ebooks.sortByPriceLow') || 'Price (Low to High)'}</option>
+                                        <option value="priceDesc">{t('ebooks.sortByPriceHigh') || 'Price (High to Low)'}</option>
+                                    </select>
+                                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#64748b' }}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -195,7 +219,7 @@ function eBooksList() {
                                             to={`/products/${product.slug || productId}`}
                                             style={{ textDecoration: 'none' }}
                                         >
-                                            <figure className="aspect-[3/4] overflow-hidden bg-base-200 relative cursor-pointer">
+                                            <figure className="aspect-[3/2] overflow-hidden bg-base-200 relative cursor-pointer">
                                                 <img
                                                     src={thumbnail}
                                                     alt={product.name}
@@ -217,7 +241,7 @@ function eBooksList() {
                                             </figure>
                                         </Link>
                                     ) : (
-                                        <figure className="aspect-[3/4] overflow-hidden bg-base-200 relative">
+                                        <figure className="aspect-[3/2] overflow-hidden bg-base-200 relative">
                                             <img
                                                 src={thumbnail}
                                                 alt={product.name}
@@ -301,7 +325,7 @@ function eBooksList() {
                                                     onClick={() => {
                                                         navigate(`/products/${product.slug || productId}`);
                                                     }}
-                                                    className="btn btn-primary btn-sm text-white"
+                                                    className="btn btn-primary btn-sm text-white px-4 py-2"
                                                     style={{ backgroundColor: '#1E293B' }}
                                                 >
                                                     {t('products.viewDetails') || 'View Details'}

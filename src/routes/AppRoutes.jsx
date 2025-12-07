@@ -35,10 +35,13 @@ import eBookViewer from '../pages/user/eBookViewer';
 import AdminProductList from '../pages/admin/Products/ProductList';
 import AdminProductCreate from '../pages/admin/Products/ProductCreate';
 import AdminProductEdit from '../pages/admin/Products/ProductEdit';
+import AdminCategoryList from '../pages/admin/Categories/CategoryList';
+import AdminUserList from '../pages/admin/Users/UserList';
 import AdminOrderList from '../pages/admin/Orders/OrderList';
 import AdminCouponList from '../pages/admin/Coupons/CouponList';
 import AdminCouponCreate from '../pages/admin/Coupons/CouponCreate';
 import AdminCouponEdit from '../pages/admin/Coupons/CouponEdit';
+import AdminDashboard from '../pages/admin/Dashboard';
 import { selectUser, updateUser } from '../store/slices/authSlice';
 import { getCurrentUser } from '../services/userService';
 
@@ -171,15 +174,6 @@ function Dashboard() {
     );
 }
 
-function AdminDashboard() {
-    const { t } = useTranslation();
-    return (
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8" style={{ backgroundColor: '#EFECE3' }}>
-            <h1 className="text-3xl sm:text-4xl font-bold mb-4" style={{ color: '#1E293B' }}>{t('nav.admin') || 'Admin Dashboard'}</h1>
-            <p className="text-base sm:text-lg" style={{ color: '#2d3748' }}>{t('pages.adminComingSoon') || 'Admin dashboard coming soon...'}</p>
-        </div>
-    );
-}
 
 function NotFound() {
     const { t } = useTranslation();
@@ -284,9 +278,9 @@ function AppRoutes() {
                     <Route path="/admin/products" element={<AdminProductList />} />
                     <Route path="/admin/products/create" element={<AdminProductCreate />} />
                     <Route path="/admin/products/:id/edit" element={<AdminProductEdit />} />
-                    <Route path="/admin/categories" element={<AdminDashboard />} />
+                    <Route path="/admin/categories" element={<AdminCategoryList />} />
+                    <Route path="/admin/users" element={<AdminUserList />} />
                     <Route path="/admin/orders" element={<AdminOrderList />} />
-                    <Route path="/admin/users" element={<AdminDashboard />} />
                     <Route path="/admin/affiliates" element={<AdminDashboard />} />
                     <Route path="/admin/coupons" element={<AdminCouponList />} />
                     <Route path="/admin/coupons/create" element={<AdminCouponCreate />} />

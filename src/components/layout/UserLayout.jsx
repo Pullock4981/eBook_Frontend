@@ -5,15 +5,27 @@
  * Includes Navbar, Sidebar, and Breadcrumbs.
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 import Breadcrumbs from './Breadcrumbs';
+import { fetchUserProfile } from '../../store/slices/userSlice';
+import { selectIsAuthenticated } from '../../store/slices/authSlice';
 
 function UserLayout() {
+    const dispatch = useDispatch();
+    const isAuthenticated = useSelector(selectIsAuthenticated);
     const [sidebarOpen, setSidebarOpen] = useState(false);
+
+    // Fetch user profile when layout loads
+    useEffect(() => {
+        if (isAuthenticated) {
+            dispatch(fetchUserProfile());
+        }
+    }, [dispatch, isAuthenticated]);
 
     return (
         <div className="min-h-screen flex flex-col bg-base-100 transition-colors duration-300">

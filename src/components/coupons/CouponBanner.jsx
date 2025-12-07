@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { fetchActiveCoupons } from '../../store/slices/couponSlice';
-import { formatCurrency } from '../../utils/helpers';
+import { formatCurrency, formatDate } from '../../utils/helpers';
 
 function CouponBanner() {
     const { t } = useTranslation();
@@ -90,30 +90,30 @@ function CouponBanner() {
                         {coupons.map((coupon) => (
                             <div
                                 key={coupon._id}
-                                className="card bg-base-100 border-2 shadow-sm hover:shadow-md transition-all cursor-pointer"
-                                style={{ borderColor: '#cbd5e1' }}
+                                className="bg-white border rounded-lg hover:shadow-md transition-all cursor-pointer"
+                                style={{ borderColor: '#e2e8f0' }}
                                 onClick={() => navigate('/cart')}
                             >
-                                <div className="card-body p-3 sm:p-4">
+                                <div className="p-3 sm:p-4">
                                     {/* Discount Badge */}
-                                    <div className="flex items-center justify-between mb-2 sm:mb-3 gap-2">
-                                        <span className="badge badge-lg text-white font-bold text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2 flex-shrink-0" style={{ backgroundColor: '#1E293B' }}>
+                                    <div className="flex items-center justify-between mb-2 gap-2">
+                                        <span className="text-xs font-semibold text-white px-2 py-1 rounded flex-shrink-0" style={{ backgroundColor: '#1E293B' }}>
                                             {getDiscountDisplay(coupon)}
                                         </span>
                                         {coupon.type === 'percentage' && (
-                                            <span className="badge badge-sm font-semibold text-xs px-2 py-1 flex-shrink-0" style={{ backgroundColor: '#fbbf24', color: '#78350f' }}>
+                                            <span className="text-xs font-medium px-2 py-0.5 rounded flex-shrink-0" style={{ backgroundColor: '#fef3c7', color: '#92400e' }}>
                                                 {t('coupon.off') || 'OFF'}
                                             </span>
                                         )}
                                     </div>
 
                                     {/* Coupon Code */}
-                                    <div className="mb-2 sm:mb-3">
-                                        <p className="text-xs opacity-70 mb-1" style={{ color: '#64748b' }}>
+                                    <div className="mb-2">
+                                        <p className="text-xs mb-1" style={{ color: '#94a3b8' }}>
                                             {t('coupon.code') || 'Code'}
                                         </p>
                                         <div className="flex items-center gap-2">
-                                            <p className="font-bold text-sm sm:text-base md:text-lg truncate flex-1" style={{ color: '#1E293B' }}>
+                                            <p className="font-bold text-sm truncate flex-1" style={{ color: '#1E293B' }}>
                                                 {coupon.code}
                                             </p>
                                             <button
@@ -121,12 +121,12 @@ function CouponBanner() {
                                                     e.stopPropagation();
                                                     handleCopyCode(coupon.code);
                                                 }}
-                                                className="btn btn-xs btn-ghost p-1 hover:bg-base-200 flex-shrink-0"
-                                                style={{ color: '#1E293B' }}
+                                                className="p-1 hover:bg-gray-100 rounded flex-shrink-0 transition-colors"
+                                                style={{ color: '#64748b' }}
                                                 title={t('coupon.copyCode') || 'Copy code'}
                                             >
                                                 <svg
-                                                    className="w-3 h-3 sm:w-4 sm:h-4"
+                                                    className="w-3.5 h-3.5"
                                                     fill="none"
                                                     stroke="currentColor"
                                                     viewBox="0 0 24 24"
@@ -142,22 +142,18 @@ function CouponBanner() {
                                         </div>
                                     </div>
 
-                                    {/* Description or Min Purchase */}
-                                    {coupon.description ? (
-                                        <p className="text-xs opacity-70 line-clamp-2 mb-2 min-h-[2.5rem]" style={{ color: '#64748b' }}>
-                                            {coupon.description}
-                                        </p>
-                                    ) : coupon.minPurchase > 0 ? (
-                                        <p className="text-xs opacity-70 mb-2" style={{ color: '#64748b' }}>
-                                            {t('coupon.minPurchase') || 'Min purchase'}: {formatCurrency(coupon.minPurchase)}
-                                        </p>
-                                    ) : (
-                                        <div className="mb-2 min-h-[1rem]"></div>
+                                    {/* Expiry Date */}
+                                    {coupon.expiryDate && (
+                                        <div className="mb-2">
+                                            <p className="text-xs" style={{ color: '#94a3b8' }}>
+                                                Expires: <span className="font-medium" style={{ color: '#64748b' }}>{formatDate(coupon.expiryDate)}</span>
+                                            </p>
+                                        </div>
                                     )}
 
                                     {/* Usage Info */}
-                                    <div className="mt-auto pt-2 border-t" style={{ borderColor: '#e2e8f0' }}>
-                                        <p className="text-xs opacity-70" style={{ color: '#64748b' }}>
+                                    <div className="pt-2 border-t" style={{ borderColor: '#f1f5f9' }}>
+                                        <p className="text-xs" style={{ color: '#94a3b8' }}>
                                             {coupon.usedCount || 0} / {coupon.usageLimit} {t('coupon.used') || 'used'}
                                         </p>
                                     </div>

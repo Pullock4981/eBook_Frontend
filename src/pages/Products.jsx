@@ -166,15 +166,17 @@ function Products() {
                                 <ProductList products={products} isLoading={isLoading} viewMode={viewMode} />
 
                                 {/* Pagination */}
-                                {pagination.totalPages > 1 && (
-                                    <Pagination
-                                        currentPage={pagination.currentPage}
-                                        totalPages={pagination.totalPages}
-                                        totalItems={pagination.totalItems}
-                                        itemsPerPage={pagination.itemsPerPage}
-                                        onPageChange={changePage}
-                                        onItemsPerPageChange={changeItemsPerPage}
-                                    />
+                                {pagination && pagination.totalPages > 1 && (
+                                    <div className="mt-6">
+                                        <Pagination
+                                            currentPage={pagination.currentPage || 1}
+                                            totalPages={pagination.totalPages || 1}
+                                            totalItems={pagination.totalItems || 0}
+                                            itemsPerPage={pagination.itemsPerPage || 8}
+                                            onPageChange={changePage}
+                                            onItemsPerPageChange={changeItemsPerPage}
+                                        />
+                                    </div>
                                 )}
                             </>
                         )}

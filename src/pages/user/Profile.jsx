@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { fetchUserProfile, updateUserProfile, changeUserPassword, selectUserProfile, selectUserLoading, selectUserUpdating, selectUserError, clearError } from '../../store/slices/userSlice';
-import { selectIsAuthenticated } from '../../store/slices/authSlice';
+import { selectIsAuthenticated, updateUser } from '../../store/slices/authSlice';
 import ProfileForm from '../../components/user/ProfileForm';
 import PasswordForm from '../../components/user/PasswordForm';
 import Loading from '../../components/common/Loading';
@@ -49,10 +49,22 @@ function Profile() {
 
     const handleProfileUpdate = async (profileData) => {
         try {
-            await dispatch(updateUserProfile(profileData)).unwrap();
+            const updatedProfile = await dispatch(updateUserProfile(profileData)).unwrap();
+            // Update authSlice user data as well for consistency
+            // Handle nested profile structure
+            const userName = updatedProfile.profile?.name || updatedProfile.name || '';
+            const userEmail = updatedProfile.profile?.email || updatedProfile.email || '';
+            dispatch(updateUser({
+                name: userName,
+                email: userEmail
+            }));
+            // Refresh profile data from database to ensure UI shows latest data
+            await dispatch(fetchUserProfile());
             toast.success(t('user.profileUpdated') || 'Profile updated successfully!');
+            return updatedProfile;
         } catch (err) {
             toast.error(err || t('user.profileUpdateFailed') || 'Failed to update profile');
+            throw err; // Re-throw to let form handle it
         }
     };
 
@@ -87,23 +99,23 @@ function Profile() {
                 </div>
 
                 {/* Tabs */}
-                <div className="tabs tabs-boxed mb-6 bg-white p-1" style={{ border: '1px solid #e2e8f0' }}>
+                <div className="tabs tabs-boxed mb-6 bg-white p-1 rounded-lg" style={{ border: '1px solid #e2e8f0' }}>
                     <button
-                        className={`tab tab-lg flex-1 ${activeTab === 'profile' ? 'tab-active' : ''}`}
+                        className={`tab flex-1 text-sm sm:text-base font-medium px-3 sm:px-4 py-2 sm:py-2.5 rounded-md transition-all ${activeTab === 'profile' ? 'tab-active' : ''}`}
                         onClick={() => setActiveTab('profile')}
                         style={{
                             backgroundColor: activeTab === 'profile' ? '#1E293B' : 'transparent',
-                            color: activeTab === 'profile' ? '#ffffff' : '#1E293B'
+                            color: activeTab === 'profile' ? '#ffffff' : '#64748b'
                         }}
                     >
                         {t('user.profileInfo') || 'Profile Information'}
                     </button>
                     <button
-                        className={`tab tab-lg flex-1 ${activeTab === 'password' ? 'tab-active' : ''}`}
+                        className={`tab flex-1 text-sm sm:text-base font-medium px-3 sm:px-4 py-2 sm:py-2.5 rounded-md transition-all ${activeTab === 'password' ? 'tab-active' : ''}`}
                         onClick={() => setActiveTab('password')}
                         style={{
                             backgroundColor: activeTab === 'password' ? '#1E293B' : 'transparent',
-                            color: activeTab === 'password' ? '#ffffff' : '#1E293B'
+                            color: activeTab === 'password' ? '#ffffff' : '#64748b'
                         }}
                     >
                         {t('user.changePassword') || 'Change Password'}
@@ -113,7 +125,13 @@ function Profile() {
                 {/* Content */}
                 <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 md:p-8" style={{ border: '1px solid #e2e8f0' }}>
                     {activeTab === 'profile' ? (
-                        <ProfileForm onSubmit={handleProfileUpdate} isLoading={isUpdating} />
+                        isLoading && !profile ? (
+                            <div className="flex justify-center items-center py-12">
+                                <Loading />
+                            </div>
+                        ) : (
+                            <ProfileForm onSubmit={handleProfileUpdate} isLoading={isUpdating} />
+                        )
                     ) : (
                         <PasswordForm onSubmit={handlePasswordChange} isLoading={isUpdating} />
                     )}

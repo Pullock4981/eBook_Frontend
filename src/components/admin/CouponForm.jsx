@@ -124,8 +124,8 @@ function CouponForm({ initialData, onSubmit, onCancel, isLoading }) {
     };
 
     return (
-        <div className="card bg-base-100 shadow-lg border-2" style={{ borderColor: '#e2e8f0' }}>
-            <div className="card-body p-4 sm:p-5 md:p-6 lg:p-8">
+        <div className="bg-white rounded-lg shadow-sm border" style={{ borderColor: '#e2e8f0' }}>
+            <div className="p-4 sm:p-5 md:p-6 lg:p-8">
                 <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 md:space-y-6">
                     {/* Grid Layout for Large Devices */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
@@ -147,7 +147,8 @@ function CouponForm({ initialData, onSubmit, onCancel, isLoading }) {
                                     borderColor: errors.code ? '#ef4444' : '#cbd5e1',
                                     color: '#1E293B',
                                     paddingLeft: '1rem',
-                                    paddingRight: '1rem'
+                                    paddingRight: '1rem',
+                                    backgroundColor: '#ffffff'
                                 }}
                                 disabled={!!initialData}
                             />
@@ -170,7 +171,7 @@ function CouponForm({ initialData, onSubmit, onCancel, isLoading }) {
                                 value={formData.type}
                                 onChange={handleChange}
                                 className="select select-bordered border-2 text-sm sm:text-base px-4 sm:px-5 py-2.5 sm:py-3"
-                                style={{ borderColor: '#cbd5e1', color: '#1E293B' }}
+                                style={{ borderColor: '#cbd5e1', color: '#1E293B', backgroundColor: '#ffffff' }}
                             >
                                 <option value="percentage">{t('admin.percentage') || 'Percentage'}</option>
                                 <option value="fixed">{t('admin.fixed') || 'Fixed Amount'}</option>
@@ -197,7 +198,8 @@ function CouponForm({ initialData, onSubmit, onCancel, isLoading }) {
                                     className={`input input-bordered border-2 text-sm sm:text-base w-full px-4 sm:px-5 py-2.5 sm:py-3 pr-10 ${errors.value ? 'input-error' : ''}`}
                                     style={{
                                         borderColor: errors.value ? '#ef4444' : '#cbd5e1',
-                                        color: '#1E293B'
+                                        color: '#1E293B',
+                                        backgroundColor: '#ffffff'
                                     }}
                                     min="0"
                                     step={formData.type === 'percentage' ? '0.01' : '1'}
@@ -230,7 +232,8 @@ function CouponForm({ initialData, onSubmit, onCancel, isLoading }) {
                                     className={`input input-bordered border-2 text-sm sm:text-base px-4 sm:px-5 py-2.5 sm:py-3 ${errors.maxDiscount ? 'input-error' : ''}`}
                                     style={{
                                         borderColor: errors.maxDiscount ? '#ef4444' : '#cbd5e1',
-                                        color: '#1E293B'
+                                        color: '#1E293B',
+                                        backgroundColor: '#ffffff'
                                     }}
                                     min="0"
                                     step="1"
@@ -259,7 +262,8 @@ function CouponForm({ initialData, onSubmit, onCancel, isLoading }) {
                                 className={`input input-bordered border-2 text-sm sm:text-base px-4 sm:px-5 py-2.5 sm:py-3 ${errors.minPurchase ? 'input-error' : ''}`}
                                 style={{
                                     borderColor: errors.minPurchase ? '#ef4444' : '#cbd5e1',
-                                    color: '#1E293B'
+                                    color: '#1E293B',
+                                    backgroundColor: '#ffffff'
                                 }}
                                 min="0"
                                 step="1"
@@ -287,7 +291,8 @@ function CouponForm({ initialData, onSubmit, onCancel, isLoading }) {
                                 className={`input input-bordered border-2 text-sm sm:text-base px-4 sm:px-5 py-2.5 sm:py-3 ${errors.usageLimit ? 'input-error' : ''}`}
                                 style={{
                                     borderColor: errors.usageLimit ? '#ef4444' : '#cbd5e1',
-                                    color: '#1E293B'
+                                    color: '#1E293B',
+                                    backgroundColor: '#ffffff'
                                 }}
                                 min="1"
                                 step="1"
@@ -314,7 +319,8 @@ function CouponForm({ initialData, onSubmit, onCancel, isLoading }) {
                                 className={`input input-bordered border-2 text-sm sm:text-base px-4 sm:px-5 py-2.5 sm:py-3 ${errors.expiryDate ? 'input-error' : ''}`}
                                 style={{
                                     borderColor: errors.expiryDate ? '#ef4444' : '#cbd5e1',
-                                    color: '#1E293B'
+                                    color: '#1E293B',
+                                    backgroundColor: '#ffffff'
                                 }}
                             />
                             {errors.expiryDate && (
@@ -333,8 +339,8 @@ function CouponForm({ initialData, onSubmit, onCancel, isLoading }) {
                                 name="isActive"
                                 checked={formData.isActive}
                                 onChange={handleChange}
-                                className="checkbox checkbox-primary w-5 h-5 sm:w-6 sm:h-6"
-                                style={{ accentColor: '#1E293B' }}
+                                className="toggle toggle-primary"
+                                style={{ '--tglbg': '#cbd5e1', '--handleoffset': '1.55em' }}
                             />
                             <span className="label-text font-semibold text-sm sm:text-base" style={{ color: '#1E293B' }}>
                                 {t('admin.active') || 'Active'}
@@ -358,6 +364,7 @@ function CouponForm({ initialData, onSubmit, onCancel, isLoading }) {
                             style={{
                                 borderColor: '#cbd5e1',
                                 color: '#1E293B',
+                                backgroundColor: '#ffffff',
                                 minHeight: '100px'
                             }}
                             rows="4"
@@ -368,22 +375,43 @@ function CouponForm({ initialData, onSubmit, onCancel, isLoading }) {
                     <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 sm:pt-6">
                         <button
                             type="submit"
-                            className="btn btn-primary text-white flex-1 sm:flex-none px-6 sm:px-8 py-2.5 sm:py-3 text-sm sm:text-base font-semibold"
+                            className="btn btn-primary text-white flex-1 sm:flex-none px-6 sm:px-8 py-2.5 sm:py-3 text-sm sm:text-base font-semibold transition-all duration-200 hover:shadow-md"
                             style={{ backgroundColor: '#1E293B' }}
                             disabled={isLoading}
+                            onMouseEnter={(e) => { if (!isLoading) e.currentTarget.style.backgroundColor = '#0f172a'; }}
+                            onMouseLeave={(e) => { if (!isLoading) e.currentTarget.style.backgroundColor = '#1E293B'; }}
                         >
                             {isLoading ? (
                                 <span className="loading loading-spinner loading-sm"></span>
                             ) : (
-                                initialData ? (t('common.update') || 'Update') : (t('common.create') || 'Create')
+                                initialData ? (t('common.update') || 'Update') : 'Create'
                             )}
                         </button>
                         <button
                             type="button"
                             onClick={onCancel}
-                            className="btn btn-outline flex-1 sm:flex-none px-6 sm:px-8 py-2.5 sm:py-3 text-sm sm:text-base font-semibold"
-                            style={{ borderColor: '#1E293B', color: '#1E293B' }}
+                            className="btn flex-1 sm:flex-none px-6 sm:px-8 py-2.5 sm:py-3 text-sm sm:text-base font-semibold transition-all duration-200 hover:shadow-sm"
+                            style={{
+                                backgroundColor: '#ffffff',
+                                borderColor: '#cbd5e1',
+                                color: '#64748b',
+                                borderWidth: '1px'
+                            }}
                             disabled={isLoading}
+                            onMouseEnter={(e) => {
+                                if (!isLoading) {
+                                    e.currentTarget.style.backgroundColor = '#f8fafc';
+                                    e.currentTarget.style.borderColor = '#94a3b8';
+                                    e.currentTarget.style.color = '#475569';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (!isLoading) {
+                                    e.currentTarget.style.backgroundColor = '#ffffff';
+                                    e.currentTarget.style.borderColor = '#cbd5e1';
+                                    e.currentTarget.style.color = '#64748b';
+                                }
+                            }}
                         >
                             {t('common.cancel') || 'Cancel'}
                         </button>

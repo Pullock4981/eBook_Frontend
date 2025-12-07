@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { selectIsAuthenticated, selectUser } from '../../store/slices/authSlice';
-import { fetchUserProfile, selectUserProfile } from '../../store/slices/userSlice';
+import { fetchUserProfile, selectUserProfile, fetchAddresses, selectUserAddresses } from '../../store/slices/userSlice';
 import { fetchUserOrders, selectOrders, selectOrdersLoading } from '../../store/slices/orderSlice';
 import { fetchUserEBooks, selectEBooks, fetcheBookAccess, selectAccessToken } from '../../store/slices/ebookSlice';
 import Loading from '../../components/common/Loading';
@@ -24,6 +24,7 @@ function Dashboard() {
     const isAuthenticated = useSelector(selectIsAuthenticated);
     const user = useSelector(selectUser);
     const profile = useSelector(selectUserProfile);
+    const addresses = useSelector(selectUserAddresses);
     const orders = useSelector(selectOrders);
     const ordersLoading = useSelector(selectOrdersLoading);
     const eBooks = useSelector(selectEBooks);
@@ -37,6 +38,7 @@ function Dashboard() {
         }
 
         dispatch(fetchUserProfile());
+        dispatch(fetchAddresses());
         dispatch(fetchUserOrders({ page: 1, limit: 5 })); // Get recent 5 orders
         dispatch(fetchUserEBooks());
     }, [dispatch, isAuthenticated, navigate]);
@@ -56,7 +58,11 @@ function Dashboard() {
                 {/* Welcome Header */}
                 <div className="mb-6 sm:mb-8">
                     <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2" style={{ color: '#1E293B' }}>
-                        {t('user.welcome') || 'Welcome'}, {user?.name || user?.mobile || 'User'}!
+                        {t('user.welcome') || 'Welcome'}, {(() => {
+                            // Get user name from profile (database) or authSlice user
+                            const userName = profile?.profile?.name || profile?.name || user?.profile?.name || '';
+                            return userName || user?.mobile || 'User';
+                        })()}!
                     </h1>
                     <p className="text-sm sm:text-base opacity-70" style={{ color: '#2d3748' }}>
                         {t('user.dashboardDescription') || 'Manage your account, orders, and eBooks'}
@@ -123,6 +129,130 @@ function Dashboard() {
                     </div>
                 </div>
 
+                {/* Profile Section */}
+                <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-6 sm:mb-8 border" style={{ borderColor: '#e2e8f0' }}>
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-lg sm:text-xl font-bold" style={{ color: '#1E293B' }}>
+                            My Info
+                        </h2>
+                        <Link
+                            to="/dashboard/profile"
+                            className="text-sm font-medium hover:underline"
+                            style={{ color: '#1E293B' }}
+                        >
+                            Edit Profile
+                        </Link>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                        {/* User Info */}
+                        <div>
+                            <div className="space-y-3">
+                                <div>
+                                    <p className="text-xs text-gray-500 mb-1" style={{ color: '#94a3b8' }}>
+                                        User Name
+                                    </p>
+                                    <p className="text-sm font-medium" style={{ color: '#1E293B' }}>
+                                        {(() => {
+                                            const userName = profile?.profile?.name || profile?.name || user?.profile?.name || '';
+                                            return userName || '-';
+                                        })()}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-gray-500 mb-1" style={{ color: '#94a3b8' }}>
+                                        User Email
+                                    </p>
+                                    <p className="text-sm font-medium" style={{ color: '#1E293B' }}>
+                                        {profile?.profile?.email || profile?.email || user?.profile?.email || user?.email || '-'}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-gray-500 mb-1" style={{ color: '#94a3b8' }}>
+                                        Mobile
+                                    </p>
+                                    <p className="text-sm font-medium" style={{ color: '#1E293B' }}>
+                                        {user?.mobile || profile?.mobile || '-'}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Address Info */}
+                        <div>
+                            <h3 className="text-sm font-semibold mb-3" style={{ color: '#64748b' }}>
+                                Address
+                            </h3>
+                            {addresses && addresses.length > 0 ? (
+                                (() => {
+                                    const defaultAddress = addresses.find(addr => addr.isDefault) || addresses[0];
+                                    return (
+                                        <div className="space-y-2">
+                                            {defaultAddress.isDefault && (
+                                                <span className="inline-block px-2 py-0.5 rounded text-xs font-medium mb-2" style={{ backgroundColor: '#d1fae5', color: '#065f46' }}>
+                                                    Default Address
+                                                </span>
+                                            )}
+                                            <div className="text-sm" style={{ color: '#1E293B' }}>
+                                                {defaultAddress.recipientName && (
+                                                    <p className="font-medium mb-1">{defaultAddress.recipientName}</p>
+                                                )}
+                                                {defaultAddress.addressLine1 && (
+                                                    <p className="mb-1">{defaultAddress.addressLine1}</p>
+                                                )}
+                                                {defaultAddress.addressLine2 && (
+                                                    <p className="mb-1">{defaultAddress.addressLine2}</p>
+                                                )}
+                                                <p className="mb-1">
+                                                    {[
+                                                        defaultAddress.area,
+                                                        defaultAddress.city,
+                                                        defaultAddress.district,
+                                                        defaultAddress.postalCode
+                                                    ].filter(Boolean).join(', ')}
+                                                </p>
+                                                {defaultAddress.recipientMobile && (
+                                                    <p className="text-xs text-gray-500 mt-2" style={{ color: '#94a3b8' }}>
+                                                        Mobile: {defaultAddress.recipientMobile}
+                                                    </p>
+                                                )}
+                                            </div>
+                                            <Link
+                                                to="/dashboard/addresses"
+                                                className="inline-block text-xs font-medium hover:underline mt-2"
+                                                style={{ color: '#1E293B' }}
+                                            >
+                                                View All Address →
+                                            </Link>
+                                        </div>
+                                    );
+                                })()
+                            ) : (
+                                <div>
+                                    <p className="text-sm text-gray-500 mb-3" style={{ color: '#94a3b8' }}>
+                                        {t('user.noAddress') || 'No address added yet'}
+                                    </p>
+                                    <Link
+                                        to="/dashboard/addresses"
+                                        className="inline-block px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200"
+                                        style={{
+                                            backgroundColor: '#1E293B',
+                                            color: '#ffffff'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.target.style.backgroundColor = '#0f172a';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.target.style.backgroundColor = '#1E293B';
+                                        }}
+                                    >
+                                        {t('user.addAddress') || 'Add Address'}
+                                    </Link>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
                 {/* Quick Actions */}
                 <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-6 sm:mb-8 border" style={{ borderColor: '#e2e8f0' }}>
                     <h2 className="text-lg sm:text-xl font-bold mb-4" style={{ color: '#1E293B' }}>
@@ -131,44 +261,92 @@ function Dashboard() {
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                         <Link
                             to="/dashboard/profile"
-                            className="btn btn-outline flex flex-col items-center justify-center h-20 sm:h-24"
-                            style={{ borderColor: '#1E293B', color: '#1E293B' }}
+                            className="group flex flex-col items-center justify-center h-20 sm:h-24 rounded-lg border-2 transition-all duration-200 hover:shadow-md"
+                            style={{
+                                borderColor: '#1E293B',
+                                color: '#1E293B',
+                                backgroundColor: '#f8fafc'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = '#1E293B';
+                                e.currentTarget.style.color = '#ffffff';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = '#f8fafc';
+                                e.currentTarget.style.color = '#1E293B';
+                            }}
                         >
                             <svg className="w-5 h-5 sm:w-6 sm:h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
-                            <span className="text-xs sm:text-sm">{t('user.profile') || 'Profile'}</span>
+                            <span className="text-xs sm:text-sm font-medium">{t('user.profile') || 'Profile'}</span>
                         </Link>
                         <Link
                             to="/dashboard/orders"
-                            className="btn btn-outline flex flex-col items-center justify-center h-20 sm:h-24"
-                            style={{ borderColor: '#1E293B', color: '#1E293B' }}
+                            className="group flex flex-col items-center justify-center h-20 sm:h-24 rounded-lg border-2 transition-all duration-200 hover:shadow-md"
+                            style={{
+                                borderColor: '#1E293B',
+                                color: '#1E293B',
+                                backgroundColor: '#f8fafc'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = '#1E293B';
+                                e.currentTarget.style.color = '#ffffff';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = '#f8fafc';
+                                e.currentTarget.style.color = '#1E293B';
+                            }}
                         >
                             <svg className="w-5 h-5 sm:w-6 sm:h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
-                            <span className="text-xs sm:text-sm">{t('orders.title') || 'Orders'}</span>
+                            <span className="text-xs sm:text-sm font-medium">{t('orders.title') || 'Orders'}</span>
                         </Link>
                         <Link
                             to="/dashboard/addresses"
-                            className="btn btn-outline flex flex-col items-center justify-center h-20 sm:h-24"
-                            style={{ borderColor: '#1E293B', color: '#1E293B' }}
+                            className="group flex flex-col items-center justify-center h-20 sm:h-24 rounded-lg border-2 transition-all duration-200 hover:shadow-md"
+                            style={{
+                                borderColor: '#1E293B',
+                                color: '#1E293B',
+                                backgroundColor: '#f8fafc'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = '#1E293B';
+                                e.currentTarget.style.color = '#ffffff';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = '#f8fafc';
+                                e.currentTarget.style.color = '#1E293B';
+                            }}
                         >
                             <svg className="w-5 h-5 sm:w-6 sm:h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
-                            <span className="text-xs sm:text-sm">{t('user.addresses') || 'Addresses'}</span>
+                            <span className="text-xs sm:text-sm font-medium">{t('user.addresses') || 'Addresses'}</span>
                         </Link>
                         <Link
                             to="/dashboard/ebooks"
-                            className="btn btn-outline flex flex-col items-center justify-center h-20 sm:h-24"
-                            style={{ borderColor: '#1E293B', color: '#1E293B' }}
+                            className="group flex flex-col items-center justify-center h-20 sm:h-24 rounded-lg border-2 transition-all duration-200 hover:shadow-md"
+                            style={{
+                                borderColor: '#1E293B',
+                                color: '#1E293B',
+                                backgroundColor: '#f8fafc'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = '#1E293B';
+                                e.currentTarget.style.color = '#ffffff';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = '#f8fafc';
+                                e.currentTarget.style.color = '#1E293B';
+                            }}
                         >
                             <svg className="w-5 h-5 sm:w-6 sm:h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                             </svg>
-                            <span className="text-xs sm:text-sm">{t('user.ebooks') || 'eBooks'}</span>
+                            <span className="text-xs sm:text-sm font-medium">{t('user.ebooks') || 'eBooks'}</span>
                         </Link>
                     </div>
                 </div>
@@ -181,10 +359,10 @@ function Dashboard() {
                         </h2>
                         <Link
                             to="/dashboard/orders"
-                            className="btn btn-sm btn-link text-sm"
+                            className="text-sm font-medium hover:underline"
                             style={{ color: '#1E293B' }}
                         >
-                            {t('common.viewAll') || 'View All'}
+                            View All
                         </Link>
                     </div>
 
@@ -209,20 +387,24 @@ function Dashboard() {
                         <div className="overflow-x-auto">
                             <table className="table w-full">
                                 <thead>
-                                    <tr>
-                                        <th className="text-sm sm:text-base" style={{ color: '#1E293B' }}>{t('orders.orderId') || 'Order ID'}</th>
-                                        <th className="text-sm sm:text-base" style={{ color: '#1E293B' }}>{t('orders.orderDate') || 'Date'}</th>
-                                        <th className="text-sm sm:text-base" style={{ color: '#1E293B' }}>{t('orders.status') || 'Status'}</th>
-                                        <th className="text-sm sm:text-base" style={{ color: '#1E293B' }}>{t('orders.total') || 'Total'}</th>
-                                        <th className="text-sm sm:text-base" style={{ color: '#1E293B' }}>{t('common.view') || 'View'}</th>
+                                    <tr style={{ backgroundColor: '#6B8E6B' }}>
+                                        <th className="text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>Order Id</th>
+                                        <th className="text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>{t('orders.orderDate') || 'Order Date'}</th>
+                                        <th className="text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>Status</th>
+                                        <th className="text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>{t('orders.total') || 'Total'}</th>
+                                        <th className="text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>{t('common.view') || 'View'}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {recentOrders.map((order) => (
-                                        <tr key={order._id}>
-                                            <td className="text-sm sm:text-base font-mono">{order.orderId}</td>
-                                            <td className="text-sm sm:text-base">{formatDate(order.createdAt)}</td>
-                                            <td>
+                                        <tr key={order._id} className="border-b hover:bg-gray-50 transition-colors" style={{ borderColor: '#e2e8f0' }}>
+                                            <td className="py-3 px-4">
+                                                <span className="text-xs sm:text-sm font-mono font-medium" style={{ color: '#1E293B' }}>{order.orderId}</span>
+                                            </td>
+                                            <td className="py-3 px-4">
+                                                <span className="text-xs sm:text-sm" style={{ color: '#64748b' }}>{formatDate(order.createdAt)}</span>
+                                            </td>
+                                            <td className="py-3 px-4">
                                                 <span className={`badge badge-sm ${order.orderStatus === 'delivered' ? 'badge-success' :
                                                     order.orderStatus === 'cancelled' ? 'badge-error' :
                                                         'badge-warning'
@@ -230,12 +412,24 @@ function Dashboard() {
                                                     {order.orderStatus}
                                                 </span>
                                             </td>
-                                            <td className="text-sm sm:text-base font-semibold">{formatCurrency(order.total)}</td>
-                                            <td>
+                                            <td className="py-3 px-4">
+                                                <span className="text-xs sm:text-sm font-semibold" style={{ color: '#1E293B' }}>{formatCurrency(order.total)}</span>
+                                            </td>
+                                            <td className="py-3 px-4">
                                                 <Link
                                                     to={`/orders/${order._id}`}
-                                                    className="btn btn-sm btn-link"
-                                                    style={{ color: '#1E293B' }}
+                                                    className="inline-block px-3 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 hover:shadow-sm"
+                                                    style={{
+                                                        backgroundColor: '#1E293B',
+                                                        color: '#ffffff',
+                                                        border: 'none'
+                                                    }}
+                                                    onMouseEnter={(e) => {
+                                                        e.target.style.backgroundColor = '#0f172a';
+                                                    }}
+                                                    onMouseLeave={(e) => {
+                                                        e.target.style.backgroundColor = '#1E293B';
+                                                    }}
                                                 >
                                                     {t('common.view') || 'View'}
                                                 </Link>
@@ -257,10 +451,10 @@ function Dashboard() {
                             </h2>
                             <Link
                                 to="/dashboard/ebooks"
-                                className="btn btn-sm btn-link text-sm"
+                                className="text-sm font-medium hover:underline"
                                 style={{ color: '#1E293B' }}
                             >
-                                {t('common.viewAll') || 'View All'}
+                                View All
                             </Link>
                         </div>
 

@@ -9,12 +9,14 @@ import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { selectUser } from '../../store/slices/authSlice';
+import { selectUserProfile } from '../../store/slices/userSlice';
 import { motion } from 'framer-motion';
 
 function Sidebar({ isAdmin = false, onLinkClick }) {
     const { t } = useTranslation();
     const location = useLocation();
     const user = useSelector(selectUser);
+    const profile = useSelector(selectUserProfile);
 
     // Check if route is active
     const isActive = (path) => {
@@ -84,7 +86,7 @@ function Sidebar({ isAdmin = false, onLinkClick }) {
         },
         {
             path: '/admin/products',
-            label: t('nav.products') || 'Products',
+            label: t('nav.productManagement') || 'Product Management',
             icon: (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
@@ -93,7 +95,7 @@ function Sidebar({ isAdmin = false, onLinkClick }) {
         },
         {
             path: '/admin/categories',
-            label: t('nav.categories') || 'Categories',
+            label: t('nav.categoryManagement') || 'Category Management',
             icon: (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -111,7 +113,7 @@ function Sidebar({ isAdmin = false, onLinkClick }) {
         },
         {
             path: '/admin/users',
-            label: t('nav.users') || 'Users',
+            label: t('nav.userManagement') || 'User Management',
             icon: (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -129,7 +131,7 @@ function Sidebar({ isAdmin = false, onLinkClick }) {
         },
         {
             path: '/admin/coupons',
-            label: t('nav.coupons') || 'Coupons',
+            label: t('nav.couponManagement') || 'Coupon Management',
             icon: (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
@@ -139,6 +141,23 @@ function Sidebar({ isAdmin = false, onLinkClick }) {
     ];
 
     const menuItems = isAdmin ? adminMenuItems : userMenuItems;
+
+    // Get user name from profile (database) or authSlice user
+    const getUserName = () => {
+        const userName = profile?.profile?.name || profile?.name || user?.profile?.name || '';
+        return userName || (isAdmin ? 'Admin' : 'User');
+    };
+
+    // Get user initial for avatar
+    const getUserInitial = () => {
+        const userName = profile?.profile?.name || profile?.name || user?.profile?.name || '';
+        return userName ? userName.charAt(0).toUpperCase() : (isAdmin ? 'A' : 'U');
+    };
+
+    // Get user phone/email
+    const getUserContact = () => {
+        return user?.mobile || profile?.profile?.email || profile?.email || user?.profile?.email || (isAdmin ? 'Administrator' : '');
+    };
 
     return (
         <aside className="w-64 min-h-screen bg-base-100 border-r-2 shadow-sm transition-colors duration-300" style={{ borderColor: '#cbd5e1', backgroundColor: '#ffffff' }}>
@@ -175,14 +194,14 @@ function Sidebar({ isAdmin = false, onLinkClick }) {
                                 className="w-12 h-12 rounded-full flex items-center justify-center text-white text-sm font-semibold"
                                 style={{ backgroundColor: '#1E293B' }}
                             >
-                                {user?.profile?.name ? user.profile.name.charAt(0).toUpperCase() : (isAdmin ? 'A' : 'U')}
+                                {getUserInitial()}
                             </div>
                             <div className="flex-1 min-w-0">
                                 <p className="font-semibold text-sm truncate" style={{ color: '#1E293B' }}>
-                                    {user?.profile?.name || (isAdmin ? 'Admin' : 'User')}
+                                    {getUserName()}
                                 </p>
                                 <p className="text-xs truncate" style={{ color: '#64748b' }}>
-                                    {user?.mobile || user?.profile?.email || (isAdmin ? 'Administrator' : '')}
+                                    {getUserContact()}
                                 </p>
                             </div>
                         </div>

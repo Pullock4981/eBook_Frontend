@@ -45,7 +45,7 @@ function ProductCard({ product }) {
         <div className="card bg-base-100 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col border border-base-200">
             {/* Product Image */}
             <Link to={productUrl} className="relative overflow-hidden group">
-                <figure className="relative w-full aspect-[3/4] sm:aspect-[4/5] bg-base-200">
+                <figure className="relative w-full aspect-[3/2] bg-base-200">
                     <img
                         src={productImage}
                         alt={product.name}
@@ -101,7 +101,7 @@ function ProductCard({ product }) {
                     {/* Action Button */}
                     <Link
                         to={productUrl}
-                        className="btn btn-sm btn-primary w-full text-white"
+                        className="btn btn-sm btn-primary w-full text-white px-4 py-2"
                         style={{ backgroundColor: '#1E293B' }}
                     >
                         {t('products.viewDetails') || 'View Details'}

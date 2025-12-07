@@ -13,10 +13,10 @@ import { API_ENDPOINTS } from '../utils/constants';
  * @param {number} limit - Items per page
  * @returns {Promise} API response
  */
-export const getAllProducts = async (filters = {}, page = 1, limit = 100) => {
+export const getAllProducts = async (filters = {}, page = 1, limit = 8) => {
     try {
-        // Ensure limit is at least 100
-        const finalLimit = limit || 100;
+        // Default to 8 items per page
+        const finalLimit = limit || 8;
 
         const params = {
             page,
@@ -118,7 +118,7 @@ export const getProductBySlug = async (slug, incrementViews = true) => {
  * @param {number} limit - Items per page
  * @returns {Promise} API response
  */
-export const searchProducts = async (query, page = 1, limit = 100) => {
+export const searchProducts = async (query, page = 1, limit = 8) => {
     try {
         const params = {
             q: query,
@@ -155,7 +155,7 @@ export const getFeaturedProducts = async (limit = 10) => {
  * @param {number} limit - Items per page
  * @returns {Promise} API response
  */
-export const getProductsByCategory = async (categoryId, page = 1, limit = 100) => {
+export const getProductsByCategory = async (categoryId, page = 1, limit = 8) => {
     try {
         const params = { page, limit };
         const response = await api.get(`${API_ENDPOINTS.PRODUCTS.LIST}/category/${categoryId}`, { params });

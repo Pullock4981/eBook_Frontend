@@ -88,27 +88,41 @@ function AdminOrderList() {
 
     const getStatusBadge = (status) => {
         const statusConfig = {
-            pending: { label: t('orders.status.pending') || 'Pending', className: 'badge-warning' },
-            confirmed: { label: t('orders.status.confirmed') || 'Confirmed', className: 'badge-info' },
-            processing: { label: t('orders.status.processing') || 'Processing', className: 'badge-info' },
-            shipped: { label: t('orders.status.shipped') || 'Shipped', className: 'badge-primary' },
-            delivered: { label: t('orders.status.delivered') || 'Delivered', className: 'badge-success' },
-            cancelled: { label: t('orders.status.cancelled') || 'Cancelled', className: 'badge-error' }
+            pending: { label: t('orders.status.pending') || 'Pending', bg: '#fef3c7', color: '#92400e' },
+            confirmed: { label: t('orders.status.confirmed') || 'Confirmed', bg: '#6B8E6B', color: '#ffffff' },
+            processing: { label: t('orders.status.processing') || 'Processing', bg: '#6B8E6B', color: '#ffffff' },
+            shipped: { label: t('orders.status.shipped') || 'Shipped', bg: '#6B8E6B', color: '#ffffff' },
+            delivered: { label: t('orders.status.delivered') || 'Delivered', bg: '#d1fae5', color: '#065f46' },
+            cancelled: { label: t('orders.status.cancelled') || 'Cancelled', bg: '#fee2e2', color: '#991b1b' }
         };
         const config = statusConfig[status] || statusConfig.pending;
-        return <span className={`badge badge-sm ${config.className}`}>{config.label}</span>;
+        return (
+            <span
+                className="badge badge-xs px-2 py-0.5 font-medium"
+                style={{ backgroundColor: config.bg, color: config.color, border: 'none' }}
+            >
+                {config.label}
+            </span>
+        );
     };
 
     const getPaymentStatusBadge = (status) => {
         const statusConfig = {
-            pending: { label: t('orders.paymentStatus.pending') || 'Pending', className: 'badge-warning' },
-            processing: { label: t('orders.paymentStatus.processing') || 'Processing', className: 'badge-info' },
-            paid: { label: t('orders.paymentStatus.paid') || 'Paid', className: 'badge-success' },
-            failed: { label: t('orders.paymentStatus.failed') || 'Failed', className: 'badge-error' },
-            refunded: { label: t('orders.paymentStatus.refunded') || 'Refunded', className: 'badge-error' }
+            pending: { label: t('orders.paymentStatus.pending') || 'Pending', bg: '#fef3c7', color: '#92400e' },
+            processing: { label: t('orders.paymentStatus.processing') || 'Processing', bg: '#6B8E6B', color: '#ffffff' },
+            paid: { label: t('orders.paymentStatus.paid') || 'Paid', bg: '#d1fae5', color: '#065f46' },
+            failed: { label: t('orders.paymentStatus.failed') || 'Failed', bg: '#fee2e2', color: '#991b1b' },
+            refunded: { label: t('orders.paymentStatus.refunded') || 'Refunded', bg: '#fee2e2', color: '#991b1b' }
         };
         const config = statusConfig[status] || statusConfig.pending;
-        return <span className={`badge badge-sm ${config.className}`}>{config.label}</span>;
+        return (
+            <span
+                className="badge badge-xs px-2 py-0.5 font-medium"
+                style={{ backgroundColor: config.bg, color: config.color, border: 'none' }}
+            >
+                {config.label}
+            </span>
+        );
     };
 
     if (!isAuthenticated) {
@@ -116,14 +130,14 @@ function AdminOrderList() {
     }
 
     return (
-        <div className="min-h-screen" style={{ backgroundColor: '#EFECE3' }}>
+        <div style={{ backgroundColor: '#EFECE3' }}>
             <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
                 {/* Page Header */}
-                <div className="mb-6">
-                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2" style={{ color: '#1E293B' }}>
+                <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-5 mb-6" style={{ borderColor: '#e2e8f0' }}>
+                    <h1 className="text-2xl sm:text-3xl font-bold mb-1" style={{ color: '#1E293B' }}>
                         {t('admin.orders.title') || 'Orders Management'}
                     </h1>
-                    <p className="text-sm sm:text-base opacity-70" style={{ color: '#2d3748' }}>
+                    <p className="text-sm opacity-70" style={{ color: '#64748b' }}>
                         {t('admin.orders.subtitle') || 'View and manage all orders'}
                     </p>
                 </div>
@@ -144,81 +158,95 @@ function AdminOrderList() {
                         <Loading />
                     </div>
                 ) : orders.length === 0 ? (
-                    <div className="card bg-base-100 shadow-sm">
-                        <div className="card-body text-center py-12">
-                            <p className="text-lg" style={{ color: '#1E293B' }}>
-                                {t('admin.orders.noOrders') || 'No orders found'}
-                            </p>
+                    <div className="bg-white rounded-lg shadow-sm border">
+                        <div className="flex flex-col items-center justify-center py-12 sm:py-16 px-4">
+                            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center mb-4 sm:mb-6" style={{ backgroundColor: '#f1f5f9' }}>
+                                <svg
+                                    className="w-10 h-10 sm:w-12 sm:h-12"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                    style={{ color: '#94a3b8' }}
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                                    />
+                                </svg>
+                            </div>
+                            <div className="text-center">
+                                <h3 className="text-lg sm:text-xl md:text-2xl font-semibold mb-2 sm:mb-3" style={{ color: '#1E293B' }}>
+                                    {t('admin.orders.noOrders') || 'No Orders Found'}
+                                </h3>
+                                <p className="text-sm sm:text-base opacity-70 px-4" style={{ color: '#64748b' }}>
+                                    No orders have been placed yet.
+                                </p>
+                            </div>
                         </div>
                     </div>
                 ) : (
                     <>
                         {/* Orders Table */}
-                        <div className="card bg-base-100 shadow-sm border-2" style={{ borderColor: '#e2e8f0' }}>
-                            <div className="card-body p-0 overflow-x-auto">
+                        <div className="bg-white rounded-lg shadow-sm border overflow-hidden" style={{ borderColor: '#e2e8f0' }}>
+                            <div className="overflow-x-auto">
                                 <table className="table w-full">
                                     <thead>
-                                        <tr style={{ backgroundColor: '#f1f5f9' }}>
-                                            <th style={{ color: '#1E293B' }}>Order ID</th>
-                                            <th style={{ color: '#1E293B' }}>Customer</th>
-                                            <th style={{ color: '#1E293B' }}>Items</th>
-                                            <th style={{ color: '#1E293B' }}>Total</th>
-                                            <th style={{ color: '#1E293B' }}>Payment</th>
-                                            <th style={{ color: '#1E293B' }}>Status</th>
-                                            <th style={{ color: '#1E293B' }}>Date</th>
-                                            <th style={{ color: '#1E293B' }}>Actions</th>
+                                        <tr style={{ backgroundColor: '#6B8E6B' }}>
+                                            <th className="text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>Order ID</th>
+                                            <th className="text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>Customer</th>
+                                            <th className="text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>Items</th>
+                                            <th className="text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>Total</th>
+                                            <th className="text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>Payment</th>
+                                            <th className="text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>Status</th>
+                                            <th className="text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>Date</th>
+                                            <th className="text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {orders.map((order) => (
-                                            <tr key={order._id} className="hover">
-                                                <td>
-                                                    <div className="font-mono text-xs sm:text-sm" style={{ color: '#1E293B' }}>
+                                            <tr key={order._id} className="hover:bg-gray-50 transition-colors border-b" style={{ borderColor: '#e2e8f0' }}>
+                                                <td className="py-3 px-4">
+                                                    <div className="font-mono text-xs sm:text-sm font-medium" style={{ color: '#1E293B' }}>
                                                         {order.orderId || order._id}
                                                     </div>
                                                 </td>
-                                                <td>
-                                                    <div className="text-sm" style={{ color: '#1E293B' }}>
+                                                <td className="py-3 px-4">
+                                                    <div className="text-sm font-medium" style={{ color: '#1E293B' }}>
                                                         {order.user?.profile?.name || order.user?.mobile || 'N/A'}
                                                     </div>
-                                                    <div className="text-xs opacity-70" style={{ color: '#2d3748' }}>
+                                                    <div className="text-xs opacity-70 mt-0.5" style={{ color: '#64748b' }}>
                                                         {order.user?.profile?.email || order.user?.mobile || ''}
                                                     </div>
                                                 </td>
-                                                <td>
+                                                <td className="py-3 px-4">
                                                     <div className="text-sm" style={{ color: '#1E293B' }}>
-                                                        {order.items?.length || 0} {t('orders.items', { count: order.items?.length || 0 }) || 'item(s)'}
+                                                        {t('orders.items', { count: order.items?.length || 0 }) || `${order.items?.length || 0} item(s)`}
                                                     </div>
                                                 </td>
-                                                <td>
-                                                    <div className="font-semibold" style={{ color: '#1E293B' }}>
+                                                <td className="py-3 px-4">
+                                                    <div className="font-semibold text-sm" style={{ color: '#1E293B' }}>
                                                         {formatCurrency(order.total)}
                                                     </div>
                                                 </td>
-                                                <td>{getPaymentStatusBadge(order.paymentStatus)}</td>
-                                                <td>{getStatusBadge(order.orderStatus)}</td>
-                                                <td>
-                                                    <div className="text-xs" style={{ color: '#2d3748' }}>
+                                                <td className="py-3 px-4">{getPaymentStatusBadge(order.paymentStatus)}</td>
+                                                <td className="py-3 px-4">{getStatusBadge(order.orderStatus)}</td>
+                                                <td className="py-3 px-4">
+                                                    <div className="text-xs" style={{ color: '#64748b' }}>
                                                         {formatDate(order.createdAt)}
                                                     </div>
                                                 </td>
-                                                <td>
-                                                    <div className="flex flex-col gap-1">
-                                                        <button
-                                                            onClick={() => navigate(`/orders/${order._id}`)}
-                                                            className="btn btn-xs btn-ghost"
-                                                            style={{ color: '#1E293B' }}
-                                                        >
-                                                            {t('common.view') || 'View'}
-                                                        </button>
+                                                <td className="py-3 px-4">
+                                                    <div className="flex flex-col gap-2">
                                                         <button
                                                             onClick={() => {
                                                                 setSelectedOrder(order);
                                                                 setPaymentStatus(order.paymentStatus || 'pending');
                                                                 setShowPaymentModal(true);
                                                             }}
-                                                            className="btn btn-xs btn-primary text-white"
-                                                            style={{ backgroundColor: '#1E293B' }}
+                                                            className="btn btn-xs text-white px-3 py-1.5 font-medium transition-all duration-200 hover:shadow-sm"
+                                                            style={{ backgroundColor: '#1E293B', paddingLeft: '0.75rem', paddingRight: '0.75rem', paddingTop: '0.375rem', paddingBottom: '0.375rem' }}
                                                         >
                                                             {t('admin.orders.updatePayment') || 'Payment'}
                                                         </button>
@@ -228,8 +256,8 @@ function AdminOrderList() {
                                                                 setOrderStatus(order.orderStatus || 'pending');
                                                                 setShowStatusModal(true);
                                                             }}
-                                                            className="btn btn-xs btn-outline"
-                                                            style={{ borderColor: '#1E293B', color: '#1E293B' }}
+                                                            className="btn btn-xs text-white px-3 py-1.5 font-medium transition-all duration-200 hover:shadow-sm"
+                                                            style={{ backgroundColor: '#1E293B', paddingLeft: '0.75rem', paddingRight: '0.75rem', paddingTop: '0.375rem', paddingBottom: '0.375rem' }}
                                                         >
                                                             {t('admin.orders.updateStatus') || 'Status'}
                                                         </button>
