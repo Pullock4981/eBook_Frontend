@@ -28,7 +28,8 @@
         "view": "View",
         "deleting": "Deleting...",
         "default": "Default",
-        "phone": "Phone"
+        "phone": "Phone",
+        "update": "Update"
     },
     "theme": {
         "light": "Light",
@@ -47,6 +48,7 @@
     "nav": {
         "home": "Home",
         "products": "Products",
+        "readPDF": "Read PDF",
         "dashboard": "Dashboard",
         "admin": "Admin",
         "adminDashboard": "Dashboard",
@@ -238,6 +240,13 @@
         "sku": "SKU",
         "digitalFile": "Digital File",
         "digitalFileUrl": "Digital File URL",
+        "uploadPDF": "Upload PDF File",
+        "orEnterURL": "or enter URL below",
+        "manualURLHint": "Or enter URL manually",
+        "pdfUploaded": "PDF Uploaded Successfully",
+        "uploadingPDF": "Uploading PDF...",
+        "clickOrDragPDF": "Click or drag PDF file here",
+        "pdfUploadHint": "PDF files only (Max {{maxSize}}MB)",
         "fileSize": "File Size",
         "images": "Images",
         "tags": "Tags",
@@ -284,8 +293,23 @@
             "priceRequired": "Valid price is required",
             "discountInvalid": "Discount price must be less than regular price",
             "stockRequired": "Stock is required for physical products",
-            "digitalFileRequired": "Digital file URL is required for digital products",
+            "digitalFileRequired": "PDF file upload or URL is required for digital products",
+            "invalidPDFFile": "Please select a valid PDF file",
+            "fileTooLarge": "File size must be less than {{maxSize}}MB",
+            "uploadFailed": "Failed to upload PDF",
             "imagesRequired": "At least one image is required"
+        },
+        "orders": {
+            "title": "Orders Management",
+            "subtitle": "View and manage all orders",
+            "noOrders": "No orders found",
+            "updatePayment": "Payment",
+            "updateStatus": "Status",
+            "updatePaymentStatus": "Update Payment Status",
+            "updateOrderStatus": "Update Order Status",
+            "paymentStatus": "Payment Status",
+            "orderStatus": "Order Status",
+            "transactionId": "Transaction ID"
         }
     },
     "cart": {
@@ -385,6 +409,7 @@
     "user": {
         "welcome": "Welcome",
         "dashboardDescription": "Manage your account, orders, and eBooks",
+        "recentEBooks": "Recent eBooks",
         "totalOrders": "Total Orders",
         "totalSpent": "Total Spent",
         "ebooksOwned": "eBooks Owned",
@@ -452,5 +477,44 @@
         "enterPostalCode": "Enter postal code",
         "ebooks": "eBooks",
         "viewAll": "View All"
+    },
+    "ebook": {
+        "myEBooks": "My eBooks",
+        "myEBooksDescription": "Access and read your purchased eBooks",
+        "noEBooks": "No eBooks Yet",
+        "noEBooksDescription": "You haven't purchased any eBooks yet. Browse our collection and start reading!",
+        "browseBooks": "Browse Books",
+        "read": "Read",
+        "reading": "Reading eBook",
+        "readerDescription": "Secure eBook reader with watermark protection",
+        "securityNotice": "This eBook is protected. Downloading, copying, or sharing is not allowed.",
+        "lastAccessed": "Last accessed",
+        "accessCount": "Opened",
+        "times": "times",
+        "accessDenied": "Access Denied",
+        "accessDeniedMessage": "You do not have access to this eBook. Please ensure you have purchased it.",
+        "backToEBooks": "Back to My eBooks",
+        "failedToLoadPDF": "Failed to load PDF",
+        "pdfLoadError": "Please try again or contact support if the problem persists.",
+        "loadingPDF": "Loading PDF..."
+    },
+    "ebooks": {
+        "title": "Read PDF eBooks",
+        "description": "Browse and purchase digital eBooks",
+        "showFeaturedOnly": "Show Featured Only",
+        "sortBy": "Sort By:",
+        "sortByName": "Name (A-Z)",
+        "sortByPriceLow": "Price (Low to High)",
+        "sortByPriceHigh": "Price (High to Low)",
+        "noEBooksFound": "No eBooks Found",
+        "noEBooksMessage": "No eBooks are available at the moment. Please check back later.",
+        "showingResults": "Showing {{count}} of {{total}} eBooks",
+        "readNow": "Read Now",
+        "alreadyPurchased": "Already Purchased",
+        "previousPage": "Previous Page",
+        "nextPage": "Next Page",
+        "zoomIn": "Zoom In",
+        "zoomOut": "Zoom Out",
+        "rotate": "Rotate"
     }
 }

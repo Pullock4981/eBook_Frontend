@@ -90,11 +90,16 @@ function Checkout() {
         }
 
         try {
+            // Prepare order data - ensure shippingAddress is null/undefined for digital products
             const orderData = {
-                shippingAddress: hasPhysicalProducts ? shippingAddress : null,
-                paymentMethod,
-                notes: notes.trim() || null
+                paymentMethod: paymentMethod || 'cash_on_delivery', // Ensure paymentMethod is always set
+                notes: notes && notes.trim() ? notes.trim() : undefined, // Use undefined instead of null for optional fields
             };
+
+            // Only include shippingAddress if there are physical products and address is selected
+            if (hasPhysicalProducts && shippingAddress) {
+                orderData.shippingAddress = shippingAddress;
+            }
 
             const result = await dispatch(createOrder(orderData)).unwrap();
 
@@ -102,16 +107,41 @@ function Checkout() {
             await dispatch(clearCartItems());
 
             // Redirect to order confirmation
-            if (result.data?._id) {
-                navigate(`/orders/${result.data._id}`);
-            } else if (result._id) {
-                navigate(`/orders/${result._id}`);
+            // API interceptor returns response.data, so result = { success: true, message: '...', data: order }
+            // orderSlice returns response.data, so result = { success: true, message: '...', data: order }
+            let order = null;
+            let orderId = null;
+
+            if (result?.data) {
+                // result.data is the order object
+                order = result.data;
+                orderId = order._id || order.id;
+            } else if (result?._id) {
+                // result is the order object directly
+                order = result;
+                orderId = result._id;
+            }
+
+            console.log('Order creation result:', { result, order, orderId });
+
+            if (orderId) {
+                navigate(`/orders/${orderId}`);
             } else {
+                console.warn('Order created but ID not found in response:', result);
                 navigate('/orders');
             }
         } catch (err) {
             console.error('Failed to place order:', err);
-            // Error is already in orderError state
+
+            // Show detailed error message if available
+            const errorMessage = err?.errors?.[0]?.message || err || 'Failed to place order';
+            console.error('Validation errors:', err?.errors || err);
+
+            // Error is already in orderError state, but we can show a more detailed message
+            if (err?.errors && Array.isArray(err.errors)) {
+                const firstError = err.errors[0];
+                alert(`${firstError.field || 'Validation'}: ${firstError.message || errorMessage}`);
+            }
         }
     };
 
@@ -146,7 +176,20 @@ function Checkout() {
                         <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
-                        <span className="text-sm sm:text-base">{error || orderError}</span>
+                        <div className="flex flex-col gap-1">
+                            <span className="text-sm sm:text-base font-semibold">
+                                {typeof orderError === 'object' ? orderError?.message || 'Validation failed' : orderError || error}
+                            </span>
+                            {typeof orderError === 'object' && orderError?.errors && orderError.errors.length > 0 && (
+                                <ul className="text-xs sm:text-sm list-disc list-inside mt-1">
+                                    {orderError.errors.map((err, idx) => (
+                                        <li key={idx}>
+                                            {err.field}: {err.message}
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
                     </div>
                 )}
 
@@ -170,12 +213,23 @@ function Checkout() {
                         </div>
 
                         {/* Shipping Address */}
-                        {hasPhysicalProducts && (
+                        {hasPhysicalProducts ? (
                             <AddressSelector
                                 selectedAddressId={shippingAddress}
                                 onAddressChange={setShippingAddress}
                                 hasPhysicalProducts={hasPhysicalProducts}
                             />
+                        ) : (
+                            <div className="card bg-base-100 shadow-sm border-2" style={{ borderColor: '#e2e8f0' }}>
+                                <div className="card-body p-4">
+                                    <h3 className="text-lg font-semibold mb-2" style={{ color: '#1E293B' }}>
+                                        {t('checkout.shippingAddress') || 'Shipping Address'}
+                                    </h3>
+                                    <p className="text-sm opacity-70" style={{ color: '#2d3748' }}>
+                                        {t('checkout.digitalProductNoAddress') || 'No shipping address required for digital products.'}
+                                    </p>
+                                </div>
+                            </div>
                         )}
 
                         {/* Payment Method */}

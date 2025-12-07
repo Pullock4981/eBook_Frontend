@@ -106,12 +106,12 @@ function Navbar() {
             </div>
 
             {/* Navbar Center - Desktop Navigation */}
-            <div className="navbar-center hidden lg:flex">
-                <ul className="menu menu-horizontal px-1 gap-1">
-                    <li>
+            <div className="navbar-center hidden lg:flex flex-shrink-0">
+                <ul className="menu menu-horizontal px-1 gap-1 flex-nowrap whitespace-nowrap">
+                    <li className="flex-shrink-0">
                         <Link
                             to="/"
-                            className={`px-4 py-2 rounded-lg transition-colors ${isActive('/') ? 'text-white' : ''
+                            className={`px-3 xl:px-4 py-2 rounded-lg transition-colors text-sm xl:text-base ${isActive('/') ? 'text-white' : ''
                                 }`}
                             style={
                                 isActive('/')
@@ -122,10 +122,10 @@ function Navbar() {
                             {t('nav.home') || 'Home'}
                         </Link>
                     </li>
-                    <li>
+                    <li className="flex-shrink-0">
                         <Link
                             to="/products"
-                            className={`px-4 py-2 rounded-lg transition-colors ${isActive('/products') ? 'text-white' : ''
+                            className={`px-3 xl:px-4 py-2 rounded-lg transition-colors text-sm xl:text-base ${isActive('/products') ? 'text-white' : ''
                                 }`}
                             style={
                                 isActive('/products')
@@ -136,14 +136,28 @@ function Navbar() {
                             {t('nav.products') || 'Products'}
                         </Link>
                     </li>
+                    <li className="flex-shrink-0">
+                        <Link
+                            to="/ebooks"
+                            className={`px-3 xl:px-4 py-2 rounded-lg transition-colors text-sm xl:text-base ${isActive('/ebooks') ? 'text-white' : ''
+                                }`}
+                            style={
+                                isActive('/ebooks')
+                                    ? { backgroundColor: '#1E293B', color: '#ffffff' }
+                                    : { color: '#1E293B' }
+                            }
+                        >
+                            {t('nav.readPDF') || 'Read PDF'}
+                        </Link>
+                    </li>
                     {isAuthenticated && (
                         <>
                             {/* Show Dashboard link only for non-admin users */}
                             {user?.role !== 'admin' && (
-                                <li>
+                                <li className="flex-shrink-0">
                                     <Link
                                         to="/dashboard"
-                                        className={`px-4 py-2 rounded-lg transition-colors ${isActive('/dashboard') ? 'text-white' : ''
+                                        className={`px-3 xl:px-4 py-2 rounded-lg transition-colors text-sm xl:text-base ${isActive('/dashboard') ? 'text-white' : ''
                                             }`}
                                         style={
                                             isActive('/dashboard')
@@ -179,32 +193,34 @@ function Navbar() {
 
             {/* Navbar End - Cart, Theme, Language, User Menu, Mobile Menu */}
             <div className="navbar-end gap-2">
-                {/* Cart Icon - Always visible */}
-                <Link
-                    to="/cart"
-                    className="btn btn-ghost btn-circle relative"
-                    aria-label="Shopping Cart"
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
+                {/* Cart Icon - Only visible for non-admin users */}
+                {user?.role !== 'admin' && (
+                    <Link
+                        to="/cart"
+                        className="btn btn-ghost btn-circle relative"
+                        aria-label="Shopping Cart"
                     >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                        />
-                    </svg>
-                    {cartItemCount > 0 && (
-                        <span className="absolute -top-1 -right-1 badge badge-sm badge-primary text-white" style={{ backgroundColor: '#1E293B' }}>
-                            {cartItemCount > 99 ? '99+' : cartItemCount}
-                        </span>
-                    )}
-                </Link>
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                            />
+                        </svg>
+                        {cartItemCount > 0 && (
+                            <span className="absolute -top-1 -right-1 badge badge-sm badge-primary text-white" style={{ backgroundColor: '#1E293B' }}>
+                                {cartItemCount > 99 ? '99+' : cartItemCount}
+                            </span>
+                        )}
+                    </Link>
+                )}
 
                 {/* Theme Toggle - Hidden on mobile */}
                 <div className="hidden sm:block">
@@ -534,14 +550,27 @@ function Navbar() {
                             </li>
                             <li>
                                 <Link
-                                    to="/cart"
-                                    className={`px-4 py-2.5 rounded-lg transition-colors ${isActive('/cart') ? 'bg-primary text-white font-semibold' : 'hover:bg-base-200'}`}
-                                    style={isActive('/cart') ? { backgroundColor: '#1E293B', color: '#ffffff' } : { color: '#1E293B' }}
+                                    to="/ebooks"
+                                    className={`px-4 py-2.5 rounded-lg transition-colors ${isActive('/ebooks') ? 'bg-primary text-white font-semibold' : 'hover:bg-base-200'}`}
+                                    style={isActive('/ebooks') ? { backgroundColor: '#1E293B', color: '#ffffff' } : { color: '#1E293B' }}
                                     onClick={closeMobileMenu}
                                 >
-                                    {t('nav.cart') || 'Cart'}
+                                    {t('nav.readPDF') || 'Read PDF'}
                                 </Link>
                             </li>
+                            {/* Cart - Only visible for non-admin users */}
+                            {user?.role !== 'admin' && (
+                                <li>
+                                    <Link
+                                        to="/cart"
+                                        className={`px-4 py-2.5 rounded-lg transition-colors ${isActive('/cart') ? 'bg-primary text-white font-semibold' : 'hover:bg-base-200'}`}
+                                        style={isActive('/cart') ? { backgroundColor: '#1E293B', color: '#ffffff' } : { color: '#1E293B' }}
+                                        onClick={closeMobileMenu}
+                                    >
+                                        {t('nav.cart') || 'Cart'}
+                                    </Link>
+                                </li>
+                            )}
                             {isAuthenticated && (
                                 <>
                                     {/* Show Dashboard link only for non-admin users */}

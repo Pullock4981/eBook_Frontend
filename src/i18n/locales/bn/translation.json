@@ -28,7 +28,8 @@
         "view": "দেখুন",
         "deleting": "মুছে ফেলা হচ্ছে...",
         "default": "ডিফল্ট",
-        "phone": "ফোন"
+        "phone": "ফোন",
+        "update": "আপডেট"
     },
     "theme": {
         "light": "হালকা",
@@ -47,6 +48,7 @@
     "nav": {
         "home": "হোম",
         "products": "পণ্য",
+        "readPDF": "PDF পড়ুন",
         "dashboard": "ড্যাশবোর্ড",
         "admin": "অ্যাডমিন",
         "adminDashboard": "ড্যাশবোর্ড",
@@ -238,6 +240,13 @@
         "sku": "SKU",
         "digitalFile": "ডিজিটাল ফাইল",
         "digitalFileUrl": "ডিজিটাল ফাইল URL",
+        "uploadPDF": "PDF ফাইল আপলোড করুন",
+        "orEnterURL": "অথবা নিচে URL দিন",
+        "manualURLHint": "অথবা ম্যানুয়ালি URL দিন",
+        "pdfUploaded": "PDF সফলভাবে আপলোড হয়েছে",
+        "uploadingPDF": "PDF আপলোড হচ্ছে...",
+        "clickOrDragPDF": "এখানে ক্লিক করুন বা PDF ফাইল টেনে আনুন",
+        "pdfUploadHint": "শুধুমাত্র PDF ফাইল (সর্বোচ্চ {{maxSize}}MB)",
         "fileSize": "ফাইল সাইজ",
         "images": "ছবি",
         "tags": "ট্যাগ",
@@ -284,8 +293,23 @@
             "priceRequired": "বৈধ মূল্য প্রয়োজন",
             "discountInvalid": "ছাড় মূল্য নিয়মিত মূল্যের চেয়ে কম হতে হবে",
             "stockRequired": "শারীরিক পণ্যের জন্য স্টক প্রয়োজন",
-            "digitalFileRequired": "ডিজিটাল পণ্যের জন্য ডিজিটাল ফাইল URL প্রয়োজন",
+            "digitalFileRequired": "ডিজিটাল পণ্যের জন্য PDF ফাইল আপলোড বা URL প্রয়োজন",
+            "invalidPDFFile": "অনুগ্রহ করে একটি বৈধ PDF ফাইল নির্বাচন করুন",
+            "fileTooLarge": "ফাইল সাইজ {{maxSize}}MB এর কম হতে হবে",
+            "uploadFailed": "PDF আপলোড করতে ব্যর্থ",
             "imagesRequired": "অন্তত একটি ছবি প্রয়োজন"
+        },
+        "orders": {
+            "title": "অর্ডার ব্যবস্থাপনা",
+            "subtitle": "সব অর্ডার দেখুন এবং পরিচালনা করুন",
+            "noOrders": "কোন অর্ডার পাওয়া যায়নি",
+            "updatePayment": "পেমেন্ট",
+            "updateStatus": "অবস্থা",
+            "updatePaymentStatus": "পেমেন্ট অবস্থা আপডেট করুন",
+            "updateOrderStatus": "অর্ডার অবস্থা আপডেট করুন",
+            "paymentStatus": "পেমেন্ট অবস্থা",
+            "orderStatus": "অর্ডার অবস্থা",
+            "transactionId": "লেনদেন ID"
         }
     },
     "cart": {
@@ -385,6 +409,7 @@
     "user": {
         "welcome": "স্বাগতম",
         "dashboardDescription": "আপনার অ্যাকাউন্ট, অর্ডার এবং ই-বুক পরিচালনা করুন",
+        "recentEBooks": "সাম্প্রতিক ই-বুক",
         "totalOrders": "মোট অর্ডার",
         "totalSpent": "মোট খরচ",
         "ebooksOwned": "মালিকানাধীন ই-বুক",
@@ -452,5 +477,43 @@
         "enterPostalCode": "পোস্টাল কোড লিখুন",
         "ebooks": "ই-বুক",
         "viewAll": "সব দেখুন"
+    },
+    "ebook": {
+        "myEBooks": "আমার ই-বুক",
+        "myEBooksDescription": "আপনার কেনা ই-বুকগুলো অ্যাক্সেস করুন এবং পড়ুন",
+        "noEBooks": "এখনও কোন ই-বুক নেই",
+        "noEBooksDescription": "আপনি এখনও কোন ই-বুক কেনেননি। আমাদের সংগ্রহ ব্রাউজ করুন এবং পড়া শুরু করুন!",
+        "browseBooks": "বই ব্রাউজ করুন",
+        "read": "পড়ুন",
+        "reading": "ই-বুক পড়ছেন",
+        "readerDescription": "ওয়াটারমার্ক সুরক্ষা সহ নিরাপদ ই-বুক রিডার",
+        "securityNotice": "এই ই-বুকটি সুরক্ষিত। ডাউনলোড, কপি বা শেয়ার করার অনুমতি নেই।",
+        "lastAccessed": "সর্বশেষ অ্যাক্সেস",
+        "accessCount": "খোলা হয়েছে",
+        "times": "বার",
+        "accessDenied": "অ্যাক্সেস অস্বীকার করা হয়েছে",
+        "accessDeniedMessage": "আপনার এই ই-বুকটিতে অ্যাক্সেস নেই। অনুগ্রহ করে নিশ্চিত করুন যে আপনি এটি কিনেছেন।",
+        "backToEBooks": "আমার ই-বুকে ফিরে যান",
+        "failedToLoadPDF": "PDF লোড করতে ব্যর্থ",
+        "pdfLoadError": "অনুগ্রহ করে আবার চেষ্টা করুন বা সমস্যা অব্যাহত থাকলে সহায়তা নিন।",
+        "loadingPDF": "PDF লোড হচ্ছে..."
+    },
+    "ebooks": {
+        "title": "PDF ই-বুক পড়ুন",
+        "description": "ডিজিটাল ই-বুক ব্রাউজ করুন এবং কিনুন",
+        "showFeaturedOnly": "শুধুমাত্র ফিচার্ড দেখান",
+        "sortBy": "সাজান:",
+        "sortByName": "নাম (A-Z)",
+        "sortByPriceHigh": "মূল্য (বেশি থেকে কম)",
+        "noEBooksFound": "কোন ই-বুক পাওয়া যায়নি",
+        "noEBooksMessage": "এখন কোন ই-বুক পাওয়া যায় না। পরে আবার চেক করুন।",
+        "showingResults": "{{total}} টির মধ্যে {{count}} টি ই-বুক দেখানো হচ্ছে",
+        "readNow": "এখন পড়ুন",
+        "alreadyPurchased": "ইতিমধ্যে কেনা হয়েছে",
+        "previousPage": "আগের পাতা",
+        "nextPage": "পরের পাতা",
+        "zoomIn": "জুম ইন",
+        "zoomOut": "জুম আউট",
+        "rotate": "ঘুরান"
     }
 }

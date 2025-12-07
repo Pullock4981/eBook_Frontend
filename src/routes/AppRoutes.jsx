@@ -22,6 +22,7 @@ import OTPVerification from '../pages/auth/OTPVerification';
 import Products from '../pages/Products';
 import ProductDetail from '../pages/ProductDetail';
 import Categories from '../pages/Categories';
+import EBooksList from '../pages/public/eBooksList';
 import Cart from '../pages/Cart';
 import Checkout from '../pages/Checkout';
 import Orders from '../pages/Orders';
@@ -29,9 +30,12 @@ import OrderDetail from '../pages/OrderDetail';
 import UserDashboard from '../pages/user/Dashboard';
 import UserProfile from '../pages/user/Profile';
 import UserAddresses from '../pages/user/Addresses';
+import UserEBooks from '../pages/user/eBooks';
+import eBookViewer from '../pages/user/eBookViewer';
 import AdminProductList from '../pages/admin/Products/ProductList';
 import AdminProductCreate from '../pages/admin/Products/ProductCreate';
 import AdminProductEdit from '../pages/admin/Products/ProductEdit';
+import AdminOrderList from '../pages/admin/Orders/OrderList';
 import { selectUser, updateUser } from '../store/slices/authSlice';
 import { getCurrentUser } from '../services/userService';
 
@@ -205,6 +209,7 @@ function AppRoutes() {
                     <Route path="/" element={<Home />} />
                     <Route path="/products" element={<Products />} />
                     <Route path="/products/:id" element={<ProductDetail />} />
+                    <Route path="/ebooks" element={<EBooksList />} />
                     <Route path="/categories" element={<Categories />} />
                     <Route path="/cart" element={<Cart />} />
                     <Route
@@ -257,10 +262,11 @@ function AppRoutes() {
                     <Route path="/dashboard" element={<UserDashboard />} />
                     <Route path="/dashboard/profile" element={<UserProfile />} />
                     <Route path="/dashboard/orders" element={<Orders />} />
-                    <Route path="/dashboard/ebooks" element={<UserDashboard />} />
+                    <Route path="/dashboard/ebooks" element={<UserEBooks />} />
                     <Route path="/dashboard/addresses" element={<UserAddresses />} />
                     <Route path="/orders" element={<Orders />} />
                     <Route path="/orders/:id" element={<OrderDetail />} />
+                    <Route path="/ebooks/viewer/:productId" element={<eBookViewer />} />
                 </Route>
 
                 {/* Admin Layout (Header + Sidebar) */}
@@ -276,7 +282,7 @@ function AppRoutes() {
                     <Route path="/admin/products/create" element={<AdminProductCreate />} />
                     <Route path="/admin/products/:id/edit" element={<AdminProductEdit />} />
                     <Route path="/admin/categories" element={<AdminDashboard />} />
-                    <Route path="/admin/orders" element={<AdminDashboard />} />
+                    <Route path="/admin/orders" element={<AdminOrderList />} />
                     <Route path="/admin/users" element={<AdminDashboard />} />
                     <Route path="/admin/affiliates" element={<AdminDashboard />} />
                     <Route path="/admin/coupons" element={<AdminDashboard />} />

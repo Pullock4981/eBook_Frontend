@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchMainCategories, selectMainCategories } from '../../store/slices/categorySlice';
 import ImageUpload from './ImageUpload';
+import PDFUpload from '../common/PDFUpload';
 import { PRODUCT_TYPES } from '../../utils/constants';
 
 function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) {
@@ -116,7 +117,7 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
         }
 
         if (formData.type === PRODUCT_TYPES.DIGITAL && !formData.digitalFile) {
-            newErrors.digitalFile = t('admin.errors.digitalFileRequired') || 'Digital file URL is required for digital products';
+            newErrors.digitalFile = t('admin.errors.digitalFileRequired') || 'PDF file upload or URL is required for digital products';
         }
 
         if (formData.images.length === 0) {
@@ -502,12 +503,56 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                         </div>
 
                         <div className="space-y-4 sm:space-y-4 md:space-y-4 lg:space-y-4">
-                            {/* Digital File URL */}
+                            {/* PDF Upload */}
+                            <div className="form-control w-full">
+                                <label className="label pb-2">
+                                    <span className="label-text text-sm sm:text-base font-semibold" style={{ color: '#1E293B' }}>
+                                        {t('admin.uploadPDF') || 'Upload PDF File'}
+                                        <span className="text-error ml-1">*</span>
+                                    </span>
+                                    <span className="label-text-alt text-xs sm:text-sm opacity-70" style={{ color: '#2d3748' }}>
+                                        {t('admin.orEnterURL') || 'or enter URL below'}
+                                    </span>
+                                </label>
+                                <PDFUpload
+                                    onUploadSuccess={(url, fileData) => {
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            digitalFile: url,
+                                            fileSize: fileData?.bytes || prev.fileSize
+                                        }));
+                                        // Clear error if upload successful
+                                        if (errors.digitalFile) {
+                                            setErrors(prev => ({ ...prev, digitalFile: '' }));
+                                        }
+                                    }}
+                                    onUploadError={(error) => {
+                                        setErrors(prev => ({
+                                            ...prev,
+                                            digitalFile: error.response?.data?.message || t('admin.errors.uploadFailed') || 'Failed to upload PDF'
+                                        }));
+                                    }}
+                                    maxSizeMB={50}
+                                    existingUrl={formData.digitalFile}
+                                />
+                                {errors.digitalFile && (
+                                    <label className="label pt-1">
+                                        <span className="label-text-alt text-error text-sm">{errors.digitalFile}</span>
+                                    </label>
+                                )}
+                            </div>
+
+                            {/* Digital File URL (Alternative/Manual Entry) */}
                             <div className="form-control w-full">
                                 <label className="label pb-2">
                                     <span className="label-text text-sm sm:text-base font-semibold" style={{ color: '#1E293B' }}>
                                         {t('admin.digitalFileUrl') || 'Digital File URL'}
-                                        <span className="text-error ml-1">*</span>
+                                        <span className="label-text-alt text-xs sm:text-sm opacity-70 ml-2" style={{ color: '#2d3748' }}>
+                                            {t('common.optional') || 'Optional'}
+                                        </span>
+                                    </span>
+                                    <span className="label-text-alt text-xs sm:text-sm opacity-70" style={{ color: '#2d3748' }}>
+                                        {t('admin.manualURLHint') || 'Or enter URL manually'}
                                     </span>
                                 </label>
                                 <input
@@ -515,21 +560,16 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                                     name="digitalFile"
                                     value={formData.digitalFile}
                                     onChange={handleChange}
-                                    className={`input input-bordered w-full h-12 text-base sm:text-base px-4 ${errors.digitalFile ? 'input-error border-error border-2' : 'border-2'}`}
+                                    className="input input-bordered w-full h-12 text-base sm:text-base px-4 border-2"
                                     style={{
                                         backgroundColor: '#ffffff',
                                         color: '#1E293B',
-                                        borderColor: errors.digitalFile ? '#EF4444' : '#cbd5e1',
+                                        borderColor: '#cbd5e1',
                                         paddingLeft: '1rem',
                                         paddingRight: '1rem',
                                     }}
                                     placeholder="https://example.com/book.pdf"
                                 />
-                                {errors.digitalFile && (
-                                    <label className="label pt-1">
-                                        <span className="label-text-alt text-error text-sm">{errors.digitalFile}</span>
-                                    </label>
-                                )}
                             </div>
 
                             {/* File Size */}

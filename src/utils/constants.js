@@ -65,9 +65,10 @@ export const API_ENDPOINTS = {
     },
     // eBook endpoints
     EBOOK: {
-        LIST: '/ebook/my-books',
-        VIEW: '/ebook/view',
-        ACCESS: '/ebook/access',
+        LIST: '/ebooks',
+        VIEW: '/ebooks',
+        ACCESS: '/ebooks',
+        VIEWER: '/ebooks',
     },
     // Affiliate endpoints
     AFFILIATE: {

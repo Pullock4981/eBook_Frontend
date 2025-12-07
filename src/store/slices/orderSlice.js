@@ -29,9 +29,13 @@ export const createOrder = createAsyncThunk(
             const response = await orderService.createOrder(orderData);
             return response.data;
         } catch (error) {
-            return rejectWithValue(
-                error.response?.data?.message || error.message || 'Failed to create order'
-            );
+            // Return full error object including validation errors
+            const errorData = error.response?.data || {};
+            return rejectWithValue({
+                message: errorData.message || error.message || 'Failed to create order',
+                errors: errorData.errors || [],
+                status: error.response?.status
+            });
         }
     }
 );
@@ -41,18 +45,24 @@ export const fetchUserOrders = createAsyncThunk(
     async ({ page = 1, limit = 10 }, { rejectWithValue }) => {
         try {
             const response = await orderService.getUserOrders(page, limit);
+            // API interceptor returns response.data, so response = { success: true, message: '...', data: orders, pagination: {...} }
+            // Backend returns: { success: true, message: '...', data: orders, pagination: {...} }
+            // Backend pagination: { page, limit, total, pages }
+            // Frontend expects: { currentPage, itemsPerPage, totalItems, totalPages }
+            const backendPagination = response.pagination || {};
             return {
-                orders: response.data.data || [],
-                pagination: response.data.pagination || {
-                    page: 1,
-                    limit: 10,
-                    total: 0,
-                    pages: 1
+                orders: response.data || [],
+                pagination: {
+                    currentPage: backendPagination.page || page,
+                    itemsPerPage: backendPagination.limit || limit,
+                    totalItems: backendPagination.total || 0,
+                    totalPages: backendPagination.pages || 1
                 }
             };
         } catch (error) {
+            const errorData = error.response?.data || {};
             return rejectWithValue(
-                error.response?.data?.message || error.message || 'Failed to fetch orders'
+                errorData.message || error.message || 'Failed to fetch orders'
             );
         }
     }
@@ -63,10 +73,13 @@ export const fetchOrderById = createAsyncThunk(
     async (orderId, { rejectWithValue }) => {
         try {
             const response = await orderService.getOrderById(orderId);
-            return response.data.data || null;
+            // API interceptor returns response.data, so response = { success: true, message: '...', data: order }
+            // So response.data is the order object
+            return response.data || response || null;
         } catch (error) {
+            const errorData = error.response?.data || {};
             return rejectWithValue(
-                error.response?.data?.message || error.message || 'Failed to fetch order'
+                errorData.message || error.message || 'Failed to fetch order'
             );
         }
     }
@@ -77,10 +90,65 @@ export const fetchOrderByOrderId = createAsyncThunk(
     async (orderIdString, { rejectWithValue }) => {
         try {
             const response = await orderService.getOrderByOrderId(orderIdString);
-            return response.data.data || null;
+            return response.data || response || null;
         } catch (error) {
             return rejectWithValue(
                 error.response?.data?.message || error.message || 'Failed to fetch order'
+            );
+        }
+    }
+);
+
+// Admin order actions
+export const fetchAllOrders = createAsyncThunk(
+    'orders/fetchAllOrders',
+    async ({ page = 1, limit = 10, filters = {} }, { rejectWithValue }) => {
+        try {
+            const response = await orderService.getAllOrders(page, limit, filters);
+            const backendPagination = response.pagination || {};
+            return {
+                orders: response.data || [],
+                pagination: {
+                    currentPage: backendPagination.page || page,
+                    itemsPerPage: backendPagination.limit || limit,
+                    totalItems: backendPagination.total || 0,
+                    totalPages: backendPagination.pages || 1
+                }
+            };
+        } catch (error) {
+            const errorData = error.response?.data || {};
+            return rejectWithValue(
+                errorData.message || error.message || 'Failed to fetch orders'
+            );
+        }
+    }
+);
+
+export const adminUpdateOrderStatus = createAsyncThunk(
+    'orders/adminUpdateOrderStatus',
+    async ({ orderId, status }, { rejectWithValue }) => {
+        try {
+            const response = await orderService.updateOrderStatus(orderId, status);
+            return response.data || response;
+        } catch (error) {
+            const errorData = error.response?.data || {};
+            return rejectWithValue(
+                errorData.message || error.message || 'Failed to update order status'
+            );
+        }
+    }
+);
+
+export const adminUpdatePaymentStatus = createAsyncThunk(
+    'orders/adminUpdatePaymentStatus',
+    async ({ orderId, paymentStatus, transactionId = null }, { rejectWithValue }) => {
+        try {
+            const response = await orderService.updatePaymentStatus(orderId, paymentStatus, transactionId);
+            return response.data || response;
+        } catch (error) {
+            const errorData = error.response?.data || {};
+            return rejectWithValue(
+                errorData.message || error.message || 'Failed to update payment status'
             );
         }
     }
@@ -131,11 +199,12 @@ const orderSlice = createSlice({
             .addCase(fetchUserOrders.fulfilled, (state, action) => {
                 state.isLoading = false;
                 state.orders = action.payload.orders || [];
-                state.pagination = {
-                    currentPage: action.payload.pagination.page || 1,
-                    totalPages: action.payload.pagination.pages || 1,
-                    totalItems: action.payload.pagination.total || 0,
-                    itemsPerPage: action.payload.pagination.limit || 10
+                // action.payload.pagination is already mapped in the thunk
+                state.pagination = action.payload.pagination || {
+                    currentPage: 1,
+                    totalPages: 1,
+                    totalItems: 0,
+                    itemsPerPage: 10
                 };
                 state.error = null;
             })
@@ -168,6 +237,68 @@ const orderSlice = createSlice({
                 state.error = null;
             })
             .addCase(fetchOrderByOrderId.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.payload;
+            })
+            // Admin: Fetch all orders
+            .addCase(fetchAllOrders.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(fetchAllOrders.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.orders = action.payload.orders || [];
+                state.pagination = action.payload.pagination || {
+                    currentPage: 1,
+                    totalPages: 1,
+                    totalItems: 0,
+                    itemsPerPage: 10
+                };
+                state.error = null;
+            })
+            .addCase(fetchAllOrders.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.payload;
+            })
+            // Admin: Update order status
+            .addCase(adminUpdateOrderStatus.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(adminUpdateOrderStatus.fulfilled, (state, action) => {
+                state.isLoading = false;
+                const updatedOrder = action.payload;
+                const index = state.orders.findIndex(o => o._id === updatedOrder._id);
+                if (index !== -1) {
+                    state.orders[index] = updatedOrder;
+                }
+                if (state.currentOrder && state.currentOrder._id === updatedOrder._id) {
+                    state.currentOrder = updatedOrder;
+                }
+                state.error = null;
+            })
+            .addCase(adminUpdateOrderStatus.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.payload;
+            })
+            // Admin: Update payment status
+            .addCase(adminUpdatePaymentStatus.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(adminUpdatePaymentStatus.fulfilled, (state, action) => {
+                state.isLoading = false;
+                const updatedOrder = action.payload;
+                const index = state.orders.findIndex(o => o._id === updatedOrder._id);
+                if (index !== -1) {
+                    state.orders[index] = updatedOrder;
+                }
+                if (state.currentOrder && state.currentOrder._id === updatedOrder._id) {
+                    state.currentOrder = updatedOrder;
+                }
+                state.error = null;
+            })
+            .addCase(adminUpdatePaymentStatus.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.payload;
             });

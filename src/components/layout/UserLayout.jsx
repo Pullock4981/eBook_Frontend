@@ -27,37 +27,6 @@ function UserLayout() {
                     <Sidebar isAdmin={false} />
                 </aside>
 
-                {/* Mobile Sidebar Toggle Button - Top Left */}
-                <button
-                    className="lg:hidden fixed top-20 left-4 z-50 btn btn-circle shadow-lg"
-                    style={{ backgroundColor: '#1E293B', color: '#ffffff', width: '48px', height: '48px' }}
-                    onClick={() => setSidebarOpen(!sidebarOpen)}
-                    aria-label="Toggle sidebar"
-                >
-                    <svg
-                        className="w-6 h-6"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        {sidebarOpen ? (
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M6 18L18 6M6 6l12 12"
-                            />
-                        ) : (
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M4 6h16M4 12h16M4 18h16"
-                            />
-                        )}
-                    </svg>
-                </button>
-
                 {/* Mobile Sidebar Overlay */}
                 {sidebarOpen && (
                     <motion.div
@@ -82,6 +51,44 @@ function UserLayout() {
                 {/* Main Content */}
                 <main className="flex-grow w-full bg-base-100 transition-colors duration-300 lg:ml-0">
                     <div className="container mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6 lg:py-8">
+                        {/* Mobile Menu Section - Above page content */}
+                        <div className="lg:hidden w-full mb-3 sm:mb-4 pt-3 sm:pt-4">
+                            <div className="flex items-center justify-between bg-base-100 rounded-lg shadow-sm border border-base-200 p-2 sm:p-3">
+                                <button
+                                    className="btn btn-sm sm:btn-md rounded-lg shadow-sm flex items-center justify-center"
+                                    style={{ backgroundColor: '#1E293B', color: '#ffffff', minWidth: '44px', height: '44px' }}
+                                    onClick={() => setSidebarOpen(!sidebarOpen)}
+                                    aria-label="Toggle sidebar"
+                                >
+                                    <svg
+                                        className="w-5 h-5 sm:w-6 sm:h-6"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        {sidebarOpen ? (
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M6 18L18 6M6 6l12 12"
+                                            />
+                                        ) : (
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M4 6h16M4 12h16M4 18h16"
+                                            />
+                                        )}
+                                    </svg>
+                                </button>
+                                <span className="text-sm sm:text-base font-semibold" style={{ color: '#1E293B' }}>
+                                    Menu
+                                </span>
+                            </div>
+                        </div>
+
                         {/* Breadcrumbs */}
                         <Breadcrumbs />
 

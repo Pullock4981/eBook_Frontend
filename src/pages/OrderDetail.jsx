@@ -4,12 +4,12 @@
  * Detailed order information page
  */
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchOrderById, selectCurrentOrder, selectOrdersLoading, selectOrdersError, clearCurrentOrder } from '../store/slices/orderSlice';
-import { selectIsAuthenticated } from '../store/slices/authSlice';
+import { fetchOrderById, selectCurrentOrder, selectOrdersLoading, selectOrdersError, clearCurrentOrder, adminUpdatePaymentStatus, adminUpdateOrderStatus } from '../store/slices/orderSlice';
+import { selectIsAuthenticated, selectUser } from '../store/slices/authSlice';
 import Loading from '../components/common/Loading';
 import { formatCurrency } from '../utils/helpers';
 import { PRODUCT_TYPES } from '../utils/constants';
@@ -20,9 +20,20 @@ function OrderDetail() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const isAuthenticated = useSelector(selectIsAuthenticated);
+    const user = useSelector(selectUser);
     const order = useSelector(selectCurrentOrder);
     const isLoading = useSelector(selectOrdersLoading);
     const error = useSelector(selectOrdersError);
+
+    // Check if user is admin
+    const isAdmin = user?.role === 'admin';
+
+    // Admin action states
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [showStatusModal, setShowStatusModal] = useState(false);
+    const [paymentStatus, setPaymentStatus] = useState('paid');
+    const [orderStatus, setOrderStatus] = useState('confirmed');
+    const [transactionId, setTransactionId] = useState('');
 
     useEffect(() => {
         if (!isAuthenticated) {
@@ -86,6 +97,43 @@ function OrderDetail() {
         });
     };
 
+    // Admin actions
+    const handleUpdatePaymentStatus = async () => {
+        if (!order) return;
+
+        try {
+            await dispatch(adminUpdatePaymentStatus({
+                orderId: order._id,
+                paymentStatus,
+                transactionId: transactionId.trim() || null
+            })).unwrap();
+
+            setShowPaymentModal(false);
+            setTransactionId('');
+            // Refresh order
+            dispatch(fetchOrderById(id));
+        } catch (err) {
+            console.error('Failed to update payment status:', err);
+        }
+    };
+
+    const handleUpdateOrderStatus = async () => {
+        if (!order) return;
+
+        try {
+            await dispatch(adminUpdateOrderStatus({
+                orderId: order._id,
+                status: orderStatus
+            })).unwrap();
+
+            setShowStatusModal(false);
+            // Refresh order
+            dispatch(fetchOrderById(id));
+        } catch (err) {
+            console.error('Failed to update order status:', err);
+        }
+    };
+
     if (!isAuthenticated) {
         return null; // Will redirect
     }
@@ -131,7 +179,7 @@ function OrderDetail() {
                 {/* Back Button */}
                 <div className="mb-4">
                     <button
-                        onClick={() => navigate('/orders')}
+                        onClick={() => navigate(isAdmin ? '/admin/orders' : '/orders')}
                         className="btn btn-ghost btn-sm"
                         style={{ color: '#1E293B' }}
                     >
@@ -157,6 +205,31 @@ function OrderDetail() {
                             {getStatusBadge(order.orderStatus)}
                             {getPaymentStatusBadge(order.paymentStatus)}
                         </div>
+                        {/* Admin Actions */}
+                        {isAdmin && (
+                            <div className="flex flex-col sm:flex-row gap-2 mt-4">
+                                <button
+                                    onClick={() => {
+                                        setPaymentStatus(order.paymentStatus || 'pending');
+                                        setShowPaymentModal(true);
+                                    }}
+                                    className="btn btn-primary btn-sm text-white"
+                                    style={{ backgroundColor: '#1E293B' }}
+                                >
+                                    {t('admin.orders.updatePayment') || 'Update Payment'}
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setOrderStatus(order.orderStatus || 'pending');
+                                        setShowStatusModal(true);
+                                    }}
+                                    className="btn btn-outline btn-sm"
+                                    style={{ borderColor: '#1E293B', color: '#1E293B' }}
+                                >
+                                    {t('admin.orders.updateStatus') || 'Update Status'}
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -172,8 +245,17 @@ function OrderDetail() {
                                 <div className="space-y-4">
                                     {order.items?.map((item, index) => {
                                         const product = item.product || {};
-                                        const productName = item.productSnapshot?.name || product.name || 'Product';
-                                        const productImage = item.productSnapshot?.thumbnail || product.thumbnail || 'https://via.placeholder.com/100';
+                                        // Parse productSnapshot if it's a JSON string
+                                        let productSnapshot = item.productSnapshot;
+                                        if (typeof productSnapshot === 'string') {
+                                            try {
+                                                productSnapshot = JSON.parse(productSnapshot);
+                                            } catch (e) {
+                                                productSnapshot = {};
+                                            }
+                                        }
+                                        const productName = productSnapshot?.name || product.name || 'Product';
+                                        const productImage = productSnapshot?.thumbnail || product.thumbnail || 'https://via.placeholder.com/100';
                                         const isPhysical = item.type === PRODUCT_TYPES.PHYSICAL || product.type === PRODUCT_TYPES.PHYSICAL;
 
                                         return (
@@ -373,6 +455,124 @@ function OrderDetail() {
                     </div>
                 </div>
             </div>
+
+            {/* Payment Status Modal (Admin) */}
+            {isAdmin && showPaymentModal && order && (
+                <div className="modal modal-open">
+                    <div className="modal-box">
+                        <h3 className="font-bold text-lg mb-4" style={{ color: '#1E293B' }}>
+                            {t('admin.orders.updatePaymentStatus') || 'Update Payment Status'}
+                        </h3>
+                        <div className="form-control mb-4">
+                            <label className="label">
+                                <span className="label-text" style={{ color: '#1E293B' }}>
+                                    {t('admin.orders.paymentStatus') || 'Payment Status'}
+                                </span>
+                            </label>
+                            <select
+                                className="select select-bordered w-full"
+                                value={paymentStatus}
+                                onChange={(e) => setPaymentStatus(e.target.value)}
+                                style={{ borderColor: '#cbd5e1', color: '#1E293B' }}
+                            >
+                                <option value="pending">Pending</option>
+                                <option value="processing">Processing</option>
+                                <option value="paid">Paid</option>
+                                <option value="failed">Failed</option>
+                                <option value="refunded">Refunded</option>
+                            </select>
+                        </div>
+                        <div className="form-control mb-4">
+                            <label className="label">
+                                <span className="label-text" style={{ color: '#1E293B' }}>
+                                    {t('admin.orders.transactionId') || 'Transaction ID'} ({t('common.optional') || 'Optional'})
+                                </span>
+                            </label>
+                            <input
+                                type="text"
+                                className="input input-bordered w-full"
+                                value={transactionId}
+                                onChange={(e) => setTransactionId(e.target.value)}
+                                placeholder="Enter transaction ID"
+                                style={{ borderColor: '#cbd5e1', color: '#1E293B' }}
+                            />
+                        </div>
+                        <div className="modal-action">
+                            <button
+                                className="btn btn-ghost"
+                                onClick={() => {
+                                    setShowPaymentModal(false);
+                                    setTransactionId('');
+                                }}
+                            >
+                                {t('common.cancel') || 'Cancel'}
+                            </button>
+                            <button
+                                className="btn btn-primary text-white"
+                                onClick={handleUpdatePaymentStatus}
+                                style={{ backgroundColor: '#1E293B' }}
+                            >
+                                {t('common.update') || 'Update'}
+                            </button>
+                        </div>
+                    </div>
+                    <div className="modal-backdrop" onClick={() => {
+                        setShowPaymentModal(false);
+                        setTransactionId('');
+                    }}></div>
+                </div>
+            )}
+
+            {/* Order Status Modal (Admin) */}
+            {isAdmin && showStatusModal && order && (
+                <div className="modal modal-open">
+                    <div className="modal-box">
+                        <h3 className="font-bold text-lg mb-4" style={{ color: '#1E293B' }}>
+                            {t('admin.orders.updateOrderStatus') || 'Update Order Status'}
+                        </h3>
+                        <div className="form-control mb-4">
+                            <label className="label">
+                                <span className="label-text" style={{ color: '#1E293B' }}>
+                                    {t('admin.orders.orderStatus') || 'Order Status'}
+                                </span>
+                            </label>
+                            <select
+                                className="select select-bordered w-full"
+                                value={orderStatus}
+                                onChange={(e) => setOrderStatus(e.target.value)}
+                                style={{ borderColor: '#cbd5e1', color: '#1E293B' }}
+                            >
+                                <option value="pending">Pending</option>
+                                <option value="confirmed">Confirmed</option>
+                                <option value="processing">Processing</option>
+                                <option value="shipped">Shipped</option>
+                                <option value="delivered">Delivered</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                        <div className="modal-action">
+                            <button
+                                className="btn btn-ghost"
+                                onClick={() => {
+                                    setShowStatusModal(false);
+                                }}
+                            >
+                                {t('common.cancel') || 'Cancel'}
+                            </button>
+                            <button
+                                className="btn btn-primary text-white"
+                                onClick={handleUpdateOrderStatus}
+                                style={{ backgroundColor: '#1E293B' }}
+                            >
+                                {t('common.update') || 'Update'}
+                            </button>
+                        </div>
+                    </div>
+                    <div className="modal-backdrop" onClick={() => {
+                        setShowStatusModal(false);
+                    }}></div>
+                </div>
+            )}
         </div>
     );
 }

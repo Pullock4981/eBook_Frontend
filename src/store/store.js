@@ -13,6 +13,7 @@ import categoryReducer from './slices/categorySlice';
 import cartReducer from './slices/cartSlice';
 import orderReducer from './slices/orderSlice';
 import userReducer from './slices/userSlice';
+import ebookReducer from './slices/ebookSlice';
 
 // Configure store
 export const store = configureStore({
@@ -25,6 +26,7 @@ export const store = configureStore({
         cart: cartReducer,
         orders: orderReducer,
         user: userReducer,
+        ebook: ebookReducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({

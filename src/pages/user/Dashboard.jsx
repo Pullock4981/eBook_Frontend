@@ -4,15 +4,18 @@
  * Main dashboard for authenticated users
  */
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { selectIsAuthenticated, selectUser } from '../../store/slices/authSlice';
 import { fetchUserProfile, selectUserProfile } from '../../store/slices/userSlice';
 import { fetchUserOrders, selectOrders, selectOrdersLoading } from '../../store/slices/orderSlice';
+import { fetchUserEBooks, selectEBooks, fetcheBookAccess, selectAccessToken } from '../../store/slices/ebookSlice';
 import Loading from '../../components/common/Loading';
+import SecurePDFViewer from '../../components/ebook/SecurePDFViewer';
 import { formatCurrency, formatDate } from '../../utils/helpers';
+import { getPDFURL } from '../../services/ebookService';
 
 function Dashboard() {
     const { t } = useTranslation();
@@ -23,6 +26,9 @@ function Dashboard() {
     const profile = useSelector(selectUserProfile);
     const orders = useSelector(selectOrders);
     const ordersLoading = useSelector(selectOrdersLoading);
+    const eBooks = useSelector(selectEBooks);
+    const [selectedEBook, setSelectedEBook] = useState(null);
+    const [showViewer, setShowViewer] = useState(false);
 
     useEffect(() => {
         if (!isAuthenticated) {
@@ -32,6 +38,7 @@ function Dashboard() {
 
         dispatch(fetchUserProfile());
         dispatch(fetchUserOrders({ page: 1, limit: 5 })); // Get recent 5 orders
+        dispatch(fetchUserEBooks());
     }, [dispatch, isAuthenticated, navigate]);
 
     if (!isAuthenticated) {
@@ -41,6 +48,7 @@ function Dashboard() {
     const recentOrders = orders.slice(0, 5);
     const totalSpent = orders.reduce((sum, order) => sum + (order.total || 0), 0);
     const totalOrders = orders.length;
+    const totalEBooks = eBooks.length;
 
     return (
         <div className="min-h-screen" style={{ backgroundColor: '#EFECE3' }}>
@@ -103,7 +111,7 @@ function Dashboard() {
                                     {t('user.ebooksOwned') || 'eBooks Owned'}
                                 </p>
                                 <p className="text-2xl sm:text-3xl font-bold" style={{ color: '#1E293B' }}>
-                                    {t('user.comingSoon') || 'Coming Soon'}
+                                    {totalEBooks}
                                 </p>
                             </div>
                             <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center" style={{ backgroundColor: '#f1f5f9' }}>
@@ -239,7 +247,119 @@ function Dashboard() {
                         </div>
                     )}
                 </div>
+
+                {/* Recent eBooks with Embedded Viewer */}
+                {eBooks.length > 0 && (
+                    <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 border mt-6 sm:mt-8" style={{ borderColor: '#e2e8f0' }}>
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-lg sm:text-xl font-bold" style={{ color: '#1E293B' }}>
+                                {t('user.recentEBooks') || 'Recent eBooks'}
+                            </h2>
+                            <Link
+                                to="/dashboard/ebooks"
+                                className="btn btn-sm btn-link text-sm"
+                                style={{ color: '#1E293B' }}
+                            >
+                                {t('common.viewAll') || 'View All'}
+                            </Link>
+                        </div>
+
+                        {/* eBooks Grid */}
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 mb-4">
+                            {eBooks.slice(0, 5).map((eBook) => {
+                                const productId = eBook.product?.id || eBook.product?._id;
+                                return (
+                                    <button
+                                        key={eBook.id || productId}
+                                        onClick={() => {
+                                            setSelectedEBook(eBook);
+                                            setShowViewer(true);
+                                            // Fetch access token for this eBook
+                                            if (productId) {
+                                                dispatch(fetcheBookAccess(productId));
+                                            }
+                                        }}
+                                        className="card bg-base-100 shadow-sm hover:shadow-md transition-all border-2 hover:border-primary cursor-pointer"
+                                        style={{ borderColor: '#e2e8f0' }}
+                                    >
+                                        <figure className="aspect-[3/4] overflow-hidden bg-base-200">
+                                            <img
+                                                src={eBook.product?.thumbnail || eBook.product?.images?.[0] || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2UyZThmMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM2NDc0OGIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5lQm9vazwvdGV4dD48L3N2Zz4='}
+                                                alt={eBook.product?.title || eBook.product?.name || 'eBook'}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </figure>
+                                        <div className="card-body p-2 sm:p-3">
+                                            <h3 className="card-title text-xs sm:text-sm font-semibold line-clamp-2" style={{ color: '#1E293B' }}>
+                                                {eBook.product?.title || eBook.product?.name || 'eBook'}
+                                            </h3>
+                                        </div>
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        {/* Embedded PDF Viewer Modal */}
+                        {showViewer && selectedEBook && <EmbeddedViewerModal eBook={selectedEBook} onClose={() => {
+                            setShowViewer(false);
+                            setSelectedEBook(null);
+                        }} />}
+                    </div>
+                )}
             </div>
+        </div>
+    );
+}
+
+// Embedded Viewer Modal Component
+function EmbeddedViewerModal({ eBook, onClose }) {
+    const dispatch = useDispatch();
+    const { t } = useTranslation();
+    const accessToken = useSelector(selectAccessToken);
+    const [pdfURL, setPdfURL] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const productId = eBook.product?.id || eBook.product?._id;
+        if (productId) {
+            dispatch(fetcheBookAccess(productId));
+        }
+    }, [dispatch, eBook]);
+
+    useEffect(() => {
+        if (accessToken) {
+            setPdfURL(getPDFURL(accessToken));
+            setLoading(false);
+        }
+    }, [accessToken]);
+
+    return (
+        <div className="modal modal-open">
+            <div className="modal-box max-w-7xl w-full h-[90vh] p-0 flex flex-col">
+                <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: '#e2e8f0' }}>
+                    <h3 className="text-lg font-bold" style={{ color: '#1E293B' }}>
+                        {eBook.product?.title || eBook.product?.name || 'Reading eBook'}
+                    </h3>
+                    <button
+                        onClick={onClose}
+                        className="btn btn-sm btn-circle btn-ghost"
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div className="flex-1 overflow-hidden p-4">
+                    {loading || !pdfURL ? (
+                        <div className="flex items-center justify-center h-full">
+                            <Loading />
+                        </div>
+                    ) : (
+                        <SecurePDFViewer pdfURL={pdfURL} accessToken={accessToken} />
+                    )}
+                </div>
+            </div>
+            <div className="modal-backdrop" onClick={onClose}></div>
         </div>
     );
 }

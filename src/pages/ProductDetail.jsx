@@ -12,6 +12,7 @@ import { fetchProductById, fetchProductBySlug, selectCurrentProduct, selectIsLoa
 import { selectUser, selectIsAuthenticated } from '../store/slices/authSlice';
 import { addItemToCart } from '../store/slices/cartSlice';
 import { deleteProduct } from '../services/adminService';
+import { checkeBookAccess } from '../services/ebookService';
 import ProductGallery from '../components/products/ProductGallery';
 import Loading from '../components/common/Loading';
 import { formatCurrency, calculateDiscount } from '../utils/helpers';
@@ -34,9 +35,15 @@ function ProductDetail() {
     const [isAddingToCart, setIsAddingToCart] = useState(false);
     const [addToCartError, setAddToCartError] = useState(null);
     const [addToCartSuccess, setAddToCartSuccess] = useState(false);
+    const [hasEBookAccess, setHasEBookAccess] = useState(false);
+    const [checkingAccess, setCheckingAccess] = useState(false);
 
     // Check if user is admin
     const isAdmin = user?.role === 'admin';
+
+    // Check product type (must be defined before use in useEffect)
+    const isDigital = product?.type === PRODUCT_TYPES.DIGITAL;
+    const isPhysical = product?.type === PRODUCT_TYPES.PHYSICAL;
 
     useEffect(() => {
         if (id) {
@@ -69,6 +76,31 @@ function ProductDetail() {
             dispatch(clearCurrentProduct());
         };
     }, [dispatch, id]);
+
+    // Check if user has eBook access (for digital products)
+    useEffect(() => {
+        const checkAccess = async () => {
+            if (!isAuthenticated || !product || !isDigital) {
+                setHasEBookAccess(false);
+                return;
+            }
+
+            setCheckingAccess(true);
+            try {
+                const productId = product.id || product._id;
+                if (productId) {
+                    const hasAccess = await checkeBookAccess(productId);
+                    setHasEBookAccess(hasAccess);
+                }
+            } catch (error) {
+                setHasEBookAccess(false);
+            } finally {
+                setCheckingAccess(false);
+            }
+        };
+
+        checkAccess();
+    }, [isAuthenticated, product, isDigital]);
 
     if (isLoading) {
         return (
@@ -122,8 +154,6 @@ function ProductDetail() {
         : 0;
 
     const displayPrice = product.discountPrice || product.price;
-    const isPhysical = product.type === PRODUCT_TYPES.PHYSICAL;
-    const isDigital = product.type === PRODUCT_TYPES.DIGITAL;
 
     return (
         <div className="min-h-screen" style={{ backgroundColor: '#EFECE3' }}>
@@ -329,72 +359,153 @@ function ProductDetail() {
                         ) : (
                             /* User Actions */
                             <>
-                                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
-                                    <button
-                                        className="btn btn-primary btn-md sm:btn-lg flex-grow text-white shadow-lg hover:shadow-xl transition-all"
-                                        style={{ backgroundColor: '#1E293B' }}
-                                        disabled={isAddingToCart || !isAuthenticated}
-                                        onClick={async () => {
-                                            if (!isAuthenticated) {
-                                                navigate('/login');
-                                                return;
-                                            }
-
-                                            // Check stock before adding
-                                            if (isPhysical && product.stock === 0) {
-                                                setAddToCartError(t('products.outOfStockMessage') || 'This product is currently out of stock.');
-                                                return;
-                                            }
-
-                                            if (!product?._id) {
-                                                setAddToCartError(t('cart.productNotFound') || 'Product not found');
-                                                return;
-                                            }
-
-                                            setIsAddingToCart(true);
-                                            setAddToCartError(null);
-                                            setAddToCartSuccess(false);
-                                            try {
-                                                await dispatch(addItemToCart({ productId: product._id, quantity: 1 })).unwrap();
-                                                setAddToCartSuccess(true);
-                                                setTimeout(() => setAddToCartSuccess(false), 3000);
-                                            } catch (error) {
-                                                // Handle specific error messages
-                                                const errorMessage = error?.message || error || t('cart.addToCartError') || 'Failed to add to cart';
-                                                setAddToCartError(errorMessage);
-                                            } finally {
-                                                setIsAddingToCart(false);
-                                            }
-                                        }}
-                                    >
-                                        {isAddingToCart ? (
+                                {/* Digital Product - Read Now or Add to Cart */}
+                                {isDigital ? (
+                                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
+                                        {isAuthenticated && hasEBookAccess ? (
                                             <>
-                                                <span className="loading loading-spinner loading-sm"></span>
-                                                <span className="ml-2">{t('cart.adding') || 'Adding...'}</span>
-                                            </>
-                                        ) : addToCartSuccess ? (
-                                            <>
-                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                                </svg>
-                                                <span className="ml-2">{t('cart.addedToCart') || 'Added to Cart!'}</span>
+                                                <button
+                                                    onClick={() => navigate(`/ebooks/viewer/${product.id || product._id}`)}
+                                                    className="btn btn-success btn-md sm:btn-lg flex-grow text-white shadow-lg hover:shadow-xl transition-all font-semibold"
+                                                    style={{
+                                                        backgroundColor: '#10b981',
+                                                        fontWeight: '600'
+                                                    }}
+                                                >
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                                    </svg>
+                                                    <span className="ml-2">{t('ebooks.readNow') || 'Read Now'}</span>
+                                                </button>
+                                                <div className="badge badge-success badge-lg flex items-center gap-2 px-4 py-3">
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                    {t('ebooks.alreadyPurchased') || 'Already Purchased'}
+                                                </div>
                                             </>
                                         ) : (
-                                            <>
-                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                                                </svg>
-                                                <span className="ml-2">{t('products.addToCart') || 'Add to Cart'}</span>
-                                            </>
+                                            <button
+                                                className="btn btn-primary btn-md sm:btn-lg flex-grow text-white shadow-lg hover:shadow-xl transition-all"
+                                                style={{ backgroundColor: '#1E293B' }}
+                                                disabled={isAddingToCart || !isAuthenticated}
+                                                onClick={async () => {
+                                                    if (!isAuthenticated) {
+                                                        navigate('/login');
+                                                        return;
+                                                    }
+
+                                                    if (!product?._id) {
+                                                        setAddToCartError(t('cart.productNotFound') || 'Product not found');
+                                                        return;
+                                                    }
+
+                                                    setIsAddingToCart(true);
+                                                    setAddToCartError(null);
+                                                    setAddToCartSuccess(false);
+                                                    try {
+                                                        await dispatch(addItemToCart({ productId: product._id, quantity: 1 })).unwrap();
+                                                        setAddToCartSuccess(true);
+                                                        setTimeout(() => setAddToCartSuccess(false), 3000);
+                                                    } catch (error) {
+                                                        const errorMessage = error?.message || error || t('cart.addToCartError') || 'Failed to add to cart';
+                                                        setAddToCartError(errorMessage);
+                                                    } finally {
+                                                        setIsAddingToCart(false);
+                                                    }
+                                                }}
+                                            >
+                                                {isAddingToCart ? (
+                                                    <>
+                                                        <span className="loading loading-spinner loading-sm"></span>
+                                                        <span className="ml-2">{t('cart.adding') || 'Adding...'}</span>
+                                                    </>
+                                                ) : addToCartSuccess ? (
+                                                    <>
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                        <span className="ml-2">{t('cart.addedToCart') || 'Added to Cart!'}</span>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                                        </svg>
+                                                        <span className="ml-2">{t('products.addToCart') || 'Add to Cart'}</span>
+                                                    </>
+                                                )}
+                                            </button>
                                         )}
-                                    </button>
-                                    <button
-                                        className="btn btn-outline btn-md sm:btn-lg"
-                                        style={{ borderColor: '#1E293B', color: '#1E293B' }}
-                                    >
-                                        {t('products.wishlist') || 'Wishlist'}
-                                    </button>
-                                </div>
+                                    </div>
+                                ) : (
+                                    /* Physical Product - Add to Cart */
+                                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
+                                        <button
+                                            className="btn btn-primary btn-md sm:btn-lg flex-grow text-white shadow-lg hover:shadow-xl transition-all"
+                                            style={{ backgroundColor: '#1E293B' }}
+                                            disabled={isAddingToCart || !isAuthenticated}
+                                            onClick={async () => {
+                                                if (!isAuthenticated) {
+                                                    navigate('/login');
+                                                    return;
+                                                }
+
+                                                // Check stock before adding
+                                                if (product.stock === 0) {
+                                                    setAddToCartError(t('products.outOfStockMessage') || 'This product is currently out of stock.');
+                                                    return;
+                                                }
+
+                                                if (!product?._id) {
+                                                    setAddToCartError(t('cart.productNotFound') || 'Product not found');
+                                                    return;
+                                                }
+
+                                                setIsAddingToCart(true);
+                                                setAddToCartError(null);
+                                                setAddToCartSuccess(false);
+                                                try {
+                                                    await dispatch(addItemToCart({ productId: product._id, quantity: 1 })).unwrap();
+                                                    setAddToCartSuccess(true);
+                                                    setTimeout(() => setAddToCartSuccess(false), 3000);
+                                                } catch (error) {
+                                                    const errorMessage = error?.message || error || t('cart.addToCartError') || 'Failed to add to cart';
+                                                    setAddToCartError(errorMessage);
+                                                } finally {
+                                                    setIsAddingToCart(false);
+                                                }
+                                            }}
+                                        >
+                                            {isAddingToCart ? (
+                                                <>
+                                                    <span className="loading loading-spinner loading-sm"></span>
+                                                    <span className="ml-2">{t('cart.adding') || 'Adding...'}</span>
+                                                </>
+                                            ) : addToCartSuccess ? (
+                                                <>
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                    <span className="ml-2">{t('cart.addedToCart') || 'Added to Cart!'}</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                                    </svg>
+                                                    <span className="ml-2">{t('products.addToCart') || 'Add to Cart'}</span>
+                                                </>
+                                            )}
+                                        </button>
+                                        <button
+                                            className="btn btn-outline btn-md sm:btn-lg"
+                                            style={{ borderColor: '#1E293B', color: '#1E293B' }}
+                                        >
+                                            {t('products.wishlist') || 'Wishlist'}
+                                        </button>
+                                    </div>
+                                )}
 
                                 {/* Success Message */}
                                 {addToCartSuccess && (

@@ -102,7 +102,7 @@ function Sidebar({ isAdmin = false, onLinkClick }) {
         },
         {
             path: '/admin/orders',
-            label: t('nav.orders') || 'Orders',
+            label: t('admin.orders.title') || 'Order Management',
             icon: (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -167,22 +167,22 @@ function Sidebar({ isAdmin = false, onLinkClick }) {
                     </button>
                 </div>
 
-                {/* User Info (for user sidebar) */}
-                {!isAdmin && user && (
+                {/* User Info - Same style for both user and admin */}
+                {user && (
                     <div className="mb-6 sm:mb-8 p-4 sm:p-5 rounded-lg bg-base-100 shadow-sm" style={{ borderColor: '#e2e8f0', borderWidth: '1px' }}>
                         <div className="flex items-center gap-3 sm:gap-4">
                             <div
                                 className="w-12 h-12 rounded-full flex items-center justify-center text-white text-sm font-semibold"
                                 style={{ backgroundColor: '#1E293B' }}
                             >
-                                {user?.profile?.name ? user.profile.name.charAt(0).toUpperCase() : 'U'}
+                                {user?.profile?.name ? user.profile.name.charAt(0).toUpperCase() : (isAdmin ? 'A' : 'U')}
                             </div>
                             <div className="flex-1 min-w-0">
                                 <p className="font-semibold text-sm truncate" style={{ color: '#1E293B' }}>
-                                    {user?.profile?.name || 'User'}
+                                    {user?.profile?.name || (isAdmin ? 'Admin' : 'User')}
                                 </p>
                                 <p className="text-xs truncate" style={{ color: '#64748b' }}>
-                                    {user?.mobile || ''}
+                                    {user?.mobile || user?.profile?.email || (isAdmin ? 'Administrator' : '')}
                                 </p>
                             </div>
                         </div>
