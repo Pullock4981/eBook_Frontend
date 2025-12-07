@@ -82,6 +82,11 @@ export const API_ENDPOINTS = {
         ORDERS: '/admin/orders',
         AFFILIATES: '/admin/affiliates',
     },
+    // Upload endpoints
+    UPLOAD: {
+        SINGLE_IMAGE: '/upload/image',
+        MULTIPLE_IMAGES: '/upload/images',
+    },
 };
 
 // Local Storage Keys

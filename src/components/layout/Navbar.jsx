@@ -78,7 +78,10 @@ function Navbar() {
 
     // Check if route is active
     const isActive = (path) => {
-        return location.pathname === path;
+        if (path === '/') {
+            return location.pathname === '/';
+        }
+        return location.pathname === path || location.pathname.startsWith(path + '/');
     };
 
     return (
@@ -213,24 +216,55 @@ function Navbar() {
                         </label>
                         <ul
                             tabIndex={0}
-                            className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow-lg border"
-                            style={{ borderColor: '#e2e8f0' }}
+                            className="menu menu-sm dropdown-content bg-base-100 rounded-lg z-[1] mt-3 w-56 p-3 shadow-xl border-2"
+                            style={{ borderColor: '#e2e8f0', backgroundColor: '#ffffff' }}
                         >
+                            {/* User Info Section */}
+                            <li className="mb-2 pb-2 border-b" style={{ borderColor: '#e2e8f0' }}>
+                                <div className="flex items-center gap-3 px-2 py-2">
+                                    <div
+                                        className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-semibold flex-shrink-0"
+                                        style={{ backgroundColor: '#1E293B' }}
+                                    >
+                                        {user?.profile?.name ? getInitials(user.profile.name) : <span>U</span>}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="font-semibold text-sm truncate" style={{ color: '#1E293B' }}>
+                                            {user?.profile?.name || 'User'}
+                                        </p>
+                                        <p className="text-xs truncate opacity-70" style={{ color: '#64748b' }}>
+                                            {user?.mobile || user?.email || ''}
+                                        </p>
+                                    </div>
+                                </div>
+                            </li>
                             {/* Show user dashboard links only for non-admin users */}
                             {user?.role !== 'admin' && (
                                 <>
                                     <li>
-                                        <Link to="/dashboard" style={{ color: '#1E293B' }}>
+                                        <Link
+                                            to="/dashboard"
+                                            className={isActive('/dashboard') ? 'bg-base-200' : ''}
+                                            style={{ color: '#1E293B' }}
+                                        >
                                             {t('nav.profile') || 'Profile'}
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link to="/dashboard/orders" style={{ color: '#1E293B' }}>
+                                        <Link
+                                            to="/dashboard/orders"
+                                            className={isActive('/dashboard/orders') ? 'bg-base-200' : ''}
+                                            style={{ color: '#1E293B' }}
+                                        >
                                             {t('nav.orders') || 'My Orders'}
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link to="/dashboard/ebooks" style={{ color: '#1E293B' }}>
+                                        <Link
+                                            to="/dashboard/ebooks"
+                                            className={isActive('/dashboard/ebooks') ? 'bg-base-200' : ''}
+                                            style={{ color: '#1E293B' }}
+                                        >
                                             {t('nav.ebooks') || 'My eBooks'}
                                         </Link>
                                     </li>
@@ -239,13 +273,21 @@ function Navbar() {
                             {/* Show admin link for admin users */}
                             {user?.role === 'admin' && (
                                 <li>
-                                    <Link to="/admin" style={{ color: '#1E293B' }}>
+                                    <Link
+                                        to="/admin"
+                                        className={isActive('/admin') ? 'bg-base-200' : ''}
+                                        style={{ color: '#1E293B' }}
+                                    >
                                         {t('nav.admin') || 'Admin Dashboard'}
                                     </Link>
                                 </li>
                             )}
-                            <li>
-                                <button onClick={handleLogout} style={{ color: '#1E293B' }}>
+                            <li className="mt-2 pt-2 border-t" style={{ borderColor: '#e2e8f0' }}>
+                                <button
+                                    onClick={handleLogout}
+                                    className="text-error hover:bg-error hover:text-white transition-colors"
+                                    style={{ color: '#dc2626' }}
+                                >
                                     {t('nav.logout') || 'Logout'}
                                 </button>
                             </li>
@@ -293,24 +335,55 @@ function Navbar() {
                             </label>
                             <ul
                                 tabIndex={0}
-                                className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow-lg border"
-                                style={{ borderColor: '#e2e8f0' }}
+                                className="menu menu-sm dropdown-content bg-base-100 rounded-lg z-[1] mt-3 w-56 p-3 shadow-xl border-2"
+                                style={{ borderColor: '#e2e8f0', backgroundColor: '#ffffff' }}
                             >
+                                {/* User Info Section */}
+                                <li className="mb-2 pb-2 border-b" style={{ borderColor: '#e2e8f0' }}>
+                                    <div className="flex items-center gap-3 px-2 py-2">
+                                        <div
+                                            className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-semibold flex-shrink-0"
+                                            style={{ backgroundColor: '#1E293B' }}
+                                        >
+                                            {user?.profile?.name ? getInitials(user.profile.name) : <span>U</span>}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-semibold text-sm truncate" style={{ color: '#1E293B' }}>
+                                                {user?.profile?.name || 'User'}
+                                            </p>
+                                            <p className="text-xs truncate opacity-70" style={{ color: '#64748b' }}>
+                                                {user?.mobile || user?.email || ''}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </li>
                                 {/* Show user dashboard links only for non-admin users */}
                                 {user?.role !== 'admin' && (
                                     <>
                                         <li>
-                                            <Link to="/dashboard" style={{ color: '#1E293B' }}>
+                                            <Link
+                                                to="/dashboard"
+                                                className={isActive('/dashboard') ? 'bg-base-200' : ''}
+                                                style={{ color: '#1E293B' }}
+                                            >
                                                 {t('nav.profile') || 'Profile'}
                                             </Link>
                                         </li>
                                         <li>
-                                            <Link to="/dashboard/orders" style={{ color: '#1E293B' }}>
+                                            <Link
+                                                to="/dashboard/orders"
+                                                className={isActive('/dashboard/orders') ? 'bg-base-200' : ''}
+                                                style={{ color: '#1E293B' }}
+                                            >
                                                 {t('nav.orders') || 'My Orders'}
                                             </Link>
                                         </li>
                                         <li>
-                                            <Link to="/dashboard/ebooks" style={{ color: '#1E293B' }}>
+                                            <Link
+                                                to="/dashboard/ebooks"
+                                                className={isActive('/dashboard/ebooks') ? 'bg-base-200' : ''}
+                                                style={{ color: '#1E293B' }}
+                                            >
                                                 {t('nav.ebooks') || 'My eBooks'}
                                             </Link>
                                         </li>
@@ -319,13 +392,21 @@ function Navbar() {
                                 {/* Show admin link for admin users */}
                                 {user?.role === 'admin' && (
                                     <li>
-                                        <Link to="/admin" style={{ color: '#1E293B' }}>
+                                        <Link
+                                            to="/admin"
+                                            className={isActive('/admin') ? 'bg-base-200' : ''}
+                                            style={{ color: '#1E293B' }}
+                                        >
                                             {t('nav.admin') || 'Admin Dashboard'}
                                         </Link>
                                     </li>
                                 )}
-                                <li>
-                                    <button onClick={handleLogout} style={{ color: '#1E293B' }}>
+                                <li className="mt-2 pt-2 border-t" style={{ borderColor: '#e2e8f0' }}>
+                                    <button
+                                        onClick={handleLogout}
+                                        className="text-error hover:bg-error hover:text-white transition-colors"
+                                        style={{ color: '#dc2626' }}
+                                    >
                                         {t('nav.logout') || 'Logout'}
                                     </button>
                                 </li>
@@ -385,8 +466,8 @@ function Navbar() {
                     {/* Mobile Menu */}
                     {mobileMenuOpen && (
                         <ul
-                            className="menu menu-sm bg-base-100 rounded-box z-[50] mt-3 w-64 p-2 shadow-lg border absolute right-0"
-                            style={{ borderColor: '#e2e8f0', backgroundColor: '#EFECE3' }}
+                            className="menu menu-sm bg-base-100 rounded-lg z-[50] mt-3 w-72 p-4 shadow-2xl border-2 absolute right-0 top-full"
+                            style={{ borderColor: '#e2e8f0', backgroundColor: '#ffffff' }}
                         >
                             {/* Mobile Theme & Language */}
                             <li className="flex gap-2 p-2 sm:hidden">
@@ -395,12 +476,34 @@ function Navbar() {
                             </li>
                             <li className="divider sm:hidden"></li>
 
+                            {/* User Info Section - Mobile */}
+                            {isAuthenticated && user && (
+                                <li className="mb-3 pb-3 border-b" style={{ borderColor: '#e2e8f0' }}>
+                                    <div className="flex items-center gap-3 px-2 py-2">
+                                        <div
+                                            className="w-12 h-12 rounded-full flex items-center justify-center text-white text-base font-semibold flex-shrink-0"
+                                            style={{ backgroundColor: '#1E293B' }}
+                                        >
+                                            {user?.profile?.name ? getInitials(user.profile.name) : <span>U</span>}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-semibold text-sm truncate" style={{ color: '#1E293B' }}>
+                                                {user?.profile?.name || 'User'}
+                                            </p>
+                                            <p className="text-xs truncate opacity-70" style={{ color: '#64748b' }}>
+                                                {user?.mobile || user?.email || ''}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </li>
+                            )}
+
                             {/* Mobile Navigation Links */}
                             <li>
                                 <Link
                                     to="/"
-                                    className={isActive('/') ? 'active' : ''}
-                                    style={isActive('/') ? {} : { color: '#1E293B' }}
+                                    className={`px-4 py-2.5 rounded-lg transition-colors ${isActive('/') ? 'bg-primary text-white font-semibold' : 'hover:bg-base-200'}`}
+                                    style={isActive('/') ? { backgroundColor: '#1E293B', color: '#ffffff' } : { color: '#1E293B' }}
                                     onClick={closeMobileMenu}
                                 >
                                     {t('nav.home') || 'Home'}
@@ -409,8 +512,8 @@ function Navbar() {
                             <li>
                                 <Link
                                     to="/products"
-                                    className={isActive('/products') ? 'active' : ''}
-                                    style={isActive('/products') ? {} : { color: '#1E293B' }}
+                                    className={`px-4 py-2.5 rounded-lg transition-colors ${isActive('/products') ? 'bg-primary text-white font-semibold' : 'hover:bg-base-200'}`}
+                                    style={isActive('/products') ? { backgroundColor: '#1E293B', color: '#ffffff' } : { color: '#1E293B' }}
                                     onClick={closeMobileMenu}
                                 >
                                     {t('nav.products') || 'Products'}
@@ -419,7 +522,8 @@ function Navbar() {
                             <li>
                                 <Link
                                     to="/cart"
-                                    style={{ color: '#1E293B' }}
+                                    className={`px-4 py-2.5 rounded-lg transition-colors ${isActive('/cart') ? 'bg-primary text-white font-semibold' : 'hover:bg-base-200'}`}
+                                    style={isActive('/cart') ? { backgroundColor: '#1E293B', color: '#ffffff' } : { color: '#1E293B' }}
                                     onClick={closeMobileMenu}
                                 >
                                     {t('nav.cart') || 'Cart'}
@@ -432,8 +536,8 @@ function Navbar() {
                                         <li>
                                             <Link
                                                 to="/dashboard"
-                                                className={isActive('/dashboard') ? 'active' : ''}
-                                                style={isActive('/dashboard') ? {} : { color: '#1E293B' }}
+                                                className={`px-4 py-2.5 rounded-lg transition-colors ${isActive('/dashboard') ? 'bg-primary text-white font-semibold' : 'hover:bg-base-200'}`}
+                                                style={isActive('/dashboard') ? { backgroundColor: '#1E293B', color: '#ffffff' } : { color: '#1E293B' }}
                                                 onClick={closeMobileMenu}
                                             >
                                                 {t('nav.dashboard') || 'Dashboard'}
@@ -445,21 +549,22 @@ function Navbar() {
                                         <li>
                                             <Link
                                                 to="/admin"
-                                                className={isActive('/admin') ? 'active' : ''}
-                                                style={isActive('/admin') ? {} : { color: '#1E293B' }}
+                                                className={`px-4 py-2.5 rounded-lg transition-colors ${isActive('/admin') ? 'bg-primary text-white font-semibold' : 'hover:bg-base-200'}`}
+                                                style={isActive('/admin') ? { backgroundColor: '#1E293B', color: '#ffffff' } : { color: '#1E293B' }}
                                                 onClick={closeMobileMenu}
                                             >
                                                 {t('nav.admin') || 'Admin'}
                                             </Link>
                                         </li>
                                     )}
-                                    <li className="divider"></li>
+                                    <li className="divider my-2"></li>
                                     {/* Show user dashboard links only for non-admin users */}
                                     {user?.role !== 'admin' && (
                                         <>
                                             <li>
                                                 <Link
                                                     to="/dashboard"
+                                                    className={`px-4 py-2.5 rounded-lg transition-colors ${isActive('/dashboard') ? 'bg-base-200' : 'hover:bg-base-200'}`}
                                                     style={{ color: '#1E293B' }}
                                                     onClick={closeMobileMenu}
                                                 >
@@ -469,6 +574,7 @@ function Navbar() {
                                             <li>
                                                 <Link
                                                     to="/dashboard/orders"
+                                                    className={`px-4 py-2.5 rounded-lg transition-colors ${isActive('/dashboard/orders') ? 'bg-base-200' : 'hover:bg-base-200'}`}
                                                     style={{ color: '#1E293B' }}
                                                     onClick={closeMobileMenu}
                                                 >
@@ -478,6 +584,7 @@ function Navbar() {
                                             <li>
                                                 <Link
                                                     to="/dashboard/ebooks"
+                                                    className={`px-4 py-2.5 rounded-lg transition-colors ${isActive('/dashboard/ebooks') ? 'bg-base-200' : 'hover:bg-base-200'}`}
                                                     style={{ color: '#1E293B' }}
                                                     onClick={closeMobileMenu}
                                                 >
@@ -491,6 +598,7 @@ function Navbar() {
                                         <li>
                                             <Link
                                                 to="/admin"
+                                                className={`px-4 py-2.5 rounded-lg transition-colors ${isActive('/admin') ? 'bg-base-200' : 'hover:bg-base-200'}`}
                                                 style={{ color: '#1E293B' }}
                                                 onClick={closeMobileMenu}
                                             >
@@ -498,10 +606,11 @@ function Navbar() {
                                             </Link>
                                         </li>
                                     )}
-                                    <li>
+                                    <li className="mt-2 pt-2 border-t" style={{ borderColor: '#e2e8f0' }}>
                                         <button
                                             onClick={handleLogout}
-                                            style={{ color: '#1E293B' }}
+                                            className="px-4 py-2.5 rounded-lg text-error hover:bg-error hover:text-white transition-colors w-full text-left"
+                                            style={{ color: '#dc2626' }}
                                         >
                                             {t('nav.logout') || 'Logout'}
                                         </button>

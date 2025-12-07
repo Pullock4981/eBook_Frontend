@@ -8,6 +8,8 @@ import { configureStore } from '@reduxjs/toolkit';
 import authReducer from './slices/authSlice';
 import appReducer from './slices/appSlice';
 import themeReducer from './slices/themeSlice';
+import productReducer from './slices/productSlice';
+import categoryReducer from './slices/categorySlice';
 
 // Configure store
 export const store = configureStore({
@@ -15,6 +17,8 @@ export const store = configureStore({
         auth: authReducer,
         app: appReducer,
         theme: themeReducer,
+        products: productReducer,
+        categories: categoryReducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({

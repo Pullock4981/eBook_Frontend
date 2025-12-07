@@ -11,7 +11,7 @@ import { useSelector } from 'react-redux';
 import { selectUser } from '../../store/slices/authSlice';
 import { motion } from 'framer-motion';
 
-function Sidebar({ isAdmin = false }) {
+function Sidebar({ isAdmin = false, onLinkClick }) {
     const { t } = useTranslation();
     const location = useLocation();
     const user = useSelector(selectUser);
@@ -141,12 +141,36 @@ function Sidebar({ isAdmin = false }) {
     const menuItems = isAdmin ? adminMenuItems : userMenuItems;
 
     return (
-        <aside className="w-64 min-h-screen bg-base-200 border-r transition-colors duration-300" style={{ borderColor: '#e2e8f0' }}>
-            <div className="p-4">
+        <aside className="w-64 min-h-screen bg-base-100 border-r-2 shadow-sm transition-colors duration-300" style={{ borderColor: '#cbd5e1', backgroundColor: '#ffffff' }}>
+            <div className="p-5 sm:p-6 md:p-8">
+                {/* Mobile Close Button */}
+                <div className="lg:hidden flex justify-end mb-5 sm:mb-6">
+                    <button
+                        onClick={onLinkClick}
+                        className="btn btn-ghost btn-sm btn-circle"
+                        aria-label="Close sidebar"
+                    >
+                        <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            style={{ color: '#1E293B' }}
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M6 18L18 6M6 6l12 12"
+                            />
+                        </svg>
+                    </button>
+                </div>
+
                 {/* User Info (for user sidebar) */}
                 {!isAdmin && user && (
-                    <div className="mb-6 p-4 rounded-lg bg-base-100 shadow-sm" style={{ borderColor: '#e2e8f0', borderWidth: '1px' }}>
-                        <div className="flex items-center gap-3">
+                    <div className="mb-6 sm:mb-8 p-4 sm:p-5 rounded-lg bg-base-100 shadow-sm" style={{ borderColor: '#e2e8f0', borderWidth: '1px' }}>
+                        <div className="flex items-center gap-3 sm:gap-4">
                             <div
                                 className="w-12 h-12 rounded-full flex items-center justify-center text-white text-sm font-semibold"
                                 style={{ backgroundColor: '#1E293B' }}
@@ -166,7 +190,7 @@ function Sidebar({ isAdmin = false }) {
                 )}
 
                 {/* Menu Items */}
-                <nav className="space-y-1">
+                <nav className="space-y-2">
                     {menuItems.map((item, index) => (
                         <motion.div
                             key={item.path}
@@ -176,18 +200,24 @@ function Sidebar({ isAdmin = false }) {
                         >
                             <Link
                                 to={item.path}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${isActive(item.path)
-                                        ? 'bg-primary text-white shadow-md'
-                                        : 'text-base-content hover:bg-base-300'
+                                className={`flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3 sm:py-3.5 rounded-lg transition-all duration-200 text-sm sm:text-base ${isActive(item.path)
+                                    ? 'bg-primary text-white shadow-md font-semibold'
+                                    : 'text-base-content hover:bg-base-200 font-medium'
                                     }`}
                                 style={
                                     isActive(item.path)
                                         ? { backgroundColor: '#1E293B', color: '#ffffff' }
                                         : { color: '#1E293B' }
                                 }
+                                onClick={() => {
+                                    // Close mobile sidebar when link is clicked
+                                    if (onLinkClick && window.innerWidth < 1024) {
+                                        onLinkClick();
+                                    }
+                                }}
                             >
-                                {item.icon}
-                                <span className="font-medium">{item.label}</span>
+                                <span className="flex-shrink-0">{item.icon}</span>
+                                <span className="font-medium truncate">{item.label}</span>
                             </Link>
                         </motion.div>
                     ))}

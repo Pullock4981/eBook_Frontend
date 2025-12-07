@@ -19,11 +19,16 @@ import AdminLayout from '../components/layout/AdminLayout';
 import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
 import OTPVerification from '../pages/auth/OTPVerification';
+import Products from '../pages/Products';
+import ProductDetail from '../pages/ProductDetail';
+import Categories from '../pages/Categories';
+import AdminProductList from '../pages/admin/Products/ProductList';
+import AdminProductCreate from '../pages/admin/Products/ProductCreate';
+import AdminProductEdit from '../pages/admin/Products/ProductEdit';
 import { selectUser, updateUser } from '../store/slices/authSlice';
 import { getCurrentUser } from '../services/userService';
 
-// Pages (will be created in later parts)
-// For now, we'll create placeholder components
+// Placeholder components
 function Home() {
     const { t } = useTranslation();
 
@@ -83,17 +88,6 @@ function Home() {
         </div>
     );
 }
-
-function Products() {
-    const { t } = useTranslation();
-    return (
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8" style={{ backgroundColor: '#EFECE3' }}>
-            <h1 className="text-3xl sm:text-4xl font-bold mb-4" style={{ color: '#1E293B' }}>{t('nav.products') || 'Products'}</h1>
-            <p className="text-base sm:text-lg" style={{ color: '#2d3748' }}>{t('pages.productsComingSoon') || 'Products page coming soon...'}</p>
-        </div>
-    );
-}
-
 
 function Dashboard() {
     const { t } = useTranslation();
@@ -203,6 +197,8 @@ function AppRoutes() {
                     {/* Public Routes */}
                     <Route path="/" element={<Home />} />
                     <Route path="/products" element={<Products />} />
+                    <Route path="/products/:id" element={<ProductDetail />} />
+                    <Route path="/categories" element={<Categories />} />
 
                     {/* Guest Routes (Login, Register, OTP) */}
                     <Route
@@ -258,7 +254,9 @@ function AppRoutes() {
                     }
                 >
                     <Route path="/admin" element={<AdminDashboard />} />
-                    <Route path="/admin/products" element={<AdminDashboard />} />
+                    <Route path="/admin/products" element={<AdminProductList />} />
+                    <Route path="/admin/products/create" element={<AdminProductCreate />} />
+                    <Route path="/admin/products/:id/edit" element={<AdminProductEdit />} />
                     <Route path="/admin/categories" element={<AdminDashboard />} />
                     <Route path="/admin/orders" element={<AdminDashboard />} />
                     <Route path="/admin/users" element={<AdminDashboard />} />

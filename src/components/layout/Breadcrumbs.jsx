@@ -72,7 +72,7 @@ function Breadcrumbs() {
     }
 
     return (
-        <nav className="flex items-center space-x-2 text-sm mb-4" aria-label="Breadcrumb">
+        <nav className="hidden md:flex items-center space-x-2 text-sm mb-4" aria-label="Breadcrumb">
             <motion.ol
                 className="flex items-center space-x-2"
                 initial={{ opacity: 0 }}
