@@ -7,16 +7,36 @@
 
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { useEffect } from 'react';
 import { selectUser } from '../../store/slices/authSlice';
 import { selectUserProfile } from '../../store/slices/userSlice';
+import {
+    fetchAffiliateProfile,
+    selectIsAffiliate,
+    selectAffiliateStatus
+} from '../../store/slices/affiliateSlice';
 import { motion } from 'framer-motion';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 function Sidebar({ isAdmin = false, onLinkClick }) {
     const { t } = useTranslation();
     const location = useLocation();
+    const dispatch = useDispatch();
+    const { buttonColor, primaryTextColor, secondaryTextColor, backgroundColor } = useThemeColors();
     const user = useSelector(selectUser);
     const profile = useSelector(selectUserProfile);
+    const isAffiliate = useSelector(selectIsAffiliate);
+    const affiliateStatus = useSelector(selectAffiliateStatus);
+
+    // Check affiliate status on mount
+    useEffect(() => {
+        if (!isAdmin) {
+            dispatch(fetchAffiliateProfile()).catch(() => {
+                // User is not affiliate, ignore
+            });
+        }
+    }, [dispatch, isAdmin]);
 
     // Check if route is active
     const isActive = (path) => {
@@ -71,6 +91,27 @@ function Sidebar({ isAdmin = false, onLinkClick }) {
                 </svg>
             ),
         },
+        // Conditionally add affiliate menu items
+        ...(isAffiliate && affiliateStatus === 'active' ? [
+            {
+                path: '/dashboard/affiliate',
+                label: t('nav.affiliateDashboard') || 'Affiliate Dashboard',
+                icon: (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                ),
+            },
+            {
+                path: '/dashboard/affiliate/withdraw',
+                label: t('nav.withdraw') || 'Withdraw',
+                icon: (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                ),
+            }
+        ] : [])
     ];
 
     // Admin sidebar menu items
@@ -138,6 +179,15 @@ function Sidebar({ isAdmin = false, onLinkClick }) {
                 </svg>
             ),
         },
+        {
+            path: '/admin/pdfs',
+            label: 'PDF Management',
+            icon: (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+            ),
+        },
     ];
 
     const menuItems = isAdmin ? adminMenuItems : userMenuItems;
@@ -160,7 +210,7 @@ function Sidebar({ isAdmin = false, onLinkClick }) {
     };
 
     return (
-        <aside className="w-64 min-h-screen bg-base-100 border-r-2 shadow-sm transition-colors duration-300" style={{ borderColor: '#cbd5e1', backgroundColor: '#ffffff' }}>
+        <aside className="w-64 min-h-screen bg-base-100 border-r-2 shadow-sm transition-colors duration-300" style={{ borderColor: secondaryTextColor, backgroundColor }}>
             <div className="p-5 sm:p-6 md:p-8">
                 {/* Mobile Close Button */}
                 <div className="lg:hidden flex justify-end mb-5 sm:mb-6">
@@ -168,13 +218,13 @@ function Sidebar({ isAdmin = false, onLinkClick }) {
                         onClick={onLinkClick}
                         className="btn btn-ghost btn-sm btn-circle"
                         aria-label="Close sidebar"
+                        style={{ color: primaryTextColor }}
                     >
                         <svg
                             className="w-5 h-5"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
-                            style={{ color: '#1E293B' }}
                         >
                             <path
                                 strokeLinecap="round"
@@ -188,19 +238,19 @@ function Sidebar({ isAdmin = false, onLinkClick }) {
 
                 {/* User Info - Same style for both user and admin */}
                 {user && (
-                    <div className="mb-6 sm:mb-8 p-4 sm:p-5 rounded-lg bg-base-100 shadow-sm" style={{ borderColor: '#e2e8f0', borderWidth: '1px' }}>
+                    <div className="mb-6 sm:mb-8 p-4 sm:p-5 rounded-lg bg-base-100 shadow-sm border" style={{ borderColor: secondaryTextColor, backgroundColor }}>
                         <div className="flex items-center gap-3 sm:gap-4">
                             <div
                                 className="w-12 h-12 rounded-full flex items-center justify-center text-white text-sm font-semibold"
-                                style={{ backgroundColor: '#1E293B' }}
+                                style={{ backgroundColor: buttonColor }}
                             >
                                 {getUserInitial()}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="font-semibold text-sm truncate" style={{ color: '#1E293B' }}>
+                                <p className="font-semibold text-sm truncate" style={{ color: primaryTextColor }}>
                                     {getUserName()}
                                 </p>
-                                <p className="text-xs truncate" style={{ color: '#64748b' }}>
+                                <p className="text-xs truncate" style={{ color: secondaryTextColor }}>
                                     {getUserContact()}
                                 </p>
                             </div>
@@ -220,14 +270,24 @@ function Sidebar({ isAdmin = false, onLinkClick }) {
                             <Link
                                 to={item.path}
                                 className={`flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3 sm:py-3.5 rounded-lg transition-all duration-200 text-sm sm:text-base ${isActive(item.path)
-                                    ? 'bg-primary text-white shadow-md font-semibold'
-                                    : 'text-base-content hover:bg-base-200 font-medium'
+                                    ? 'shadow-md font-semibold'
+                                    : 'hover:bg-base-200 font-medium'
                                     }`}
                                 style={
                                     isActive(item.path)
-                                        ? { backgroundColor: '#1E293B', color: '#ffffff' }
-                                        : { color: '#1E293B' }
+                                        ? { backgroundColor: buttonColor, color: '#ffffff' }
+                                        : { color: primaryTextColor }
                                 }
+                                onMouseEnter={(e) => {
+                                    if (!isActive(item.path)) {
+                                        e.currentTarget.style.backgroundColor = secondaryTextColor + '20';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (!isActive(item.path)) {
+                                        e.currentTarget.style.backgroundColor = 'transparent';
+                                    }
+                                }}
                                 onClick={() => {
                                     // Close mobile sidebar when link is clicked
                                     if (onLinkClick && window.innerWidth < 1024) {

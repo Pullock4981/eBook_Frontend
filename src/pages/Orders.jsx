@@ -13,11 +13,13 @@ import { selectIsAuthenticated } from '../store/slices/authSlice';
 import OrderCard from '../components/orders/OrderCard';
 import Pagination from '../components/common/Pagination';
 import Loading from '../components/common/Loading';
+import { useThemeColors } from '../hooks/useThemeColors';
 
 function Orders() {
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { buttonColor, primaryTextColor, secondaryTextColor, backgroundColor } = useThemeColors();
     const isAuthenticated = useSelector(selectIsAuthenticated);
     const orders = useSelector(selectOrders);
     const isLoading = useSelector(selectOrdersLoading);
@@ -46,14 +48,14 @@ function Orders() {
     }
 
     return (
-        <div className="min-h-screen" style={{ backgroundColor: '#EFECE3' }}>
+        <div style={{ backgroundColor }}>
             <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 md:py-8">
                 {/* Page Header */}
                 <div className="mb-6 sm:mb-8">
-                    <h1 className="text-3xl sm:text-4xl font-bold mb-1.5" style={{ color: '#1E293B' }}>
+                    <h1 className="text-3xl sm:text-4xl font-bold mb-1.5" style={{ color: primaryTextColor }}>
                         {t('orders.title') || 'My Orders'}
                     </h1>
-                    <p className="text-sm text-gray-600" style={{ color: '#64748b' }}>
+                    <p className="text-sm" style={{ color: secondaryTextColor }}>
                         {t('orders.subtitle') || 'View and track your order history'}
                     </p>
                 </div>
@@ -75,15 +77,15 @@ function Orders() {
                     </div>
                 ) : orders.length === 0 ? (
                     /* Empty State */
-                    <div className="card bg-base-100 shadow-sm">
+                    <div className="card bg-base-100 shadow-sm border" style={{ borderColor: secondaryTextColor, backgroundColor }}>
                         <div className="flex flex-col items-center justify-center py-12 sm:py-16 px-4">
-                            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center mb-4 sm:mb-6" style={{ backgroundColor: '#f1f5f9' }}>
+                            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center mb-4 sm:mb-6" style={{ backgroundColor: secondaryTextColor + '20' }}>
                                 <svg
                                     className="w-10 h-10 sm:w-12 sm:h-12"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
-                                    style={{ color: '#94a3b8' }}
+                                    style={{ color: secondaryTextColor }}
                                 >
                                     <path
                                         strokeLinecap="round"
@@ -94,10 +96,10 @@ function Orders() {
                                 </svg>
                             </div>
                             <div className="text-center">
-                                <h3 className="text-lg sm:text-xl md:text-2xl font-semibold mb-2 sm:mb-3" style={{ color: '#1E293B' }}>
+                                <h3 className="text-lg sm:text-xl md:text-2xl font-semibold mb-2 sm:mb-3" style={{ color: primaryTextColor }}>
                                     {t('orders.noOrders') || 'No Orders Yet'}
                                 </h3>
-                                <p className="text-sm sm:text-base opacity-70 mb-4 sm:mb-6 px-4" style={{ color: '#2d3748' }}>
+                                <p className="text-sm sm:text-base opacity-70 mb-4 sm:mb-6 px-4" style={{ color: secondaryTextColor }}>
                                     {t('orders.noOrdersDescription') || 'You haven\'t placed any orders yet. Start shopping to see your orders here!'}
                                 </p>
                             </div>

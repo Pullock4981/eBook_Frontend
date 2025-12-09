@@ -16,6 +16,7 @@ import userReducer from './slices/userSlice';
 import ebookReducer from './slices/ebookSlice';
 import couponReducer from './slices/couponSlice';
 import adminReducer from './slices/adminSlice';
+import affiliateReducer from './slices/affiliateSlice';
 
 // Configure store
 export const store = configureStore({
@@ -31,6 +32,7 @@ export const store = configureStore({
         ebook: ebookReducer,
         coupon: couponReducer,
         admin: adminReducer,
+        affiliate: affiliateReducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({

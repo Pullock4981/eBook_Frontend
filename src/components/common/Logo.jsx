@@ -7,9 +7,11 @@
 
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 function Logo({ className = '', showText = true, size = 'md' }) {
     const { t } = useTranslation();
+    const { primaryTextColor } = useThemeColors();
 
     const sizeClasses = {
         sm: 'text-base',
@@ -21,7 +23,7 @@ function Logo({ className = '', showText = true, size = 'md' }) {
         <Link
             to="/"
             className={`btn btn-ghost font-bold ${sizeClasses[size]} ${className}`}
-            style={{ color: '#1E293B' }}
+            style={{ color: primaryTextColor }}
         >
             {showText && (t('app.name') || 'eBook Store')}
         </Link>

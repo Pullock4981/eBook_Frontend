@@ -12,11 +12,13 @@ import { fetchMainCategories, selectMainCategories } from '../../store/slices/ca
 import ImageUpload from './ImageUpload';
 import PDFUpload from '../common/PDFUpload';
 import { PRODUCT_TYPES } from '../../utils/constants';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) {
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const categories = useSelector(selectMainCategories);
+    const { primaryTextColor, secondaryTextColor, buttonColor, backgroundColor, errorColor } = useThemeColors();
 
     const [formData, setFormData] = useState({
         name: '',
@@ -147,11 +149,11 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
     return (
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-4 md:space-y-4 lg:space-y-5">
             {/* Basic Information Section */}
-            <div className="card bg-base-100 shadow-lg border-2" style={{ borderColor: '#e2e8f0' }}>
+            <div className="card bg-base-100 shadow-lg border-2" style={{ borderColor: secondaryTextColor, backgroundColor }}>
                 <div className="card-body p-3 sm:p-4 md:p-4 lg:p-5">
                     <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-3 md:mb-3 lg:mb-4">
-                        <div className="w-1 h-6 sm:h-7 md:h-8 rounded-full flex-shrink-0" style={{ backgroundColor: '#1E293B' }}></div>
-                        <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold" style={{ color: '#1E293B' }}>
+                        <div className="w-1 h-6 sm:h-7 md:h-8 rounded-full flex-shrink-0" style={{ backgroundColor: buttonColor }}></div>
+                        <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold" style={{ color: primaryTextColor }}>
                             {t('admin.basicInformation') || 'Basic Information'}
                         </h2>
                     </div>
@@ -160,7 +162,7 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                         {/* Product Name - Full Width */}
                         <div className="form-control w-full">
                             <label className="label pb-2">
-                                <span className="label-text text-sm sm:text-base font-semibold" style={{ color: '#1E293B' }}>
+                                <span className="label-text text-sm sm:text-base font-semibold" style={{ color: primaryTextColor }}>
                                     {t('admin.productName') || 'Product Name'}
                                     <span className="text-error ml-1">*</span>
                                 </span>
@@ -172,9 +174,9 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                                 onChange={handleChange}
                                 className={`input input-bordered w-full h-12 text-base sm:text-base px-4 ${errors.name ? 'input-error border-error border-2' : 'border-2'}`}
                                 style={{
-                                    backgroundColor: '#ffffff',
-                                    color: '#1E293B',
-                                    borderColor: errors.name ? '#EF4444' : '#cbd5e1',
+                                    backgroundColor: backgroundColor,
+                                    color: primaryTextColor,
+                                    borderColor: errors.name ? errorColor : secondaryTextColor,
                                     paddingLeft: '1rem',
                                     paddingRight: '1rem',
                                 }}
@@ -192,7 +194,7 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                             {/* Product Type */}
                             <div className="form-control w-full">
                                 <label className="label pb-2">
-                                    <span className="label-text text-sm sm:text-base font-semibold" style={{ color: '#1E293B' }}>
+                                    <span className="label-text text-sm sm:text-base font-semibold" style={{ color: primaryTextColor }}>
                                         {t('admin.productType') || 'Product Type'}
                                         <span className="text-error ml-1">*</span>
                                     </span>
@@ -203,9 +205,9 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                                     onChange={handleChange}
                                     className="select select-bordered w-full h-12 text-base sm:text-base border-2 px-4"
                                     style={{
-                                        backgroundColor: '#ffffff',
-                                        color: '#1E293B',
-                                        borderColor: '#cbd5e1',
+                                        backgroundColor: backgroundColor,
+                                        color: primaryTextColor,
+                                        borderColor: secondaryTextColor,
                                         paddingLeft: '1rem',
                                         paddingRight: '1rem',
                                     }}
@@ -222,7 +224,7 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                             {/* Category */}
                             <div className="form-control w-full">
                                 <label className="label pb-2">
-                                    <span className="label-text text-sm sm:text-base font-semibold" style={{ color: '#1E293B' }}>
+                                    <span className="label-text text-sm sm:text-base font-semibold" style={{ color: primaryTextColor }}>
                                         {t('admin.category') || 'Category'}
                                         <span className="text-error ml-1">*</span>
                                     </span>
@@ -233,9 +235,9 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                                     onChange={handleChange}
                                     className={`select select-bordered w-full h-12 text-base sm:text-base px-4 ${errors.category ? 'select-error border-error border-2' : 'border-2'}`}
                                     style={{
-                                        backgroundColor: '#ffffff',
-                                        color: '#1E293B',
-                                        borderColor: errors.category ? '#EF4444' : '#cbd5e1',
+                                        backgroundColor: backgroundColor,
+                                        color: primaryTextColor,
+                                        borderColor: errors.category ? errorColor : secondaryTextColor,
                                         paddingLeft: '1rem',
                                         paddingRight: '1rem',
                                     }}
@@ -258,10 +260,10 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                         {/* Short Description - Full Width */}
                         <div className="form-control w-full">
                             <label className="label pb-2">
-                                <span className="label-text text-sm sm:text-base font-semibold" style={{ color: '#1E293B' }}>
+                                <span className="label-text text-sm sm:text-base font-semibold" style={{ color: primaryTextColor }}>
                                     {t('admin.shortDescription') || 'Short Description'}
                                 </span>
-                                <span className="label-text-alt text-xs sm:text-sm opacity-70" style={{ color: '#2d3748' }}>
+                                <span className="label-text-alt text-xs sm:text-sm opacity-70" style={{ color: secondaryTextColor }}>
                                     {formData.shortDescription?.length || 0}/300
                                 </span>
                             </label>
@@ -271,9 +273,9 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                                 onChange={handleChange}
                                 className="textarea textarea-bordered w-full min-h-24 text-base sm:text-base border-2 resize-y px-4 py-3"
                                 style={{
-                                    backgroundColor: '#ffffff',
-                                    color: '#1E293B',
-                                    borderColor: '#cbd5e1',
+                                    backgroundColor: backgroundColor,
+                                    color: primaryTextColor,
+                                    borderColor: secondaryTextColor,
                                     paddingLeft: '1rem',
                                     paddingRight: '1rem',
                                     paddingTop: '0.75rem',
@@ -288,7 +290,7 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                         {/* Description - Full Width */}
                         <div className="form-control w-full">
                             <label className="label pb-2">
-                                <span className="label-text text-sm sm:text-base font-semibold" style={{ color: '#1E293B' }}>
+                                <span className="label-text text-sm sm:text-base font-semibold" style={{ color: primaryTextColor }}>
                                     {t('admin.description') || 'Description'}
                                     <span className="text-error ml-1">*</span>
                                 </span>
@@ -299,9 +301,9 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                                 onChange={handleChange}
                                 className={`textarea textarea-bordered w-full min-h-32 text-base sm:text-base resize-y px-4 py-3 ${errors.description ? 'textarea-error border-error border-2' : 'border-2'}`}
                                 style={{
-                                    backgroundColor: '#ffffff',
-                                    color: '#1E293B',
-                                    borderColor: errors.description ? '#EF4444' : '#cbd5e1',
+                                    backgroundColor: backgroundColor,
+                                    color: primaryTextColor,
+                                    borderColor: errors.description ? errorColor : secondaryTextColor,
                                     paddingLeft: '1rem',
                                     paddingRight: '1rem',
                                     paddingTop: '0.75rem',
@@ -321,11 +323,11 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
             </div>
 
             {/* Pricing Section */}
-            <div className="card bg-base-100 shadow-lg border-2" style={{ borderColor: '#e2e8f0' }}>
+            <div className="card bg-base-100 shadow-lg border-2" style={{ borderColor: secondaryTextColor, backgroundColor }}>
                 <div className="card-body p-3 sm:p-4 md:p-4 lg:p-5">
                     <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-3 md:mb-3 lg:mb-4">
-                        <div className="w-1 h-6 sm:h-7 md:h-8 rounded-full flex-shrink-0" style={{ backgroundColor: '#6B8E6B' }}></div>
-                        <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold" style={{ color: '#1E293B' }}>
+                        <div className="w-1 h-6 sm:h-7 md:h-8 rounded-full flex-shrink-0" style={{ backgroundColor: buttonColor }}></div>
+                        <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold" style={{ color: primaryTextColor }}>
                             {t('admin.pricing') || 'Pricing'}
                         </h2>
                     </div>
@@ -334,13 +336,13 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                         {/* Price */}
                         <div className="form-control w-full">
                             <label className="label pb-2">
-                                <span className="label-text text-sm sm:text-base font-semibold" style={{ color: '#1E293B' }}>
+                                <span className="label-text text-sm sm:text-base font-semibold" style={{ color: primaryTextColor }}>
                                     {t('admin.price') || 'Price (BDT)'}
                                     <span className="text-error ml-1">*</span>
                                 </span>
                             </label>
                             <div className="relative">
-                                <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-base font-medium" style={{ color: '#2d3748' }}>
+                                <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-base font-medium" style={{ color: secondaryTextColor }}>
                                     ৳
                                 </span>
                                 <input
@@ -350,9 +352,9 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                                     onChange={handleChange}
                                     className={`input input-bordered w-full h-12 text-base sm:text-base pl-10 pr-4 ${errors.price ? 'input-error border-error border-2' : 'border-2'}`}
                                     style={{
-                                        backgroundColor: '#ffffff',
-                                        color: '#1E293B',
-                                        borderColor: errors.price ? '#EF4444' : '#cbd5e1',
+                                        backgroundColor: backgroundColor,
+                                        color: primaryTextColor,
+                                        borderColor: errors.price ? errorColor : secondaryTextColor,
                                         paddingLeft: '2.5rem',
                                         paddingRight: '1rem',
                                     }}
@@ -371,15 +373,15 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                         {/* Discount Price */}
                         <div className="form-control w-full">
                             <label className="label pb-2">
-                                <span className="label-text text-sm sm:text-base font-semibold" style={{ color: '#1E293B' }}>
+                                <span className="label-text text-sm sm:text-base font-semibold" style={{ color: primaryTextColor }}>
                                     {t('admin.discountPrice') || 'Discount Price (BDT)'}
-                                    <span className="label-text-alt text-xs sm:text-sm opacity-70 ml-2" style={{ color: '#2d3748' }}>
+                                    <span className="label-text-alt text-xs sm:text-sm opacity-70 ml-2" style={{ color: secondaryTextColor }}>
                                         {t('common.optional') || 'Optional'}
                                     </span>
                                 </span>
                             </label>
                             <div className="relative">
-                                <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-base font-medium" style={{ color: '#2d3748' }}>
+                                <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-base font-medium" style={{ color: secondaryTextColor }}>
                                     ৳
                                 </span>
                                 <input
@@ -389,9 +391,9 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                                     onChange={handleChange}
                                     className={`input input-bordered w-full h-12 text-base sm:text-base pl-10 pr-4 ${errors.discountPrice ? 'input-error border-error border-2' : 'border-2'}`}
                                     style={{
-                                        backgroundColor: '#ffffff',
-                                        color: '#1E293B',
-                                        borderColor: errors.discountPrice ? '#EF4444' : '#cbd5e1',
+                                        backgroundColor: backgroundColor,
+                                        color: primaryTextColor,
+                                        borderColor: errors.discountPrice ? errorColor : secondaryTextColor,
                                         paddingLeft: '2.5rem',
                                         paddingRight: '1rem',
                                     }}
@@ -419,11 +421,11 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
 
             {/* Physical Product Fields */}
             {formData.type === PRODUCT_TYPES.PHYSICAL && (
-                <div className="card bg-base-100 shadow-lg border-2" style={{ borderColor: '#e2e8f0' }}>
+                <div className="card bg-base-100 shadow-lg border-2" style={{ borderColor: secondaryTextColor, backgroundColor }}>
                     <div className="card-body p-3 sm:p-4 md:p-4 lg:p-5">
                         <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-3 md:mb-3 lg:mb-4">
-                            <div className="w-1 h-6 sm:h-7 md:h-8 rounded-full flex-shrink-0" style={{ backgroundColor: '#1E293B' }}></div>
-                            <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold" style={{ color: '#1E293B' }}>
+                            <div className="w-1 h-6 sm:h-7 md:h-8 rounded-full flex-shrink-0" style={{ backgroundColor: buttonColor }}></div>
+                            <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold" style={{ color: primaryTextColor }}>
                                 {t('admin.stockInformation') || 'Stock Information'}
                             </h2>
                         </div>
@@ -432,7 +434,7 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                             {/* Stock */}
                             <div className="form-control w-full">
                                 <label className="label pb-2">
-                                    <span className="label-text text-sm sm:text-base font-semibold" style={{ color: '#1E293B' }}>
+                                    <span className="label-text text-sm sm:text-base font-semibold" style={{ color: primaryTextColor }}>
                                         {t('admin.stock') || 'Stock Quantity'}
                                         <span className="text-error ml-1">*</span>
                                     </span>
@@ -444,9 +446,9 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                                     onChange={handleChange}
                                     className={`input input-bordered w-full h-12 text-base sm:text-base px-4 ${errors.stock ? 'input-error border-error border-2' : 'border-2'}`}
                                     style={{
-                                        backgroundColor: '#ffffff',
-                                        color: '#1E293B',
-                                        borderColor: errors.stock ? '#EF4444' : '#cbd5e1',
+                                        backgroundColor: backgroundColor,
+                                        color: primaryTextColor,
+                                        borderColor: errors.stock ? errorColor : secondaryTextColor,
                                         paddingLeft: '1rem',
                                         paddingRight: '1rem',
                                     }}
@@ -463,9 +465,9 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                             {/* SKU */}
                             <div className="form-control w-full">
                                 <label className="label pb-2">
-                                    <span className="label-text text-sm sm:text-base font-semibold" style={{ color: '#1E293B' }}>
+                                    <span className="label-text text-sm sm:text-base font-semibold" style={{ color: primaryTextColor }}>
                                         {t('admin.sku') || 'SKU (Stock Keeping Unit)'}
-                                        <span className="label-text-alt text-xs sm:text-sm opacity-70 ml-2" style={{ color: '#2d3748' }}>
+                                        <span className="label-text-alt text-xs sm:text-sm opacity-70 ml-2" style={{ color: secondaryTextColor }}>
                                             {t('common.optional') || 'Optional'}
                                         </span>
                                     </span>
@@ -477,9 +479,9 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                                     onChange={handleChange}
                                     className="input input-bordered w-full h-12 text-base sm:text-base border-2 px-4"
                                     style={{
-                                        backgroundColor: '#ffffff',
-                                        color: '#1E293B',
-                                        borderColor: '#cbd5e1',
+                                        backgroundColor: backgroundColor,
+                                        color: primaryTextColor,
+                                        borderColor: secondaryTextColor,
                                         paddingLeft: '1rem',
                                         paddingRight: '1rem',
                                     }}
@@ -493,11 +495,11 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
 
             {/* Digital Product Fields */}
             {formData.type === PRODUCT_TYPES.DIGITAL && (
-                <div className="card bg-base-100 shadow-lg border-2" style={{ borderColor: '#e2e8f0' }}>
+                <div className="card bg-base-100 shadow-lg border-2" style={{ borderColor: secondaryTextColor, backgroundColor }}>
                     <div className="card-body p-3 sm:p-4 md:p-4 lg:p-5">
                         <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-3 md:mb-3 lg:mb-4">
-                            <div className="w-1 h-6 sm:h-7 md:h-8 rounded-full flex-shrink-0" style={{ backgroundColor: '#6B8E6B' }}></div>
-                            <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold" style={{ color: '#1E293B' }}>
+                            <div className="w-1 h-6 sm:h-7 md:h-8 rounded-full flex-shrink-0" style={{ backgroundColor: buttonColor }}></div>
+                            <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold" style={{ color: primaryTextColor }}>
                                 {t('admin.digitalFile') || 'Digital File Information'}
                             </h2>
                         </div>
@@ -506,11 +508,11 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                             {/* PDF Upload */}
                             <div className="form-control w-full">
                                 <label className="label pb-2">
-                                    <span className="label-text text-sm sm:text-base font-semibold" style={{ color: '#1E293B' }}>
+                                    <span className="label-text text-sm sm:text-base font-semibold" style={{ color: primaryTextColor }}>
                                         {t('admin.uploadPDF') || 'Upload PDF File'}
                                         <span className="text-error ml-1">*</span>
                                     </span>
-                                    <span className="label-text-alt text-xs sm:text-sm opacity-70" style={{ color: '#2d3748' }}>
+                                    <span className="label-text-alt text-xs sm:text-sm opacity-70" style={{ color: secondaryTextColor }}>
                                         {t('admin.orEnterURL') || 'or enter URL below'}
                                     </span>
                                 </label>
@@ -545,13 +547,13 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                             {/* Digital File URL (Alternative/Manual Entry) */}
                             <div className="form-control w-full">
                                 <label className="label pb-2">
-                                    <span className="label-text text-sm sm:text-base font-semibold" style={{ color: '#1E293B' }}>
+                                    <span className="label-text text-sm sm:text-base font-semibold" style={{ color: primaryTextColor }}>
                                         {t('admin.digitalFileUrl') || 'Digital File URL'}
-                                        <span className="label-text-alt text-xs sm:text-sm opacity-70 ml-2" style={{ color: '#2d3748' }}>
+                                        <span className="label-text-alt text-xs sm:text-sm opacity-70 ml-2" style={{ color: secondaryTextColor }}>
                                             {t('common.optional') || 'Optional'}
                                         </span>
                                     </span>
-                                    <span className="label-text-alt text-xs sm:text-sm opacity-70" style={{ color: '#2d3748' }}>
+                                    <span className="label-text-alt text-xs sm:text-sm opacity-70" style={{ color: secondaryTextColor }}>
                                         {t('admin.manualURLHint') || 'Or enter URL manually'}
                                     </span>
                                 </label>
@@ -562,9 +564,9 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                                     onChange={handleChange}
                                     className="input input-bordered w-full h-12 text-base sm:text-base px-4 border-2"
                                     style={{
-                                        backgroundColor: '#ffffff',
-                                        color: '#1E293B',
-                                        borderColor: '#cbd5e1',
+                                        backgroundColor: backgroundColor,
+                                        color: primaryTextColor,
+                                        borderColor: secondaryTextColor,
                                         paddingLeft: '1rem',
                                         paddingRight: '1rem',
                                     }}
@@ -575,9 +577,9 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                             {/* File Size */}
                             <div className="form-control w-full">
                                 <label className="label pb-2">
-                                    <span className="label-text text-sm sm:text-base font-semibold" style={{ color: '#1E293B' }}>
+                                    <span className="label-text text-sm sm:text-base font-semibold" style={{ color: primaryTextColor }}>
                                         {t('admin.fileSize') || 'File Size (bytes)'}
-                                        <span className="label-text-alt text-xs sm:text-sm opacity-70 ml-2" style={{ color: '#2d3748' }}>
+                                        <span className="label-text-alt text-xs sm:text-sm opacity-70 ml-2" style={{ color: secondaryTextColor }}>
                                             {t('common.optional') || 'Optional'}
                                         </span>
                                     </span>
@@ -590,9 +592,9 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                                         onChange={handleChange}
                                         className="input input-bordered flex-grow h-12 text-base sm:text-base border-2 px-4"
                                         style={{
-                                            backgroundColor: '#ffffff',
-                                            color: '#1E293B',
-                                            borderColor: '#cbd5e1',
+                                            backgroundColor: backgroundColor,
+                                            color: primaryTextColor,
+                                            borderColor: secondaryTextColor,
                                             paddingLeft: '1rem',
                                             paddingRight: '1rem',
                                         }}
@@ -600,7 +602,7 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                                         min="0"
                                     />
                                     {formData.fileSize && (
-                                        <span className="text-sm opacity-70 whitespace-nowrap" style={{ color: '#2d3748' }}>
+                                        <span className="text-sm opacity-70 whitespace-nowrap" style={{ color: secondaryTextColor }}>
                                             ({(formData.fileSize / 1024 / 1024).toFixed(2)} MB)
                                         </span>
                                     )}
@@ -612,11 +614,11 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
             )}
 
             {/* Images Section */}
-            <div className="card bg-base-100 shadow-lg border-2" style={{ borderColor: '#e2e8f0' }}>
+            <div className="card bg-base-100 shadow-lg border-2" style={{ borderColor: secondaryTextColor, backgroundColor }}>
                 <div className="card-body p-3 sm:p-4 md:p-4 lg:p-5">
                     <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-3 md:mb-3 lg:mb-4">
-                        <div className="w-1 h-6 sm:h-7 md:h-8 rounded-full flex-shrink-0" style={{ backgroundColor: '#1E293B' }}></div>
-                        <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold" style={{ color: '#1E293B' }}>
+                        <div className="w-1 h-6 sm:h-7 md:h-8 rounded-full flex-shrink-0" style={{ backgroundColor: buttonColor }}></div>
+                        <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold" style={{ color: primaryTextColor }}>
                             {t('admin.images') || 'Product Images'}
                             <span className="text-error ml-1">*</span>
                         </h2>
@@ -636,11 +638,11 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
             </div>
 
             {/* Additional Information */}
-            <div className="card bg-base-100 shadow-lg border-2" style={{ borderColor: '#e2e8f0' }}>
+            <div className="card bg-base-100 shadow-lg border-2" style={{ borderColor: secondaryTextColor, backgroundColor }}>
                 <div className="card-body p-3 sm:p-4 md:p-4 lg:p-5">
                     <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-3 md:mb-3 lg:mb-4">
-                        <div className="w-1 h-6 sm:h-7 md:h-8 rounded-full flex-shrink-0" style={{ backgroundColor: '#6B8E6B' }}></div>
-                        <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold" style={{ color: '#1E293B' }}>
+                        <div className="w-1 h-6 sm:h-7 md:h-8 rounded-full flex-shrink-0" style={{ backgroundColor: buttonColor }}></div>
+                        <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold" style={{ color: primaryTextColor }}>
                             {t('admin.additionalInformation') || 'Additional Information'}
                         </h2>
                     </div>
@@ -649,9 +651,9 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                         {/* Tags */}
                         <div className="form-control w-full">
                             <label className="label pb-2">
-                                <span className="label-text text-sm sm:text-base font-semibold" style={{ color: '#1E293B' }}>
+                                <span className="label-text text-sm sm:text-base font-semibold" style={{ color: primaryTextColor }}>
                                     {t('admin.tags') || 'Tags'}
-                                    <span className="label-text-alt text-xs sm:text-sm opacity-70 ml-1 sm:ml-2" style={{ color: '#2d3748' }}>
+                                    <span className="label-text-alt text-xs sm:text-sm opacity-70 ml-1 sm:ml-2" style={{ color: secondaryTextColor }}>
                                         {t('common.optional') || 'Optional'}
                                     </span>
                                 </span>
@@ -663,16 +665,16 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                                 onChange={handleChange}
                                 className="input input-bordered w-full h-12 text-base sm:text-base border-2 px-4"
                                 style={{
-                                    backgroundColor: '#ffffff',
-                                    color: '#1E293B',
-                                    borderColor: '#cbd5e1',
+                                    backgroundColor: backgroundColor,
+                                    color: primaryTextColor,
+                                    borderColor: secondaryTextColor,
                                     paddingLeft: '1rem',
                                     paddingRight: '1rem',
                                 }}
                                 placeholder="book, fiction, novel (comma separated)"
                             />
                             <label className="label pt-1">
-                                <span className="label-text-alt opacity-70 text-xs sm:text-sm" style={{ color: '#2d3748' }}>
+                                <span className="label-text-alt opacity-70 text-xs sm:text-sm" style={{ color: secondaryTextColor }}>
                                     {t('admin.tagsHint') || 'Separate tags with commas'}
                                 </span>
                             </label>
@@ -681,12 +683,19 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                         {/* Featured & Active - Side by Side */}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-3 md:gap-3 lg:gap-4">
                             <div className="form-control w-full">
-                                <label className="label cursor-pointer p-3 sm:p-4 rounded-lg border-2 hover:bg-base-200 transition-colors justify-between w-full" style={{ borderColor: '#e2e8f0' }}>
+                                <label className="label cursor-pointer p-3 sm:p-4 rounded-lg border-2 transition-colors justify-between w-full" style={{ borderColor: secondaryTextColor, backgroundColor }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.backgroundColor = secondaryTextColor + '20';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.backgroundColor = backgroundColor;
+                                    }}
+                                >
                                     <div className="flex flex-col flex-1 min-w-0 pr-2 sm:pr-3">
-                                        <span className="label-text text-sm sm:text-base font-semibold mb-0.5 sm:mb-1" style={{ color: '#1E293B' }}>
+                                        <span className="label-text text-sm sm:text-base font-semibold mb-0.5 sm:mb-1" style={{ color: primaryTextColor }}>
                                             {t('admin.featured') || 'Featured Product'}
                                         </span>
-                                        <span className="label-text-alt text-xs sm:text-sm opacity-70 leading-relaxed break-words" style={{ color: '#2d3748', lineHeight: '1.4' }}>
+                                        <span className="label-text-alt text-xs sm:text-sm opacity-70 leading-relaxed break-words" style={{ color: secondaryTextColor, lineHeight: '1.4' }}>
                                             {t('admin.featuredHint') || 'Show in featured section'}
                                         </span>
                                     </div>
@@ -701,12 +710,19 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                             </div>
 
                             <div className="form-control w-full">
-                                <label className="label cursor-pointer p-3 sm:p-4 rounded-lg border-2 hover:bg-base-200 transition-colors justify-between w-full" style={{ borderColor: '#e2e8f0' }}>
+                                <label className="label cursor-pointer p-3 sm:p-4 rounded-lg border-2 transition-colors justify-between w-full" style={{ borderColor: secondaryTextColor, backgroundColor }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.backgroundColor = secondaryTextColor + '20';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.backgroundColor = backgroundColor;
+                                    }}
+                                >
                                     <div className="flex flex-col flex-1 min-w-0 pr-2 sm:pr-3">
-                                        <span className="label-text text-sm sm:text-base font-semibold mb-0.5 sm:mb-1" style={{ color: '#1E293B' }}>
+                                        <span className="label-text text-sm sm:text-base font-semibold mb-0.5 sm:mb-1" style={{ color: primaryTextColor }}>
                                             {t('admin.active') || 'Active Status'}
                                         </span>
-                                        <span className="label-text-alt text-xs sm:text-sm opacity-70 leading-relaxed break-words" style={{ color: '#2d3748', lineHeight: '1.4' }}>
+                                        <span className="label-text-alt text-xs sm:text-sm opacity-70 leading-relaxed break-words" style={{ color: secondaryTextColor, lineHeight: '1.4' }}>
                                             {t('admin.activeHint') || 'Product will be visible to customers'}
                                         </span>
                                     </div>
@@ -725,23 +741,45 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
             </div>
 
             {/* Form Actions - Fixed Bottom Bar */}
-            <div className="fixed bottom-0 left-0 right-0 bg-base-100 border-t-2 shadow-2xl p-3 sm:p-4 md:p-4 lg:p-4 z-50" style={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0' }}>
+            <div className="fixed bottom-0 left-0 right-0 bg-base-100 border-t-2 shadow-2xl p-3 sm:p-4 md:p-4 lg:p-4 z-50" style={{ backgroundColor, borderColor: secondaryTextColor }}>
                 <div className="container mx-auto max-w-5xl px-3 sm:px-4 md:px-4 lg:px-5">
                     <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-3 md:gap-3 lg:gap-3">
                         <button
                             type="button"
                             onClick={onCancel}
                             className="btn btn-outline w-full sm:w-auto sm:min-w-[130px] md:min-w-[150px] h-11 sm:h-12 md:h-14 text-sm sm:text-base font-semibold flex items-center justify-center"
-                            style={{ borderColor: '#1E293B', borderWidth: '2px', color: '#1E293B' }}
+                            style={{ borderColor: buttonColor, borderWidth: '2px', color: buttonColor }}
                             disabled={isLoading}
+                            onMouseEnter={(e) => {
+                                if (!isLoading) {
+                                    e.currentTarget.style.backgroundColor = buttonColor;
+                                    e.currentTarget.style.color = '#ffffff';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (!isLoading) {
+                                    e.currentTarget.style.backgroundColor = 'transparent';
+                                    e.currentTarget.style.color = buttonColor;
+                                }
+                            }}
                         >
                             <span>{t('common.cancel') || 'Cancel'}</span>
                         </button>
                         <button
                             type="submit"
                             className="btn btn-primary w-full sm:w-auto sm:min-w-[150px] md:min-w-[180px] h-11 sm:h-12 md:h-14 text-sm sm:text-base font-semibold text-white shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
-                            style={{ backgroundColor: '#1E293B' }}
+                            style={{ backgroundColor: buttonColor }}
                             disabled={isLoading}
+                            onMouseEnter={(e) => {
+                                if (!isLoading) {
+                                    e.currentTarget.style.backgroundColor = buttonColor.startsWith('#') ? `color-mix(in srgb, ${buttonColor} 80%, black)` : `darken(${buttonColor}, 10%)`;
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (!isLoading) {
+                                    e.currentTarget.style.backgroundColor = buttonColor;
+                                }
+                            }}
                         >
                             {isLoading ? (
                                 <>

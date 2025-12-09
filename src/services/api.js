@@ -102,9 +102,19 @@ api.interceptors.response.use(
         } else if (error.request) {
             // Request was made but no response received
             console.error('Network error:', error.message);
+
+            // Check if it's a connection refused error (backend not running)
+            let errorMessage = 'Network error. Please check your connection.';
+            if (error.message && (error.message.includes('ERR_CONNECTION_REFUSED') || error.message.includes('ECONNREFUSED'))) {
+                errorMessage = 'Backend server is not running. Please start the backend server on port 5000.';
+            } else if (error.code === 'ECONNREFUSED' || error.code === 'ERR_CONNECTION_REFUSED') {
+                errorMessage = 'Backend server is not running. Please start the backend server on port 5000.';
+            }
+
             return Promise.reject({
-                message: 'Network error. Please check your connection.',
+                message: errorMessage,
                 status: 0,
+                code: error.code,
             });
         } else {
             // Something else happened

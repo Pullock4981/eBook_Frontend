@@ -6,9 +6,11 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 function AddressForm({ address = null, onSubmit, onCancel, isLoading = false }) {
     const { t } = useTranslation();
+    const { buttonColor, primaryTextColor, secondaryTextColor, backgroundColor } = useThemeColors();
 
     const [formData, setFormData] = useState({
         label: 'Home',
@@ -102,7 +104,7 @@ function AddressForm({ address = null, onSubmit, onCancel, isLoading = false }) 
             {/* Address Label - Full Width */}
             <div className="form-control w-full">
                 <label className="label pb-1.5">
-                    <span className="label-text text-sm font-medium" style={{ color: '#1E293B' }}>
+                    <span className="label-text text-sm font-medium" style={{ color: primaryTextColor }}>
                         {t('user.addressLabel') || 'Address Label'}
                         <span className="text-error ml-1">*</span>
                     </span>
@@ -111,11 +113,11 @@ function AddressForm({ address = null, onSubmit, onCancel, isLoading = false }) 
                     name="label"
                     value={formData.label}
                     onChange={handleChange}
-                    className="select select-bordered w-full h-11 text-sm border-2 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-blue-500"
+                    className="select select-bordered w-full h-11 text-sm border-2 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-primary"
                     style={{
-                        backgroundColor: '#ffffff',
-                        color: '#1E293B',
-                        borderColor: '#cbd5e1',
+                        backgroundColor: backgroundColor,
+                        color: primaryTextColor,
+                        borderColor: secondaryTextColor,
                         paddingLeft: '16px',
                         paddingRight: '16px'
                     }}
@@ -131,7 +133,7 @@ function AddressForm({ address = null, onSubmit, onCancel, isLoading = false }) 
                 {/* Recipient Name */}
                 <div className="form-control w-full">
                     <label className="label pb-1.5">
-                        <span className="label-text text-sm font-medium" style={{ color: '#1E293B' }}>
+                        <span className="label-text text-sm font-medium" style={{ color: primaryTextColor }}>
                             {t('user.recipientName') || 'Recipient Name'}
                             <span className="text-error ml-1">*</span>
                         </span>
@@ -141,12 +143,12 @@ function AddressForm({ address = null, onSubmit, onCancel, isLoading = false }) 
                         name="recipientName"
                         value={formData.recipientName}
                         onChange={handleChange}
-                        className={`input input-bordered w-full h-11 text-sm border-2 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-blue-500 ${errors.recipientName ? 'input-error border-error' : ''
+                        className={`input input-bordered w-full h-11 text-sm border-2 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-primary ${errors.recipientName ? 'input-error border-error' : ''
                             }`}
                         style={{
-                            backgroundColor: '#ffffff',
-                            color: '#1E293B',
-                            borderColor: errors.recipientName ? '#EF4444' : '#cbd5e1',
+                            backgroundColor: backgroundColor,
+                            color: primaryTextColor,
+                            borderColor: errors.recipientName ? '#EF4444' : secondaryTextColor,
                             paddingLeft: '16px',
                             paddingRight: '16px'
                         }}
@@ -162,7 +164,7 @@ function AddressForm({ address = null, onSubmit, onCancel, isLoading = false }) 
                 {/* Recipient Mobile */}
                 <div className="form-control w-full">
                     <label className="label pb-1.5">
-                        <span className="label-text text-sm font-medium" style={{ color: '#1E293B' }}>
+                        <span className="label-text text-sm font-medium" style={{ color: primaryTextColor }}>
                             {t('user.recipientMobile') || 'Recipient Mobile'}
                             <span className="text-error ml-1">*</span>
                         </span>
@@ -172,12 +174,12 @@ function AddressForm({ address = null, onSubmit, onCancel, isLoading = false }) 
                         name="recipientMobile"
                         value={formData.recipientMobile}
                         onChange={handleChange}
-                        className={`input input-bordered w-full h-11 text-sm border-2 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-blue-500 ${errors.recipientMobile ? 'input-error border-error' : ''
+                        className={`input input-bordered w-full h-11 text-sm border-2 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-primary ${errors.recipientMobile ? 'input-error border-error' : ''
                             }`}
                         style={{
-                            backgroundColor: '#ffffff',
-                            color: '#1E293B',
-                            borderColor: errors.recipientMobile ? '#EF4444' : '#cbd5e1',
+                            backgroundColor: backgroundColor,
+                            color: primaryTextColor,
+                            borderColor: errors.recipientMobile ? '#EF4444' : secondaryTextColor,
                             paddingLeft: '16px',
                             paddingRight: '16px'
                         }}
@@ -194,7 +196,7 @@ function AddressForm({ address = null, onSubmit, onCancel, isLoading = false }) 
             {/* Address Line 1 - Full Width */}
             <div className="form-control w-full">
                 <label className="label pb-1.5">
-                    <span className="label-text text-sm font-medium" style={{ color: '#1E293B' }}>
+                    <span className="label-text text-sm font-medium" style={{ color: primaryTextColor }}>
                         {t('user.addressLine1') || 'Address Line 1'}
                         <span className="text-error ml-1">*</span>
                     </span>
@@ -204,12 +206,12 @@ function AddressForm({ address = null, onSubmit, onCancel, isLoading = false }) 
                     name="addressLine1"
                     value={formData.addressLine1}
                     onChange={handleChange}
-                    className={`input input-bordered w-full h-11 text-sm border-2 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-blue-500 ${errors.addressLine1 ? 'input-error border-error' : ''
+                    className={`input input-bordered w-full h-11 text-sm border-2 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-primary ${errors.addressLine1 ? 'input-error border-error' : ''
                         }`}
                     style={{
-                        backgroundColor: '#ffffff',
-                        color: '#1E293B',
-                        borderColor: errors.addressLine1 ? '#EF4444' : '#cbd5e1',
+                        backgroundColor: backgroundColor,
+                        color: primaryTextColor,
+                        borderColor: errors.addressLine1 ? '#EF4444' : secondaryTextColor,
                         paddingLeft: '16px',
                         paddingRight: '16px'
                     }}
@@ -225,9 +227,9 @@ function AddressForm({ address = null, onSubmit, onCancel, isLoading = false }) 
             {/* Address Line 2 - Full Width */}
             <div className="form-control w-full">
                 <label className="label pb-1.5">
-                    <span className="label-text text-sm font-medium" style={{ color: '#1E293B' }}>
+                    <span className="label-text text-sm font-medium" style={{ color: primaryTextColor }}>
                         {t('user.addressLine2') || 'Address Line 2'}
-                        <span className="label-text-alt text-xs opacity-70 ml-2" style={{ color: '#64748b' }}>
+                        <span className="label-text-alt text-xs opacity-70 ml-2" style={{ color: secondaryTextColor }}>
                             {t('common.optional') || 'Optional'}
                         </span>
                     </span>
@@ -237,11 +239,11 @@ function AddressForm({ address = null, onSubmit, onCancel, isLoading = false }) 
                     name="addressLine2"
                     value={formData.addressLine2}
                     onChange={handleChange}
-                    className="input input-bordered w-full h-11 text-sm border-2 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-blue-500"
+                    className="input input-bordered w-full h-11 text-sm border-2 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-primary"
                     style={{
-                        backgroundColor: '#ffffff',
-                        color: '#1E293B',
-                        borderColor: '#cbd5e1',
+                        backgroundColor: backgroundColor,
+                        color: primaryTextColor,
+                        borderColor: secondaryTextColor,
                         paddingLeft: '16px',
                         paddingRight: '16px'
                     }}
@@ -254,7 +256,7 @@ function AddressForm({ address = null, onSubmit, onCancel, isLoading = false }) 
                 {/* Area */}
                 <div className="form-control w-full">
                     <label className="label pb-1.5">
-                        <span className="label-text text-sm font-medium" style={{ color: '#1E293B' }}>
+                        <span className="label-text text-sm font-medium" style={{ color: primaryTextColor }}>
                             {t('user.area') || 'Area'}
                             <span className="text-error ml-1">*</span>
                         </span>
@@ -264,12 +266,12 @@ function AddressForm({ address = null, onSubmit, onCancel, isLoading = false }) 
                         name="area"
                         value={formData.area}
                         onChange={handleChange}
-                        className={`input input-bordered w-full h-11 text-sm border-2 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-blue-500 ${errors.area ? 'input-error border-error' : ''
+                        className={`input input-bordered w-full h-11 text-sm border-2 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-primary ${errors.area ? 'input-error border-error' : ''
                             }`}
                         style={{
-                            backgroundColor: '#ffffff',
-                            color: '#1E293B',
-                            borderColor: errors.area ? '#EF4444' : '#cbd5e1',
+                            backgroundColor: backgroundColor,
+                            color: primaryTextColor,
+                            borderColor: errors.area ? '#EF4444' : secondaryTextColor,
                             paddingLeft: '16px',
                             paddingRight: '16px'
                         }}
@@ -285,9 +287,9 @@ function AddressForm({ address = null, onSubmit, onCancel, isLoading = false }) 
                 {/* Postal Code */}
                 <div className="form-control w-full">
                     <label className="label pb-1.5">
-                        <span className="label-text text-sm font-medium" style={{ color: '#1E293B' }}>
+                        <span className="label-text text-sm font-medium" style={{ color: primaryTextColor }}>
                             {t('user.postalCode') || 'Postal Code'}
-                            <span className="label-text-alt text-xs opacity-70 ml-2" style={{ color: '#64748b' }}>
+                            <span className="label-text-alt text-xs opacity-70 ml-2" style={{ color: secondaryTextColor }}>
                                 {t('common.optional') || 'Optional'}
                             </span>
                         </span>
@@ -297,11 +299,11 @@ function AddressForm({ address = null, onSubmit, onCancel, isLoading = false }) 
                         name="postalCode"
                         value={formData.postalCode}
                         onChange={handleChange}
-                        className="input input-bordered w-full h-11 text-sm border-2 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-blue-500"
+                        className="input input-bordered w-full h-11 text-sm border-2 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-primary"
                         style={{
-                            backgroundColor: '#ffffff',
-                            color: '#1E293B',
-                            borderColor: '#cbd5e1',
+                            backgroundColor: backgroundColor,
+                            color: primaryTextColor,
+                            borderColor: secondaryTextColor,
                             paddingLeft: '16px',
                             paddingRight: '16px'
                         }}
@@ -315,7 +317,7 @@ function AddressForm({ address = null, onSubmit, onCancel, isLoading = false }) 
                 {/* City */}
                 <div className="form-control w-full">
                     <label className="label pb-1.5">
-                        <span className="label-text text-sm font-medium" style={{ color: '#1E293B' }}>
+                        <span className="label-text text-sm font-medium" style={{ color: primaryTextColor }}>
                             {t('user.city') || 'City'}
                             <span className="text-error ml-1">*</span>
                         </span>
@@ -325,12 +327,12 @@ function AddressForm({ address = null, onSubmit, onCancel, isLoading = false }) 
                         name="city"
                         value={formData.city}
                         onChange={handleChange}
-                        className={`input input-bordered w-full h-11 text-sm border-2 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-blue-500 ${errors.city ? 'input-error border-error' : ''
+                        className={`input input-bordered w-full h-11 text-sm border-2 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-primary ${errors.city ? 'input-error border-error' : ''
                             }`}
                         style={{
-                            backgroundColor: '#ffffff',
-                            color: '#1E293B',
-                            borderColor: errors.city ? '#EF4444' : '#cbd5e1',
+                            backgroundColor: backgroundColor,
+                            color: primaryTextColor,
+                            borderColor: errors.city ? '#EF4444' : secondaryTextColor,
                             paddingLeft: '16px',
                             paddingRight: '16px'
                         }}
@@ -346,7 +348,7 @@ function AddressForm({ address = null, onSubmit, onCancel, isLoading = false }) 
                 {/* District */}
                 <div className="form-control w-full">
                     <label className="label pb-1.5">
-                        <span className="label-text text-sm font-medium" style={{ color: '#1E293B' }}>
+                        <span className="label-text text-sm font-medium" style={{ color: primaryTextColor }}>
                             {t('user.district') || 'District'}
                             <span className="text-error ml-1">*</span>
                         </span>
@@ -356,12 +358,12 @@ function AddressForm({ address = null, onSubmit, onCancel, isLoading = false }) 
                         name="district"
                         value={formData.district}
                         onChange={handleChange}
-                        className={`input input-bordered w-full h-11 text-sm border-2 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-blue-500 ${errors.district ? 'input-error border-error' : ''
+                        className={`input input-bordered w-full h-11 text-sm border-2 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-primary ${errors.district ? 'input-error border-error' : ''
                             }`}
                         style={{
-                            backgroundColor: '#ffffff',
-                            color: '#1E293B',
-                            borderColor: errors.district ? '#EF4444' : '#cbd5e1',
+                            backgroundColor: backgroundColor,
+                            color: primaryTextColor,
+                            borderColor: errors.district ? '#EF4444' : secondaryTextColor,
                             paddingLeft: '16px',
                             paddingRight: '16px'
                         }}
@@ -377,12 +379,19 @@ function AddressForm({ address = null, onSubmit, onCancel, isLoading = false }) 
 
             {/* Set as Default */}
             <div className="form-control pt-2">
-                <label className="label cursor-pointer p-3 sm:p-4 rounded-lg border-2 hover:bg-gray-50 transition-colors flex-col sm:flex-row sm:justify-between gap-3 sm:gap-0" style={{ borderColor: '#e2e8f0', backgroundColor: '#ffffff' }}>
+                <label className="label cursor-pointer p-3 sm:p-4 rounded-lg border-2 transition-colors flex-col sm:flex-row sm:justify-between gap-3 sm:gap-0" style={{ borderColor: secondaryTextColor, backgroundColor: backgroundColor }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = secondaryTextColor + '20';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = backgroundColor;
+                    }}
+                >
                     <div className="flex flex-col items-start flex-1 min-w-0">
-                        <span className="label-text text-sm font-medium mb-1 break-words" style={{ color: '#1E293B' }}>
+                        <span className="label-text text-sm font-medium mb-1 break-words" style={{ color: primaryTextColor }}>
                             {t('user.setAsDefault') || 'Set as Default Address'}
                         </span>
-                        <span className="label-text-alt text-xs opacity-70 break-words" style={{ color: '#64748b' }}>
+                        <span className="label-text-alt text-xs opacity-70 break-words" style={{ color: secondaryTextColor }}>
                             {t('user.defaultAddressHint') || 'Use this address as default for future orders'}
                         </span>
                     </div>
@@ -393,23 +402,29 @@ function AddressForm({ address = null, onSubmit, onCancel, isLoading = false }) 
                             checked={formData.isDefault}
                             onChange={handleChange}
                             className="toggle toggle-primary toggle-sm sm:toggle-md"
-                            style={{ backgroundColor: formData.isDefault ? '#1E293B' : '#cbd5e1' }}
+                            style={{ backgroundColor: formData.isDefault ? buttonColor : secondaryTextColor }}
                         />
                     </div>
                 </label>
             </div>
 
             {/* Form Actions */}
-            <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 sm:pt-6 border-t" style={{ borderColor: '#e2e8f0' }}>
+            <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 sm:pt-6 border-t" style={{ borderColor: secondaryTextColor }}>
                 {onCancel && (
                     <button
                         type="button"
                         onClick={onCancel}
-                        className="btn btn-outline w-full sm:w-auto order-2 sm:order-1 px-6 py-2.5 text-sm font-medium hover:bg-gray-50 transition-all"
+                        className="btn btn-outline w-full sm:w-auto order-2 sm:order-1 px-6 py-2.5 text-sm font-medium transition-all"
                         style={{
-                            borderColor: '#cbd5e1',
-                            color: '#1E293B',
-                            backgroundColor: '#ffffff'
+                            borderColor: secondaryTextColor,
+                            color: primaryTextColor,
+                            backgroundColor: backgroundColor
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = secondaryTextColor + '20';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = backgroundColor;
                         }}
                         disabled={isLoading}
                     >
@@ -420,8 +435,8 @@ function AddressForm({ address = null, onSubmit, onCancel, isLoading = false }) 
                     type="submit"
                     className="btn btn-primary text-white w-full sm:w-auto order-1 sm:order-2 px-6 py-2.5 text-sm font-medium shadow-sm hover:shadow-md transition-all"
                     style={{
-                        backgroundColor: '#1E293B',
-                        borderColor: '#1E293B'
+                        backgroundColor: buttonColor,
+                        borderColor: buttonColor
                     }}
                     disabled={isLoading}
                 >

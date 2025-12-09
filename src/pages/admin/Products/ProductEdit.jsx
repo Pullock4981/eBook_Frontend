@@ -13,12 +13,14 @@ import { updateProduct } from '../../../services/adminService';
 import { fetchProducts } from '../../../store/slices/productSlice';
 import ProductForm from '../../../components/admin/ProductForm';
 import Loading from '../../../components/common/Loading';
+import { useThemeColors } from '../../../hooks/useThemeColors';
 
 function ProductEdit() {
     const { t } = useTranslation();
     const { id } = useParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const { buttonColor, primaryTextColor, secondaryTextColor, backgroundColor } = useThemeColors();
 
     const product = useSelector(selectCurrentProduct);
     const isLoading = useSelector(selectIsLoading);
@@ -63,8 +65,8 @@ function ProductEdit() {
 
     if (!product) {
         return (
-            <div className="text-center py-12">
-                <p className="text-base opacity-70" style={{ color: '#2d3748' }}>
+            <div className="text-center py-12" style={{ backgroundColor }}>
+                <p className="text-base opacity-70" style={{ color: secondaryTextColor }}>
                     {t('admin.productNotFound') || 'Product not found'}
                 </p>
             </div>
@@ -72,17 +74,17 @@ function ProductEdit() {
     }
 
     return (
-        <div className="min-h-screen" style={{ backgroundColor: '#EFECE3' }}>
+        <div className="w-full pb-4" style={{ backgroundColor }}>
             <div className="w-full">
                 {/* Header */}
                 <div className="mb-4 sm:mb-6 lg:mb-8 px-3 sm:px-0">
                     <div className="flex items-center gap-2 sm:gap-3 mb-2">
-                        <div className="w-1 h-8 sm:h-10 rounded-full" style={{ backgroundColor: '#1E293B' }}></div>
-                        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold" style={{ color: '#1E293B' }}>
+                        <div className="w-1 h-8 sm:h-10 rounded-full" style={{ backgroundColor: buttonColor }}></div>
+                        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold" style={{ color: primaryTextColor }}>
                             {t('admin.editProduct') || 'Edit Product'}
                         </h1>
                     </div>
-                    <p className="text-sm sm:text-base lg:text-lg opacity-70 ml-3 sm:ml-4" style={{ color: '#2d3748' }}>
+                    <p className="text-sm sm:text-base lg:text-lg opacity-70 ml-3 sm:ml-4" style={{ color: secondaryTextColor }}>
                         {t('admin.editProductDescription') || 'Update product information'}
                     </p>
                 </div>

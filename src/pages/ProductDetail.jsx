@@ -17,6 +17,7 @@ import ProductGallery from '../components/products/ProductGallery';
 import Loading from '../components/common/Loading';
 import { formatCurrency, calculateDiscount } from '../utils/helpers';
 import { PRODUCT_TYPES } from '../utils/constants';
+import { useThemeColors } from '../hooks/useThemeColors';
 
 function ProductDetail() {
     const { t } = useTranslation();
@@ -37,6 +38,7 @@ function ProductDetail() {
     const [addToCartSuccess, setAddToCartSuccess] = useState(false);
     const [hasEBookAccess, setHasEBookAccess] = useState(false);
     const [checkingAccess, setCheckingAccess] = useState(false);
+    const { buttonColor, primaryTextColor, secondaryTextColor, backgroundColor, errorColor, successColor, infoColor } = useThemeColors();
 
     // Check if user is admin
     const isAdmin = user?.role === 'admin';
@@ -104,7 +106,7 @@ function ProductDetail() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#EFECE3' }}>
+            <div className="flex items-center justify-center py-12" style={{ backgroundColor }}>
                 <Loading />
             </div>
         );
@@ -123,24 +125,24 @@ function ProductDetail() {
 
     if (error || (!isLoading && !product)) {
         return (
-            <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#EFECE3' }}>
+            <div className="flex items-center justify-center py-12" style={{ backgroundColor }}>
                 <div className="text-center">
                     <div className="text-6xl mb-4">😕</div>
-                    <h2 className="text-2xl font-bold mb-2" style={{ color: '#1E293B' }}>
+                    <h2 className="text-2xl font-bold mb-2" style={{ color: primaryTextColor }}>
                         {t('products.notFound') || 'Product Not Found'}
                     </h2>
-                    <p className="text-base opacity-70 mb-4" style={{ color: '#2d3748' }}>
+                    <p className="text-base opacity-70 mb-4" style={{ color: secondaryTextColor }}>
                         {error || t('products.notFoundDescription') || 'The product you are looking for does not exist.'}
                     </p>
                     {import.meta.env.DEV && (
-                        <div className="text-xs opacity-50 mb-4" style={{ color: '#2d3748' }}>
+                        <div className="text-xs opacity-50 mb-4" style={{ color: secondaryTextColor }}>
                             ID: {id} | Error: {error || 'No error message'}
                         </div>
                     )}
                     <Link
                         to="/products"
                         className="btn btn-primary text-white"
-                        style={{ backgroundColor: '#1E293B' }}
+                        style={{ backgroundColor: buttonColor }}
                     >
                         {t('products.backToProducts') || 'Back to Products'}
                     </Link>
@@ -156,18 +158,18 @@ function ProductDetail() {
     const displayPrice = product.discountPrice || product.price;
 
     return (
-        <div className="min-h-screen" style={{ backgroundColor: '#EFECE3' }}>
+        <div className="w-full pb-4" style={{ backgroundColor }}>
             <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
                 {/* Breadcrumb */}
                 <div className="breadcrumbs text-xs sm:text-sm mb-4 sm:mb-6">
                     <ul>
                         <li>
-                            <Link to="/" style={{ color: '#1E293B' }}>
+                            <Link to="/" style={{ color: primaryTextColor }}>
                                 {t('nav.home') || 'Home'}
                             </Link>
                         </li>
                         <li>
-                            <Link to="/products" style={{ color: '#1E293B' }}>
+                            <Link to="/products" style={{ color: primaryTextColor }}>
                                 {t('nav.products') || 'Products'}
                             </Link>
                         </li>
@@ -175,13 +177,13 @@ function ProductDetail() {
                             <li>
                                 <Link
                                     to={`/products?category=${product.category._id}`}
-                                    style={{ color: '#1E293B' }}
+                                    style={{ color: primaryTextColor }}
                                 >
                                     {product.category.name}
                                 </Link>
                             </li>
                         )}
-                        <li style={{ color: '#1E293B' }}>{product.name}</li>
+                        <li style={{ color: primaryTextColor }}>{product.name}</li>
                     </ul>
                 </div>
 
@@ -195,24 +197,24 @@ function ProductDetail() {
                     <div className="space-y-4 sm:space-y-5 md:space-y-6 w-full flex flex-col">
                         {/* Category */}
                         {product.category && (
-                            <div className="badge badge-outline" style={{ borderColor: '#6B8E6B', color: '#6B8E6B' }}>
+                            <div className="badge badge-outline" style={{ borderColor: buttonColor, color: buttonColor }}>
                                 {product.category.name}
                             </div>
                         )}
 
                         {/* Product Name */}
-                        <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold leading-tight" style={{ color: '#1E293B' }}>
+                        <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold leading-tight" style={{ color: primaryTextColor }}>
                             {product.name}
                         </h1>
 
                         {/* Price Section */}
                         <div className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4">
-                            <span className="text-2xl sm:text-3xl font-bold" style={{ color: '#1E293B' }}>
+                            <span className="text-2xl sm:text-3xl font-bold" style={{ color: primaryTextColor }}>
                                 {formatCurrency(displayPrice)}
                             </span>
                             {product.discountPrice && (
                                 <>
-                                    <span className="text-lg sm:text-xl line-through opacity-50" style={{ color: '#2d3748' }}>
+                                    <span className="text-lg sm:text-xl line-through opacity-50" style={{ color: secondaryTextColor }}>
                                         {formatCurrency(product.price)}
                                     </span>
                                     <span className="badge badge-error badge-sm sm:badge-md text-white">
@@ -253,10 +255,10 @@ function ProductDetail() {
                         {/* Description */}
                         {product.description && (
                             <div>
-                                <h2 className="text-lg sm:text-xl font-semibold mb-2" style={{ color: '#1E293B' }}>
+                                <h2 className="text-lg sm:text-xl font-semibold mb-2" style={{ color: primaryTextColor }}>
                                     {t('products.description') || 'Description'}
                                 </h2>
-                                <p className="text-sm sm:text-base leading-relaxed whitespace-pre-line" style={{ color: '#2d3748' }}>
+                                <p className="text-sm sm:text-base leading-relaxed whitespace-pre-line" style={{ color: secondaryTextColor }}>
                                     {product.description}
                                 </p>
                             </div>
@@ -284,7 +286,7 @@ function ProductDetail() {
                         {/* Tags */}
                         {product.tags && product.tags.length > 0 && (
                             <div>
-                                <h3 className="text-sm font-semibold mb-2" style={{ color: '#1E293B' }}>
+                                <h3 className="text-sm font-semibold mb-2" style={{ color: primaryTextColor }}>
                                     {t('products.tags') || 'Tags'}:
                                 </h3>
                                 <div className="flex flex-wrap gap-2">
@@ -292,7 +294,7 @@ function ProductDetail() {
                                         <span
                                             key={index}
                                             className="badge badge-outline"
-                                            style={{ borderColor: '#6B8E6B', color: '#6B8E6B' }}
+                                            style={{ borderColor: buttonColor, color: buttonColor }}
                                         >
                                             {tag}
                                         </span>
@@ -308,7 +310,7 @@ function ProductDetail() {
                                 <Link
                                     to={`/admin/products/${product._id}/edit`}
                                     className="btn btn-primary btn-md sm:btn-lg flex-grow text-white shadow-lg hover:shadow-xl transition-all"
-                                    style={{ backgroundColor: '#1E293B' }}
+                                    style={{ backgroundColor: buttonColor }}
                                 >
                                     <svg
                                         className="w-5 h-5"
@@ -327,7 +329,7 @@ function ProductDetail() {
                                 </Link>
                                 <button
                                     className="btn btn-error btn-md sm:btn-lg text-white shadow-lg hover:shadow-xl transition-all flex-shrink-0"
-                                    style={{ backgroundColor: '#dc2626', minWidth: '140px' }}
+                                    style={{ backgroundColor: errorColor, minWidth: '140px' }}
                                     onClick={() => setShowDeleteConfirm(true)}
                                     disabled={isDeleting}
                                 >
@@ -361,14 +363,14 @@ function ProductDetail() {
                             <>
                                 {/* Digital Product - Read Now or Add to Cart */}
                                 {isDigital ? (
-                                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
+                                    <div className="flex flex-col gap-3 sm:gap-4 pt-4">
                                         {isAuthenticated && hasEBookAccess ? (
                                             <>
                                                 <button
                                                     onClick={() => navigate(`/ebooks/viewer/${product.id || product._id}`)}
                                                     className="btn btn-success btn-md sm:btn-lg flex-grow text-white shadow-lg hover:shadow-xl transition-all font-semibold"
                                                     style={{
-                                                        backgroundColor: '#10b981',
+                                                        backgroundColor: successColor,
                                                         fontWeight: '600'
                                                     }}
                                                 >
@@ -385,57 +387,83 @@ function ProductDetail() {
                                                 </div>
                                             </>
                                         ) : (
-                                            <button
-                                                className="btn btn-primary btn-md sm:btn-lg flex-grow text-white shadow-lg hover:shadow-xl transition-all"
-                                                style={{ backgroundColor: '#1E293B' }}
-                                                disabled={isAddingToCart || !isAuthenticated}
-                                                onClick={async () => {
-                                                    if (!isAuthenticated) {
-                                                        navigate('/login');
-                                                        return;
-                                                    }
-
-                                                    if (!product?._id) {
-                                                        setAddToCartError(t('cart.productNotFound') || 'Product not found');
-                                                        return;
-                                                    }
-
-                                                    setIsAddingToCart(true);
-                                                    setAddToCartError(null);
-                                                    setAddToCartSuccess(false);
-                                                    try {
-                                                        await dispatch(addItemToCart({ productId: product._id, quantity: 1 })).unwrap();
-                                                        setAddToCartSuccess(true);
-                                                        setTimeout(() => setAddToCartSuccess(false), 3000);
-                                                    } catch (error) {
-                                                        const errorMessage = error?.message || error || t('cart.addToCartError') || 'Failed to add to cart';
-                                                        setAddToCartError(errorMessage);
-                                                    } finally {
-                                                        setIsAddingToCart(false);
-                                                    }
-                                                }}
-                                            >
-                                                {isAddingToCart ? (
-                                                    <>
-                                                        <span className="loading loading-spinner loading-sm"></span>
-                                                        <span className="ml-2">{t('cart.adding') || 'Adding...'}</span>
-                                                    </>
-                                                ) : addToCartSuccess ? (
-                                                    <>
+                                            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                                                {/* Read Button for Logged-in Users */}
+                                                {isAuthenticated && product?.digitalFile ? (
+                                                    <button
+                                                        onClick={() => {
+                                                            // Navigate to PDF viewer in same tab
+                                                            const productId = product.id || product._id;
+                                                            if (productId) {
+                                                                navigate(`/pdf/view/${productId}`);
+                                                            }
+                                                        }}
+                                                        className="btn btn-info btn-md sm:btn-lg flex-grow text-white shadow-lg hover:shadow-xl transition-all font-semibold"
+                                                        style={{
+                                                            backgroundColor: infoColor,
+                                                            fontWeight: '600'
+                                                        }}
+                                                    >
                                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                                                         </svg>
-                                                        <span className="ml-2">{t('cart.addedToCart') || 'Added to Cart!'}</span>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                                                        </svg>
-                                                        <span className="ml-2">{t('products.addToCart') || 'Add to Cart'}</span>
-                                                    </>
-                                                )}
-                                            </button>
+                                                        <span className="ml-2">{t('ebooks.read') || 'Read'}</span>
+                                                    </button>
+                                                ) : null}
+
+                                                {/* Add to Cart Button */}
+                                                <button
+                                                    className="btn btn-primary btn-md sm:btn-lg flex-grow text-white shadow-lg hover:shadow-xl transition-all"
+                                                    style={{ backgroundColor: buttonColor }}
+                                                    disabled={isAddingToCart || !isAuthenticated}
+                                                    onClick={async () => {
+                                                        if (!isAuthenticated) {
+                                                            navigate('/login');
+                                                            return;
+                                                        }
+
+                                                        if (!product?._id) {
+                                                            setAddToCartError(t('cart.productNotFound') || 'Product not found');
+                                                            return;
+                                                        }
+
+                                                        setIsAddingToCart(true);
+                                                        setAddToCartError(null);
+                                                        setAddToCartSuccess(false);
+                                                        try {
+                                                            await dispatch(addItemToCart({ productId: product._id, quantity: 1 })).unwrap();
+                                                            setAddToCartSuccess(true);
+                                                            setTimeout(() => setAddToCartSuccess(false), 3000);
+                                                        } catch (error) {
+                                                            const errorMessage = error?.message || error || t('cart.addToCartError') || 'Failed to add to cart';
+                                                            setAddToCartError(errorMessage);
+                                                        } finally {
+                                                            setIsAddingToCart(false);
+                                                        }
+                                                    }}
+                                                >
+                                                    {isAddingToCart ? (
+                                                        <>
+                                                            <span className="loading loading-spinner loading-sm"></span>
+                                                            <span className="ml-2">{t('cart.adding') || 'Adding...'}</span>
+                                                        </>
+                                                    ) : addToCartSuccess ? (
+                                                        <>
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                            <span className="ml-2">{t('cart.addedToCart') || 'Added to Cart!'}</span>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                                            </svg>
+                                                            <span className="ml-2">{t('products.addToCart') || 'Add to Cart'}</span>
+                                                        </>
+                                                    )}
+                                                </button>
+                                            </div>
                                         )}
                                     </div>
                                 ) : (
@@ -443,7 +471,7 @@ function ProductDetail() {
                                     <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
                                         <button
                                             className="btn btn-primary btn-md sm:btn-lg flex-grow text-white shadow-lg hover:shadow-xl transition-all"
-                                            style={{ backgroundColor: '#1E293B' }}
+                                            style={{ backgroundColor: buttonColor }}
                                             disabled={isAddingToCart || !isAuthenticated}
                                             onClick={async () => {
                                                 if (!isAuthenticated) {
@@ -500,7 +528,15 @@ function ProductDetail() {
                                         </button>
                                         <button
                                             className="btn btn-outline btn-md sm:btn-lg"
-                                            style={{ borderColor: '#1E293B', color: '#1E293B' }}
+                                            style={{ borderColor: buttonColor, color: buttonColor }}
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.backgroundColor = buttonColor;
+                                                e.currentTarget.style.color = '#ffffff';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.backgroundColor = 'transparent';
+                                                e.currentTarget.style.color = buttonColor;
+                                            }}
                                         >
                                             {t('products.wishlist') || 'Wishlist'}
                                         </button>
@@ -555,11 +591,11 @@ function ProductDetail() {
                         {/* Delete Confirmation Modal */}
                         {showDeleteConfirm && (
                             <div className="modal modal-open">
-                                <div className="modal-box">
-                                    <h3 className="font-bold text-lg mb-4" style={{ color: '#1E293B' }}>
+                                <div className="modal-box" style={{ backgroundColor }}>
+                                    <h3 className="font-bold text-lg mb-4" style={{ color: primaryTextColor }}>
                                         {t('admin.confirmDelete') || 'Confirm Delete'}
                                     </h3>
-                                    <p className="py-4" style={{ color: '#2d3748' }}>
+                                    <p className="py-4" style={{ color: secondaryTextColor }}>
                                         {t('admin.confirmDeleteMessage') || 'Are you sure you want to delete this product? This action cannot be undone.'}
                                     </p>
                                     <div className="modal-action">
@@ -567,7 +603,19 @@ function ProductDetail() {
                                             className="btn btn-outline"
                                             onClick={() => setShowDeleteConfirm(false)}
                                             disabled={isDeleting}
-                                            style={{ borderColor: '#1E293B', color: '#1E293B' }}
+                                            style={{ borderColor: buttonColor, color: buttonColor }}
+                                            onMouseEnter={(e) => {
+                                                if (!isDeleting) {
+                                                    e.currentTarget.style.backgroundColor = buttonColor;
+                                                    e.currentTarget.style.color = '#ffffff';
+                                                }
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                if (!isDeleting) {
+                                                    e.currentTarget.style.backgroundColor = 'transparent';
+                                                    e.currentTarget.style.color = buttonColor;
+                                                }
+                                            }}
                                         >
                                             {t('common.cancel') || 'Cancel'}
                                         </button>

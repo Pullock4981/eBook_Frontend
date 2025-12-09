@@ -12,11 +12,13 @@ import { fetchAllCoupons, deleteCoupon, selectCoupons, selectCouponPagination, s
 import { formatCurrency } from '../../../utils/helpers';
 import Loading from '../../../components/common/Loading';
 import Pagination from '../../../components/common/Pagination';
+import { useThemeColors } from '../../../hooks/useThemeColors';
 
 function CouponList() {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const { buttonColor, primaryTextColor, secondaryTextColor, backgroundColor, errorColor, successColor } = useThemeColors();
 
     const coupons = useSelector(selectCoupons);
     const pagination = useSelector(selectCouponPagination);
@@ -94,24 +96,24 @@ function CouponList() {
     };
 
     return (
-        <div style={{ backgroundColor: '#EFECE3' }}>
+        <div style={{ backgroundColor }}>
             <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 md:py-8">
                 <div className="space-y-5 sm:space-y-6">
                     {/* Header */}
-                    <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-5" style={{ borderColor: '#e2e8f0' }}>
+                    <div className="bg-base-100 rounded-lg shadow-sm border p-4 sm:p-5" style={{ borderColor: secondaryTextColor, backgroundColor }}>
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                             <div className="flex-1 min-w-0">
-                                <h1 className="text-2xl sm:text-3xl font-bold mb-1" style={{ color: '#1E293B' }}>
+                                <h1 className="text-2xl sm:text-3xl font-bold mb-1" style={{ color: primaryTextColor }}>
                                     {t('admin.coupons') || 'Coupons'}
                                 </h1>
-                                <p className="text-sm opacity-70" style={{ color: '#64748b' }}>
+                                <p className="text-sm opacity-70" style={{ color: secondaryTextColor }}>
                                     {t('admin.manageCoupons') || 'Manage all discount coupons'}
                                 </p>
                             </div>
                             <Link
                                 to="/admin/coupons/create"
                                 className="btn btn-primary text-white btn-sm sm:btn-md flex-shrink-0 px-4 py-2.5 font-medium transition-all duration-200 hover:shadow-md"
-                                style={{ backgroundColor: '#1E293B', paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '0.625rem', paddingBottom: '0.625rem' }}
+                                style={{ backgroundColor: buttonColor, paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '0.625rem', paddingBottom: '0.625rem' }}
                             >
                                 <svg
                                     className="w-4 h-4 sm:w-5 sm:h-5"
@@ -132,7 +134,7 @@ function CouponList() {
                     </div>
 
                     {/* Search */}
-                    <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-5" style={{ borderColor: '#e2e8f0' }}>
+                    <div className="bg-base-100 rounded-lg shadow-sm border p-4 sm:p-5" style={{ borderColor: secondaryTextColor, backgroundColor }}>
                         <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                             <input
                                 type="text"
@@ -140,12 +142,12 @@ function CouponList() {
                                 className="input input-bordered flex-grow border-2 text-sm sm:text-base px-4 py-2.5"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                style={{ borderColor: '#cbd5e1', color: '#1E293B', paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '0.625rem', paddingBottom: '0.625rem' }}
+                                style={{ borderColor: secondaryTextColor, backgroundColor, color: primaryTextColor, paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '0.625rem', paddingBottom: '0.625rem' }}
                             />
                             <button
                                 type="submit"
                                 className="btn btn-primary text-white px-5 sm:px-6 py-2.5 text-sm sm:text-base font-medium transition-all duration-200 hover:shadow-md"
-                                style={{ backgroundColor: '#1E293B', paddingLeft: '1.25rem', paddingRight: '1.25rem', paddingTop: '0.625rem', paddingBottom: '0.625rem' }}
+                                style={{ backgroundColor: buttonColor, paddingLeft: '1.25rem', paddingRight: '1.25rem', paddingTop: '0.625rem', paddingBottom: '0.625rem' }}
                             >
                                 <svg
                                     className="w-4 h-4 sm:w-5 sm:h-5"
@@ -182,15 +184,15 @@ function CouponList() {
                         </div>
                     ) : coupons.length === 0 ? (
                         /* Empty State */
-                        <div className="bg-white rounded-lg shadow-sm border">
+                        <div className="bg-base-100 rounded-lg shadow-sm border" style={{ borderColor: secondaryTextColor, backgroundColor }}>
                             <div className="flex flex-col items-center justify-center py-12 sm:py-16 px-4">
-                                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center mb-4 sm:mb-6" style={{ backgroundColor: '#f1f5f9' }}>
+                                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center mb-4 sm:mb-6" style={{ backgroundColor: secondaryTextColor + '20' }}>
                                     <svg
                                         className="w-10 h-10 sm:w-12 sm:h-12"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
-                                        style={{ color: '#94a3b8' }}
+                                        style={{ color: secondaryTextColor }}
                                     >
                                         <path
                                             strokeLinecap="round"
@@ -201,16 +203,16 @@ function CouponList() {
                                     </svg>
                                 </div>
                                 <div className="text-center">
-                                    <h3 className="text-lg sm:text-xl md:text-2xl font-semibold mb-2 sm:mb-3" style={{ color: '#1E293B' }}>
+                                    <h3 className="text-lg sm:text-xl md:text-2xl font-semibold mb-2 sm:mb-3" style={{ color: primaryTextColor }}>
                                         {t('admin.noCoupons') || 'No Coupons Found'}
                                     </h3>
-                                    <p className="text-sm sm:text-base opacity-70 mb-4 sm:mb-6 px-4" style={{ color: '#64748b' }}>
+                                    <p className="text-sm sm:text-base opacity-70 mb-4 sm:mb-6 px-4" style={{ color: secondaryTextColor }}>
                                         {t('admin.noCouponsDescription') || 'Create your first coupon to get started!'}
                                     </p>
                                     <Link
                                         to="/admin/coupons/create"
                                         className="btn btn-primary text-white inline-flex items-center gap-2 btn-sm sm:btn-md"
-                                        style={{ backgroundColor: '#1E293B' }}
+                                        style={{ backgroundColor: buttonColor }}
                                     >
                                         <svg
                                             className="w-4 h-4 sm:w-5 sm:h-5"
@@ -237,20 +239,20 @@ function CouponList() {
                                 {coupons.map((coupon) => (
                                     <div
                                         key={coupon._id}
-                                        className="bg-white rounded-lg shadow-sm border"
-                                        style={{ borderColor: '#e2e8f0' }}
+                                        className="bg-base-100 rounded-lg shadow-sm border"
+                                        style={{ borderColor: secondaryTextColor, backgroundColor }}
                                     >
                                         <div className="p-4 space-y-3">
                                             {/* Header */}
                                             <div className="flex items-start justify-between">
                                                 <div className="flex-1">
-                                                    <h3 className="font-bold text-base sm:text-lg mb-1" style={{ color: '#1E293B' }}>
+                                                    <h3 className="font-bold text-base sm:text-lg mb-1" style={{ color: primaryTextColor }}>
                                                         {coupon.code}
                                                     </h3>
                                                     <div className="flex items-center gap-2 flex-wrap">
                                                         <span
                                                             className="badge badge-xs px-2 py-0.5 font-medium"
-                                                            style={{ backgroundColor: '#6B8E6B', color: '#ffffff', border: 'none' }}
+                                                            style={{ backgroundColor: buttonColor, color: '#ffffff', border: 'none' }}
                                                         >
                                                             {coupon.type === 'percentage' ? t('admin.percentage') || 'Percentage' : t('admin.fixed') || 'Fixed'}
                                                         </span>
@@ -260,28 +262,28 @@ function CouponList() {
                                             </div>
 
                                             {/* Details */}
-                                            <div className="space-y-2 border-t border-b py-3" style={{ borderColor: '#e2e8f0' }}>
+                                            <div className="space-y-2 border-t border-b py-3" style={{ borderColor: secondaryTextColor }}>
                                                 <div className="flex justify-between items-center">
-                                                    <span className="text-sm opacity-70" style={{ color: '#64748b' }}>
+                                                    <span className="text-sm opacity-70" style={{ color: secondaryTextColor }}>
                                                         {t('admin.discount') || 'Discount'}:
                                                     </span>
-                                                    <span className="font-semibold text-sm" style={{ color: '#1E293B' }}>
+                                                    <span className="font-semibold text-sm" style={{ color: primaryTextColor }}>
                                                         {getDiscountDisplay(coupon)}
                                                     </span>
                                                 </div>
                                                 <div className="flex justify-between items-center">
-                                                    <span className="text-sm opacity-70" style={{ color: '#64748b' }}>
+                                                    <span className="text-sm opacity-70" style={{ color: secondaryTextColor }}>
                                                         {t('admin.usage') || 'Usage'}:
                                                     </span>
-                                                    <span className="text-sm" style={{ color: '#64748b' }}>
+                                                    <span className="text-sm" style={{ color: secondaryTextColor }}>
                                                         {coupon.usedCount || 0} / {coupon.usageLimit}
                                                     </span>
                                                 </div>
                                                 <div className="flex justify-between items-center">
-                                                    <span className="text-sm opacity-70" style={{ color: '#64748b' }}>
+                                                    <span className="text-sm opacity-70" style={{ color: secondaryTextColor }}>
                                                         {t('admin.expiry') || 'Expiry'}:
                                                     </span>
-                                                    <span className="text-sm" style={{ color: '#64748b' }}>
+                                                    <span className="text-sm" style={{ color: secondaryTextColor }}>
                                                         {coupon.expiryDate
                                                             ? new Date(coupon.expiryDate).toLocaleDateString()
                                                             : t('admin.noExpiry') || 'No Expiry'}
@@ -294,7 +296,7 @@ function CouponList() {
                                                 <Link
                                                     to={`/admin/coupons/edit/${coupon._id}`}
                                                     className="btn btn-sm text-white flex-1 flex items-center justify-center gap-2 px-3 py-1.5 font-medium transition-all duration-200 hover:shadow-sm"
-                                                    style={{ backgroundColor: '#1E293B', paddingLeft: '0.75rem', paddingRight: '0.75rem', paddingTop: '0.375rem', paddingBottom: '0.375rem' }}
+                                                    style={{ backgroundColor: buttonColor, paddingLeft: '0.75rem', paddingRight: '0.75rem', paddingTop: '0.375rem', paddingBottom: '0.375rem' }}
                                                 >
                                                     <svg
                                                         className="w-4 h-4"
@@ -315,7 +317,7 @@ function CouponList() {
                                                     onClick={() => handleDelete(coupon._id)}
                                                     className="btn btn-sm text-white flex-1 flex items-center justify-center gap-2 px-4 py-2 font-medium transition-all duration-200 hover:shadow-sm"
                                                     style={{
-                                                        backgroundColor: '#ef4444',
+                                                        backgroundColor: errorColor || '#ef4444',
                                                         paddingLeft: '1rem',
                                                         paddingRight: '1rem',
                                                         paddingTop: '0.5rem',
@@ -351,11 +353,11 @@ function CouponList() {
                             </div>
 
                             {/* Desktop Table View - Large Devices */}
-                            <div className="hidden md:block bg-white rounded-lg shadow-sm border overflow-hidden" style={{ borderColor: '#e2e8f0' }}>
+                            <div className="hidden md:block bg-base-100 rounded-lg shadow-sm border overflow-hidden" style={{ borderColor: secondaryTextColor, backgroundColor }}>
                                 <div className="overflow-x-auto">
                                     <table className="table w-full">
                                         <thead>
-                                            <tr style={{ backgroundColor: '#6B8E6B' }}>
+                                            <tr style={{ backgroundColor: buttonColor }}>
                                                 <th className="text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>
                                                     {t('admin.code') || 'Code'}
                                                 </th>
@@ -381,33 +383,40 @@ function CouponList() {
                                         </thead>
                                         <tbody>
                                             {coupons.map((coupon) => (
-                                                <tr key={coupon._id} className="hover:bg-gray-50 transition-colors border-b" style={{ borderColor: '#e2e8f0' }}>
+                                                <tr key={coupon._id} className="transition-colors border-b" style={{ borderColor: secondaryTextColor }}
+                                                    onMouseEnter={(e) => {
+                                                        e.currentTarget.style.backgroundColor = secondaryTextColor + '20';
+                                                    }}
+                                                    onMouseLeave={(e) => {
+                                                        e.currentTarget.style.backgroundColor = 'transparent';
+                                                    }}
+                                                >
                                                     <td className="py-3 px-4">
-                                                        <div className="font-semibold text-sm" style={{ color: '#1E293B' }}>
+                                                        <div className="font-semibold text-sm" style={{ color: primaryTextColor }}>
                                                             {coupon.code}
                                                         </div>
                                                     </td>
                                                     <td className="py-3 px-4">
                                                         <span
                                                             className="badge badge-xs px-2 py-0.5 font-medium"
-                                                            style={{ backgroundColor: '#6B8E6B', color: '#ffffff', border: 'none' }}
+                                                            style={{ backgroundColor: buttonColor, color: '#ffffff', border: 'none' }}
                                                         >
                                                             {coupon.type === 'percentage' ? t('admin.percentage') || 'Percentage' : t('admin.fixed') || 'Fixed'}
                                                         </span>
                                                     </td>
                                                     <td className="py-3 px-4">
-                                                        <span className="font-medium text-sm" style={{ color: '#1E293B' }}>
+                                                        <span className="font-medium text-sm" style={{ color: primaryTextColor }}>
                                                             {getDiscountDisplay(coupon)}
                                                         </span>
                                                     </td>
                                                     <td className="py-3 px-4">
-                                                        <span className="text-xs sm:text-sm" style={{ color: '#64748b' }}>
+                                                        <span className="text-xs sm:text-sm" style={{ color: secondaryTextColor }}>
                                                             {coupon.usedCount || 0} / {coupon.usageLimit}
                                                         </span>
                                                     </td>
                                                     <td className="py-3 px-4">{getStatusBadge(coupon)}</td>
                                                     <td className="py-3 px-4">
-                                                        <span className="text-xs sm:text-sm" style={{ color: '#64748b' }}>
+                                                        <span className="text-xs sm:text-sm" style={{ color: secondaryTextColor }}>
                                                             {coupon.expiryDate
                                                                 ? new Date(coupon.expiryDate).toLocaleDateString()
                                                                 : t('admin.noExpiry') || 'No Expiry'}
@@ -418,7 +427,7 @@ function CouponList() {
                                                             <Link
                                                                 to={`/admin/coupons/edit/${coupon._id}`}
                                                                 className="btn btn-sm text-white px-3 py-1.5 font-medium transition-all duration-200 hover:shadow-sm"
-                                                                style={{ backgroundColor: '#1E293B', paddingLeft: '0.75rem', paddingRight: '0.75rem', paddingTop: '0.375rem', paddingBottom: '0.375rem' }}
+                                                                style={{ backgroundColor: buttonColor, paddingLeft: '0.75rem', paddingRight: '0.75rem', paddingTop: '0.375rem', paddingBottom: '0.375rem' }}
                                                             >
                                                                 <svg
                                                                     className="w-4 h-4"
@@ -439,7 +448,7 @@ function CouponList() {
                                                                 onClick={() => handleDelete(coupon._id)}
                                                                 className="btn btn-sm text-white px-4 py-2 font-medium transition-all duration-200 hover:shadow-sm"
                                                                 style={{
-                                                                    backgroundColor: '#ef4444',
+                                                                    backgroundColor: errorColor || '#ef4444',
                                                                     paddingLeft: '1rem',
                                                                     paddingRight: '1rem',
                                                                     paddingTop: '0.5rem',

@@ -6,15 +6,22 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { getAllUsers, updateUserRole, updateUserStatus } from '../../../services/adminService';
+import { getAllAffiliates, approveAffiliate, rejectAffiliate } from '../../../services/adminAffiliateService';
 import Loading from '../../../components/common/Loading';
 import Pagination from '../../../components/common/Pagination';
 import { formatDate } from '../../../utils/helpers';
+import { useThemeColors } from '../../../hooks/useThemeColors';
 
 function UserList() {
     const { t } = useTranslation();
+    const navigate = useNavigate();
+    const { buttonColor, primaryTextColor, secondaryTextColor, backgroundColor, errorColor, successColor, infoColor, warningColor } = useThemeColors();
     const [users, setUsers] = useState([]);
+    const [affiliates, setAffiliates] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isLoadingAffiliates, setIsLoadingAffiliates] = useState(true);
     const [error, setError] = useState(null);
     const [pagination, setPagination] = useState({
         currentPage: 1,
@@ -23,9 +30,11 @@ function UserList() {
         itemsPerPage: 10
     });
     const [actionLoading, setActionLoading] = useState(null);
+    const [rejectModal, setRejectModal] = useState({ open: false, affiliateId: null, reason: '' });
 
     useEffect(() => {
         fetchUsers();
+        fetchPendingAffiliates();
     }, [pagination.currentPage, pagination.itemsPerPage]);
 
     const fetchUsers = async () => {
@@ -96,19 +105,195 @@ function UserList() {
         }
     };
 
+    const fetchPendingAffiliates = async () => {
+        try {
+            setIsLoadingAffiliates(true);
+            const response = await getAllAffiliates({ status: 'pending' }, 1, 5);
+
+            // Handle response structure - getAllAffiliates service returns response.data from axios
+            // Backend sends: { success: true, data: { affiliates: [...], pagination: {...} } }
+            // Service returns: response.data (which is the backend response)
+            let affiliatesList = [];
+
+            if (response?.success && response?.data?.affiliates) {
+                // Standard structure: response.data.affiliates
+                affiliatesList = response.data.affiliates;
+            } else if (response?.data?.affiliates) {
+                // Alternative structure: response.data.affiliates (without success check)
+                affiliatesList = response.data.affiliates;
+            } else if (response?.affiliates) {
+                // Direct affiliates array
+                affiliatesList = response.affiliates;
+            } else if (Array.isArray(response)) {
+                // Response is directly an array
+                affiliatesList = response;
+            }
+
+            setAffiliates(affiliatesList);
+        } catch (error) {
+            console.error('Error fetching pending affiliates:', error);
+            setAffiliates([]);
+        } finally {
+            setIsLoadingAffiliates(false);
+        }
+    };
+
+    const handleApproveAffiliate = async (affiliateId) => {
+        if (!window.confirm('Are you sure you want to approve this affiliate request?')) {
+            return;
+        }
+
+        setActionLoading(`affiliate-${affiliateId}`);
+        try {
+            await approveAffiliate(affiliateId);
+            alert('Affiliate approved successfully!');
+            await fetchPendingAffiliates();
+        } catch (error) {
+            alert(error.response?.data?.message || error.message || 'Failed to approve affiliate');
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
+    const handleRejectAffiliate = async () => {
+        if (!rejectModal.reason.trim()) {
+            alert('Please provide a rejection reason');
+            return;
+        }
+
+        setActionLoading(`affiliate-${rejectModal.affiliateId}`);
+        try {
+            await rejectAffiliate(rejectModal.affiliateId, rejectModal.reason);
+            alert('Affiliate rejected successfully!');
+            setRejectModal({ open: false, affiliateId: null, reason: '' });
+            await fetchPendingAffiliates();
+        } catch (error) {
+            alert(error.response?.data?.message || error.message || 'Failed to reject affiliate');
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
     return (
-        <div style={{ backgroundColor: '#EFECE3' }}>
+        <div style={{ backgroundColor }}>
             <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 md:py-8">
                 <div className="space-y-5 sm:space-y-6">
                     {/* Header */}
-                    <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-5" style={{ borderColor: '#e2e8f0' }}>
-                        <h1 className="text-2xl sm:text-3xl font-bold mb-1" style={{ color: '#1E293B' }}>
+                    <div className="bg-base-100 rounded-lg shadow-sm border p-4 sm:p-5" style={{ borderColor: secondaryTextColor, backgroundColor }}>
+                        <h1 className="text-2xl sm:text-3xl font-bold mb-1" style={{ color: primaryTextColor }}>
                             {t('nav.userManagement') || 'User Management'}
                         </h1>
-                        <p className="text-sm opacity-70" style={{ color: '#64748b' }}>
+                        <p className="text-sm opacity-70" style={{ color: secondaryTextColor }}>
                             Manage all users, roles, and permissions
                         </p>
                     </div>
+
+                    {/* Affiliate Requests Section */}
+                    {isLoadingAffiliates ? (
+                        <div className="bg-base-100 rounded-lg shadow-sm border p-4" style={{ borderColor: secondaryTextColor, backgroundColor }}>
+                            <div className="text-center py-4">
+                                <span className="loading loading-spinner loading-sm"></span>
+                                <span className="ml-2 text-sm" style={{ color: secondaryTextColor }}>Loading affiliate requests...</span>
+                            </div>
+                        </div>
+                    ) : affiliates.length > 0 ? (
+                        <div className="bg-base-100 rounded-lg shadow-sm border p-4 sm:p-5" style={{ borderColor: secondaryTextColor, backgroundColor }}>
+                            <div className="flex items-center justify-between mb-4">
+                                <div>
+                                    <h2 className="text-lg sm:text-xl font-bold mb-1" style={{ color: primaryTextColor }}>
+                                        Pending Affiliate Requests
+                                    </h2>
+                                    <p className="text-xs sm:text-sm opacity-70" style={{ color: secondaryTextColor }}>
+                                        {affiliates.length} request{affiliates.length > 1 ? 's' : ''} waiting for approval
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => navigate('/admin/affiliates')}
+                                    className="btn btn-sm px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white"
+                                    style={{ backgroundColor: buttonColor, minHeight: '36px' }}
+                                >
+                                    View All
+                                </button>
+                            </div>
+                            <div className="space-y-3">
+                                {affiliates.map((affiliate) => (
+                                    <div
+                                        key={affiliate.id}
+                                        className="border rounded-lg p-3 sm:p-4 hover:shadow-sm transition-shadow"
+                                        style={{ borderColor: secondaryTextColor, backgroundColor }}
+                                    >
+                                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                            <div className="flex-1">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <span className="text-sm font-medium" style={{ color: primaryTextColor }}>
+                                                        {affiliate.user?.name || 'N/A'}
+                                                    </span>
+                                                    <span className="badge badge-xs px-2 py-0.5" style={{ backgroundColor: warningColor ? warningColor + '40' : '#FEF3C7', color: warningColor || '#92400E', border: 'none' }}>
+                                                        Pending
+                                                    </span>
+                                                </div>
+                                                <div className="text-xs opacity-70" style={{ color: secondaryTextColor }}>
+                                                    {affiliate.user?.email || affiliate.user?.mobile || '-'}
+                                                </div>
+                                                <div className="text-xs mt-1" style={{ color: secondaryTextColor }}>
+                                                    Referral Code: <span className="font-mono font-medium" style={{ color: buttonColor }}>{affiliate.referralCode || 'N/A'}</span>
+                                                </div>
+                                                {affiliate.paymentMethod && (
+                                                    <div className="text-xs mt-1" style={{ color: secondaryTextColor }}>
+                                                        Payment: {affiliate.paymentMethod === 'mobile_banking' ? 'Mobile Banking' : affiliate.paymentMethod === 'bank' ? 'Bank Transfer' : affiliate.paymentMethod}
+                                                        {affiliate.mobileBanking && (
+                                                            <span className="ml-1">
+                                                                ({affiliate.mobileBanking.provider?.toUpperCase()}: {affiliate.mobileBanking.accountNumber})
+                                                            </span>
+                                                        )}
+                                                        {affiliate.bankDetails && (
+                                                            <span className="ml-1">
+                                                                ({affiliate.bankDetails.bankName} - {affiliate.bankDetails.accountNumber})
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="flex gap-2 flex-shrink-0">
+                                                <button
+                                                    onClick={() => handleApproveAffiliate(affiliate.id)}
+                                                    disabled={actionLoading === `affiliate-${affiliate.id}`}
+                                                    className="btn btn-xs px-2 sm:px-3 py-1.5 text-xs font-medium text-white"
+                                                    style={{ backgroundColor: buttonColor, minHeight: '32px' }}
+                                                >
+                                                    {actionLoading === `affiliate-${affiliate.id}` ? '...' : 'Approve'}
+                                                </button>
+                                                <button
+                                                    onClick={() => setRejectModal({ open: true, affiliateId: affiliate.id, reason: '' })}
+                                                    disabled={actionLoading === `affiliate-${affiliate.id}`}
+                                                    className="btn btn-xs px-2 sm:px-3 py-1.5 text-xs font-medium"
+                                                    style={{ backgroundColor: errorColor || '#EF4444', color: '#ffffff', minHeight: '32px' }}
+                                                >
+                                                    Reject
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="rounded-lg p-4 border" style={{ borderColor: infoColor || '#3b82f6', backgroundColor: infoColor ? infoColor + '20' : '#dbeafe' }}>
+                            <div className="flex items-center gap-2">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: infoColor || '#3b82f6' }}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <div>
+                                    <p className="text-sm font-medium" style={{ color: primaryTextColor }}>
+                                        No Pending Affiliate Requests
+                                    </p>
+                                    <p className="text-xs mt-1" style={{ color: secondaryTextColor }}>
+                                        All affiliate requests have been processed. Check the <button onClick={() => navigate('/admin/affiliates')} className="underline font-medium" style={{ color: buttonColor }}>Affiliate Management</button> page for all affiliates.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Error Message */}
                     {error && (
@@ -123,15 +308,15 @@ function UserList() {
                             <Loading />
                         </div>
                     ) : users.length === 0 ? (
-                        <div className="bg-white rounded-lg shadow-sm border">
+                        <div className="bg-base-100 rounded-lg shadow-sm border" style={{ borderColor: secondaryTextColor, backgroundColor }}>
                             <div className="flex flex-col items-center justify-center py-12 sm:py-16 px-4">
-                                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center mb-4 sm:mb-6" style={{ backgroundColor: '#f1f5f9' }}>
+                                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center mb-4 sm:mb-6" style={{ backgroundColor: secondaryTextColor + '20' }}>
                                     <svg
                                         className="w-10 h-10 sm:w-12 sm:h-12"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
-                                        style={{ color: '#94a3b8' }}
+                                        style={{ color: secondaryTextColor }}
                                     >
                                         <path
                                             strokeLinecap="round"
@@ -142,10 +327,10 @@ function UserList() {
                                     </svg>
                                 </div>
                                 <div className="text-center">
-                                    <h3 className="text-lg sm:text-xl md:text-2xl font-semibold mb-2 sm:mb-3" style={{ color: '#1E293B' }}>
+                                    <h3 className="text-lg sm:text-xl md:text-2xl font-semibold mb-2 sm:mb-3" style={{ color: primaryTextColor }}>
                                         No Users Found
                                     </h3>
-                                    <p className="text-sm sm:text-base opacity-70 px-4" style={{ color: '#64748b' }}>
+                                    <p className="text-sm sm:text-base opacity-70 px-4" style={{ color: secondaryTextColor }}>
                                         No users have been registered yet.
                                     </p>
                                 </div>
@@ -154,11 +339,11 @@ function UserList() {
                     ) : (
                         <>
                             {/* Users Table */}
-                            <div className="bg-white rounded-lg shadow-sm border overflow-hidden" style={{ borderColor: '#e2e8f0' }}>
+                            <div className="bg-base-100 rounded-lg shadow-sm border overflow-hidden" style={{ borderColor: secondaryTextColor, backgroundColor }}>
                                 <div className="overflow-x-auto">
                                     <table className="table w-full">
                                         <thead>
-                                            <tr style={{ backgroundColor: '#6B8E6B' }}>
+                                            <tr style={{ backgroundColor: buttonColor }}>
                                                 <th className="text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>Name</th>
                                                 <th className="text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>Email</th>
                                                 <th className="text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>Mobile</th>
@@ -170,26 +355,33 @@ function UserList() {
                                         </thead>
                                         <tbody>
                                             {users.map((user) => (
-                                                <tr key={user.id || user._id} className="hover:bg-gray-50 transition-colors border-b" style={{ borderColor: '#e2e8f0' }}>
+                                                <tr key={user.id || user._id} className="transition-colors border-b" style={{ borderColor: secondaryTextColor }}
+                                                    onMouseEnter={(e) => {
+                                                        e.currentTarget.style.backgroundColor = secondaryTextColor + '20';
+                                                    }}
+                                                    onMouseLeave={(e) => {
+                                                        e.currentTarget.style.backgroundColor = 'transparent';
+                                                    }}
+                                                >
                                                     <td className="py-3 px-4">
-                                                        <div className="text-sm font-medium" style={{ color: '#1E293B' }}>
+                                                        <div className="text-sm font-medium" style={{ color: primaryTextColor }}>
                                                             {user.profile?.name || 'N/A'}
                                                         </div>
                                                     </td>
                                                     <td className="py-3 px-4">
-                                                        <div className="text-sm" style={{ color: '#1E293B' }}>
+                                                        <div className="text-sm" style={{ color: primaryTextColor }}>
                                                             {user.profile?.email || '-'}
                                                         </div>
                                                     </td>
                                                     <td className="py-3 px-4">
-                                                        <div className="text-sm" style={{ color: '#1E293B' }}>
+                                                        <div className="text-sm" style={{ color: primaryTextColor }}>
                                                             {user.mobile || '-'}
                                                         </div>
                                                     </td>
                                                     <td className="py-3 px-4">
                                                         <span
                                                             className="badge badge-xs px-2 py-0.5 font-medium"
-                                                            style={user.role === 'admin' ? { backgroundColor: '#6B8E6B', color: '#ffffff', border: 'none' } : { backgroundColor: '#64748b', color: '#ffffff', border: 'none' }}
+                                                            style={user.role === 'admin' ? { backgroundColor: buttonColor, color: '#ffffff', border: 'none' } : { backgroundColor: secondaryTextColor, color: '#ffffff', border: 'none' }}
                                                         >
                                                             {user.role === 'admin' ? 'Admin' : 'User'}
                                                         </span>
@@ -197,13 +389,13 @@ function UserList() {
                                                     <td className="py-3 px-4">
                                                         <span
                                                             className={`badge badge-xs px-2 py-0.5 font-medium ${user.isVerified !== false ? 'badge-success' : 'badge-error'}`}
-                                                            style={user.isVerified !== false ? { backgroundColor: '#d1fae5', color: '#065f46', border: 'none' } : { backgroundColor: '#fee2e2', color: '#991b1b', border: 'none' }}
+                                                            style={user.isVerified !== false ? { backgroundColor: successColor ? successColor + '40' : '#d1fae5', color: successColor || '#065f46', border: 'none' } : { backgroundColor: errorColor ? errorColor + '40' : '#fee2e2', color: errorColor || '#991b1b', border: 'none' }}
                                                         >
                                                             {user.isVerified !== false ? 'Active' : 'Banned'}
                                                         </span>
                                                     </td>
                                                     <td className="py-3 px-4">
-                                                        <div className="text-xs" style={{ color: '#64748b' }}>
+                                                        <div className="text-xs" style={{ color: secondaryTextColor }}>
                                                             {formatDate(user.createdAt)}
                                                         </div>
                                                     </td>
@@ -213,7 +405,7 @@ function UserList() {
                                                                 <button
                                                                     onClick={() => handleUpdateRole(user.id || user._id, 'admin')}
                                                                     className="btn btn-xs text-white px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium transition-all duration-200 hover:shadow-sm flex-1 sm:flex-initial"
-                                                                    style={{ backgroundColor: '#1E293B', paddingLeft: '0.5rem', paddingRight: '0.5rem', paddingTop: '0.375rem', paddingBottom: '0.375rem' }}
+                                                                    style={{ backgroundColor: buttonColor, paddingLeft: '0.5rem', paddingRight: '0.5rem', paddingTop: '0.375rem', paddingBottom: '0.375rem' }}
                                                                     disabled={actionLoading === (user.id || user._id)}
                                                                 >
                                                                     {actionLoading === (user.id || user._id) ? (
@@ -226,7 +418,7 @@ function UserList() {
                                                                 <button
                                                                     onClick={() => handleUpdateRole(user.id || user._id, 'user')}
                                                                     className="btn btn-xs text-white px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium transition-all duration-200 hover:shadow-sm flex-1 sm:flex-initial"
-                                                                    style={{ backgroundColor: '#ef4444', paddingLeft: '0.5rem', paddingRight: '0.5rem', paddingTop: '0.375rem', paddingBottom: '0.375rem' }}
+                                                                    style={{ backgroundColor: errorColor || '#ef4444', paddingLeft: '0.5rem', paddingRight: '0.5rem', paddingTop: '0.375rem', paddingBottom: '0.375rem' }}
                                                                     disabled={actionLoading === (user.id || user._id)}
                                                                 >
                                                                     {actionLoading === (user.id || user._id) ? (
@@ -240,7 +432,7 @@ function UserList() {
                                                                 onClick={() => handleBanUser(user.id || user._id, user.isVerified !== false)}
                                                                 className="btn btn-xs text-white px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium transition-all duration-200 hover:shadow-sm flex-1 sm:flex-initial"
                                                                 style={{
-                                                                    backgroundColor: user.isVerified !== false ? '#ef4444' : '#6B8E6B',
+                                                                    backgroundColor: user.isVerified !== false ? (errorColor || '#ef4444') : buttonColor,
                                                                     paddingLeft: '0.5rem',
                                                                     paddingRight: '0.5rem',
                                                                     paddingTop: '0.375rem',
@@ -278,6 +470,46 @@ function UserList() {
                     )}
                 </div>
             </div>
+
+            {/* Reject Affiliate Modal */}
+            {rejectModal.open && (
+                <div className="modal modal-open">
+                    <div className="modal-box max-w-md" style={{ backgroundColor }}>
+                        <h3 className="text-lg font-bold mb-4" style={{ color: primaryTextColor }}>Reject Affiliate Request</h3>
+                        <div className="form-control mb-4">
+                            <label className="label">
+                                <span className="label-text font-medium" style={{ color: primaryTextColor }}>
+                                    Rejection Reason <span className="text-error">*</span>
+                                </span>
+                            </label>
+                            <textarea
+                                value={rejectModal.reason}
+                                onChange={(e) => setRejectModal(prev => ({ ...prev, reason: e.target.value }))}
+                                className="textarea textarea-bordered w-full"
+                                style={{ borderColor: secondaryTextColor, backgroundColor, color: primaryTextColor, minHeight: '100px' }}
+                                placeholder="Enter reason for rejection..."
+                            />
+                        </div>
+                        <div className="modal-action">
+                            <button
+                                onClick={() => setRejectModal({ open: false, affiliateId: null, reason: '' })}
+                                className="btn"
+                                style={{ backgroundColor, color: primaryTextColor, borderColor: secondaryTextColor }}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleRejectAffiliate}
+                                disabled={actionLoading === `affiliate-${rejectModal.affiliateId}`}
+                                className="btn text-white"
+                                style={{ backgroundColor: errorColor || '#EF4444', minHeight: '44px' }}
+                            >
+                                {actionLoading === `affiliate-${rejectModal.affiliateId}` ? 'Rejecting...' : 'Reject'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

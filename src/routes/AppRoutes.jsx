@@ -23,6 +23,7 @@ import Products from '../pages/Products';
 import ProductDetail from '../pages/ProductDetail';
 import Categories from '../pages/Categories';
 import EBooksList from '../pages/public/eBooksList';
+import PDFViewerPage from '../pages/PDFViewerPage';
 import Cart from '../pages/Cart';
 import Checkout from '../pages/Checkout';
 import Orders from '../pages/Orders';
@@ -32,79 +33,25 @@ import UserProfile from '../pages/user/Profile';
 import UserAddresses from '../pages/user/Addresses';
 import UserEBooks from '../pages/user/eBooks';
 import eBookViewer from '../pages/user/eBookViewer';
+import AffiliateDashboard from '../pages/user/Affiliate';
+import AffiliateWithdraw from '../pages/user/AffiliateWithdraw';
 import AdminProductList from '../pages/admin/Products/ProductList';
 import AdminProductCreate from '../pages/admin/Products/ProductCreate';
 import AdminProductEdit from '../pages/admin/Products/ProductEdit';
 import AdminCategoryList from '../pages/admin/Categories/CategoryList';
 import AdminUserList from '../pages/admin/Users/UserList';
 import AdminOrderList from '../pages/admin/Orders/OrderList';
+import AdminAffiliateList from '../pages/admin/Affiliates/AffiliateList';
 import AdminCouponList from '../pages/admin/Coupons/CouponList';
 import AdminCouponCreate from '../pages/admin/Coupons/CouponCreate';
 import AdminCouponEdit from '../pages/admin/Coupons/CouponEdit';
+import AdminPDFList from '../pages/admin/PDFs/PDFList';
 import AdminDashboard from '../pages/admin/Dashboard';
 import { selectUser, updateUser } from '../store/slices/authSlice';
 import { getCurrentUser } from '../services/userService';
 
-// Placeholder components
-function Home() {
-    const { t } = useTranslation();
-
-    return (
-        <div className="w-full" style={{ backgroundColor: '#EFECE3' }}>
-            {/* Hero Section */}
-            <section className="relative py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8">
-                <div className="container mx-auto max-w-6xl">
-                    <div className="text-center space-y-6 sm:space-y-8">
-                        {/* Main Heading */}
-                        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-                            <span style={{ color: '#1E293B' }}>{t('home.discoverYourNext') || 'Discover Your Next'}</span>
-                            <span className="block mt-2" style={{ color: '#6B8E6B' }}>{t('home.greatRead') || 'Great Read'}</span>
-                        </h1>
-
-                        {/* Description */}
-                        <p className="text-base sm:text-lg md:text-xl max-w-2xl mx-auto leading-relaxed px-4" style={{ color: '#2d3748' }}>
-                            {t('home.description') || 'Explore thousands of books, both physical and digital. From bestsellers to hidden gems, find your perfect story.'}
-                        </p>
-
-                        {/* CTA Buttons */}
-                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center pt-4 px-4">
-                            <Link
-                                to="/products"
-                                className="btn btn-lg px-6 sm:px-8 font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105 w-full sm:w-auto text-white"
-                                style={{ backgroundColor: '#1E293B' }}
-                            >
-                                {t('home.browseBooks') || 'Browse Books'}
-                            </Link>
-                            <Link
-                                to="/register"
-                                className="btn btn-lg px-6 sm:px-8 font-semibold shadow-md hover:shadow-lg transition-all transform hover:scale-105 w-full sm:w-auto text-white"
-                                style={{ backgroundColor: '#6B8E6B' }}
-                            >
-                                {t('home.getStarted') || 'Get Started'}
-                            </Link>
-                        </div>
-
-                        {/* Stats */}
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mt-12 sm:mt-16 pt-8 sm:pt-12 border-t" style={{ borderColor: '#e2e8f0' }}>
-                            <div className="stat rounded-lg shadow-sm p-4 sm:p-6 bg-white">
-                                <div className="stat-value text-2xl sm:text-3xl font-bold" style={{ color: '#1E293B' }}>10K+</div>
-                                <div className="stat-title text-sm sm:text-base" style={{ color: '#2d3748' }}>{t('home.booksAvailable') || 'Books Available'}</div>
-                            </div>
-                            <div className="stat rounded-lg shadow-sm p-4 sm:p-6 bg-white">
-                                <div className="stat-value text-2xl sm:text-3xl font-bold" style={{ color: '#6B8E6B' }}>50K+</div>
-                                <div className="stat-title text-sm sm:text-base" style={{ color: '#2d3748' }}>{t('home.happyReaders') || 'Happy Readers'}</div>
-                            </div>
-                            <div className="stat rounded-lg shadow-sm p-4 sm:p-6 bg-white">
-                                <div className="stat-value text-2xl sm:text-3xl font-bold" style={{ color: '#1E293B' }}>4.8★</div>
-                                <div className="stat-title text-sm sm:text-base" style={{ color: '#2d3748' }}>{t('home.averageRating') || 'Average Rating'}</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
-    );
-}
+// Import Home component
+import Home from '../pages/Home';
 
 function Dashboard() {
     const { t } = useTranslation();
@@ -210,6 +157,14 @@ function AppRoutes() {
                     <Route path="/categories" element={<Categories />} />
                     <Route path="/cart" element={<Cart />} />
                     <Route
+                        path="/pdf/view/:productId"
+                        element={
+                            <ProtectedRoute>
+                                <PDFViewerPage />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
                         path="/checkout"
                         element={
                             <ProtectedRoute>
@@ -264,6 +219,8 @@ function AppRoutes() {
                     <Route path="/orders" element={<Orders />} />
                     <Route path="/orders/:id" element={<OrderDetail />} />
                     <Route path="/ebooks/viewer/:productId" element={<eBookViewer />} />
+                    <Route path="/dashboard/affiliate" element={<AffiliateDashboard />} />
+                    <Route path="/dashboard/affiliate/withdraw" element={<AffiliateWithdraw />} />
                 </Route>
 
                 {/* Admin Layout (Header + Sidebar) */}
@@ -281,10 +238,11 @@ function AppRoutes() {
                     <Route path="/admin/categories" element={<AdminCategoryList />} />
                     <Route path="/admin/users" element={<AdminUserList />} />
                     <Route path="/admin/orders" element={<AdminOrderList />} />
-                    <Route path="/admin/affiliates" element={<AdminDashboard />} />
+                    <Route path="/admin/affiliates" element={<AdminAffiliateList />} />
                     <Route path="/admin/coupons" element={<AdminCouponList />} />
                     <Route path="/admin/coupons/create" element={<AdminCouponCreate />} />
                     <Route path="/admin/coupons/edit/:id" element={<AdminCouponEdit />} />
+                    <Route path="/admin/pdfs" element={<AdminPDFList />} />
                 </Route>
             </Routes>
         </ErrorBoundary>

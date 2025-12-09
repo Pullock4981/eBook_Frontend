@@ -6,6 +6,7 @@
  */
 
 import { useTranslation } from 'react-i18next';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 /**
  * Pagination Component
@@ -26,6 +27,7 @@ function Pagination({
     onItemsPerPageChange,
 }) {
     const { t } = useTranslation();
+    const { buttonColor, primaryTextColor, secondaryTextColor, backgroundColor } = useThemeColors();
 
     // Calculate page range to display
     const getPageNumbers = () => {
@@ -75,26 +77,26 @@ function Pagination({
     }
 
     return (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 mt-6 sm:mt-8 py-4 px-4 sm:px-6 rounded-lg border" style={{ borderColor: '#e2e8f0', backgroundColor: '#ffffff' }}>
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 mt-6 sm:mt-8 py-4 px-4 sm:px-6 rounded-lg border" style={{ borderColor: secondaryTextColor, backgroundColor }}>
             {/* Items per page selector */}
             {onItemsPerPageChange && (
                 <div className="flex items-center gap-3">
-                    <label className="text-sm font-medium" style={{ color: '#64748b' }}>
+                    <label className="text-sm font-medium" style={{ color: secondaryTextColor }}>
                         {t('common.itemsPerPage') || 'Items per page:'}
                     </label>
                     <div className="relative">
                         <select
                             value={itemsPerPage}
                             onChange={handleItemsPerPageChange}
-                            className="appearance-none bg-white border-2 rounded-md pl-3 pr-8 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 cursor-pointer"
-                            style={{ borderColor: '#cbd5e1', color: '#1E293B' }}
+                            className="appearance-none border-2 rounded-md pl-3 pr-8 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 cursor-pointer"
+                            style={{ borderColor: secondaryTextColor, color: primaryTextColor, backgroundColor }}
                         >
                             <option value={8}>8</option>
                             <option value={12}>12</option>
                             <option value={24}>24</option>
                             <option value={48}>48</option>
                         </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2" style={{ color: '#64748b' }}>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2" style={{ color: secondaryTextColor }}>
                             <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                                 <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
                             </svg>
@@ -104,18 +106,26 @@ function Pagination({
             )}
 
             {/* Page info */}
-            <div className="text-sm font-medium" style={{ color: '#64748b' }}>
-                {t('common.showing') || 'Showing'} <span style={{ color: '#1E293B', fontWeight: '600' }}>{startItem}</span> - <span style={{ color: '#1E293B', fontWeight: '600' }}>{endItem}</span> {t('common.of') || 'of'} <span style={{ color: '#1E293B', fontWeight: '600' }}>{totalItems}</span>
+            <div className="text-sm font-medium" style={{ color: secondaryTextColor }}>
+                {t('common.showing') || 'Showing'} <span style={{ color: primaryTextColor, fontWeight: '600' }}>{startItem}</span> - <span style={{ color: primaryTextColor, fontWeight: '600' }}>{endItem}</span> {t('common.of') || 'of'} <span style={{ color: primaryTextColor, fontWeight: '600' }}>{totalItems}</span>
             </div>
 
             {/* Pagination buttons */}
             <div className="flex items-center gap-1">
                 {/* First page */}
                 <button
-                    className="px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
+                    className="px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
                     style={{
-                        color: currentPage === 1 ? '#94a3b8' : '#1E293B',
+                        color: currentPage === 1 ? secondaryTextColor : primaryTextColor,
                         backgroundColor: 'transparent'
+                    }}
+                    onMouseEnter={(e) => {
+                        if (currentPage !== 1) {
+                            e.currentTarget.style.backgroundColor = 'rgba(107, 142, 107, 0.1)';
+                        }
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent';
                     }}
                     onClick={() => handlePageChange(1)}
                     disabled={currentPage === 1}
@@ -128,10 +138,18 @@ function Pagination({
 
                 {/* Previous page */}
                 <button
-                    className="px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
+                    className="px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
                     style={{
-                        color: currentPage === 1 ? '#94a3b8' : '#1E293B',
+                        color: currentPage === 1 ? secondaryTextColor : primaryTextColor,
                         backgroundColor: 'transparent'
+                    }}
+                    onMouseEnter={(e) => {
+                        if (currentPage !== 1) {
+                            e.currentTarget.style.backgroundColor = 'rgba(107, 142, 107, 0.1)';
+                        }
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent';
                     }}
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
@@ -146,12 +164,21 @@ function Pagination({
                 {pageNumbers.map((page) => (
                     <button
                         key={page}
-                        className={`px-3.5 py-2 rounded-md text-sm font-medium transition-all duration-200 ${page === currentPage ? '' : 'hover:bg-gray-100'
-                            }`}
+                        className="px-3.5 py-2 rounded-md text-sm font-medium transition-all duration-200"
                         style={{
-                            backgroundColor: page === currentPage ? '#1E293B' : 'transparent',
-                            color: page === currentPage ? '#ffffff' : '#1E293B',
+                            backgroundColor: page === currentPage ? buttonColor : 'transparent',
+                            color: page === currentPage ? '#ffffff' : primaryTextColor,
                             fontWeight: page === currentPage ? '600' : '500'
+                        }}
+                        onMouseEnter={(e) => {
+                            if (page !== currentPage) {
+                                e.currentTarget.style.backgroundColor = 'rgba(107, 142, 107, 0.1)';
+                            }
+                        }}
+                        onMouseLeave={(e) => {
+                            if (page !== currentPage) {
+                                e.currentTarget.style.backgroundColor = 'transparent';
+                            }
                         }}
                         onClick={() => handlePageChange(page)}
                     >
@@ -161,10 +188,18 @@ function Pagination({
 
                 {/* Next page */}
                 <button
-                    className="px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
+                    className="px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
                     style={{
-                        color: currentPage === totalPages ? '#94a3b8' : '#1E293B',
+                        color: currentPage === totalPages ? secondaryTextColor : primaryTextColor,
                         backgroundColor: 'transparent'
+                    }}
+                    onMouseEnter={(e) => {
+                        if (currentPage !== totalPages) {
+                            e.currentTarget.style.backgroundColor = 'rgba(107, 142, 107, 0.1)';
+                        }
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent';
                     }}
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
@@ -177,10 +212,18 @@ function Pagination({
 
                 {/* Last page */}
                 <button
-                    className="px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
+                    className="px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
                     style={{
-                        color: currentPage === totalPages ? '#94a3b8' : '#1E293B',
+                        color: currentPage === totalPages ? secondaryTextColor : primaryTextColor,
                         backgroundColor: 'transparent'
+                    }}
+                    onMouseEnter={(e) => {
+                        if (currentPage !== totalPages) {
+                            e.currentTarget.style.backgroundColor = 'rgba(107, 142, 107, 0.1)';
+                        }
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent';
                     }}
                     onClick={() => handlePageChange(totalPages)}
                     disabled={currentPage === totalPages}

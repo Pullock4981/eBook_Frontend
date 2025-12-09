@@ -7,9 +7,11 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatCurrency } from '../../utils/helpers';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 function CouponForm({ initialData, onSubmit, onCancel, isLoading }) {
     const { t } = useTranslation();
+    const { primaryTextColor, secondaryTextColor, buttonColor, backgroundColor, errorColor } = useThemeColors();
 
     const [formData, setFormData] = useState({
         code: '',
@@ -124,7 +126,7 @@ function CouponForm({ initialData, onSubmit, onCancel, isLoading }) {
     };
 
     return (
-        <div className="bg-white rounded-lg shadow-sm border" style={{ borderColor: '#e2e8f0' }}>
+        <div className="rounded-lg shadow-sm border" style={{ borderColor: secondaryTextColor, backgroundColor }}>
             <div className="p-4 sm:p-5 md:p-6 lg:p-8">
                 <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 md:space-y-6">
                     {/* Grid Layout for Large Devices */}
@@ -132,7 +134,7 @@ function CouponForm({ initialData, onSubmit, onCancel, isLoading }) {
                         {/* Code - Full Width */}
                         <div className="form-control lg:col-span-2">
                             <label className="label pb-2">
-                                <span className="label-text font-semibold text-sm sm:text-base" style={{ color: '#1E293B' }}>
+                                <span className="label-text font-semibold text-sm sm:text-base" style={{ color: primaryTextColor }}>
                                     {t('admin.couponCode') || 'Coupon Code'} <span className="text-error">*</span>
                                 </span>
                             </label>
@@ -144,11 +146,11 @@ function CouponForm({ initialData, onSubmit, onCancel, isLoading }) {
                                 placeholder={t('admin.enterCouponCode') || 'Enter coupon code (e.g., SAVE10)'}
                                 className={`input input-bordered border-2 text-sm sm:text-base px-4 sm:px-5 py-2.5 sm:py-3 ${errors.code ? 'input-error' : ''}`}
                                 style={{
-                                    borderColor: errors.code ? '#ef4444' : '#cbd5e1',
-                                    color: '#1E293B',
+                                    borderColor: errors.code ? errorColor : secondaryTextColor,
+                                    color: primaryTextColor,
                                     paddingLeft: '1rem',
                                     paddingRight: '1rem',
-                                    backgroundColor: '#ffffff'
+                                    backgroundColor
                                 }}
                                 disabled={!!initialData}
                             />
@@ -162,7 +164,7 @@ function CouponForm({ initialData, onSubmit, onCancel, isLoading }) {
                         {/* Type */}
                         <div className="form-control">
                             <label className="label pb-2">
-                                <span className="label-text font-semibold text-sm sm:text-base" style={{ color: '#1E293B' }}>
+                                <span className="label-text font-semibold text-sm sm:text-base" style={{ color: primaryTextColor }}>
                                     {t('admin.couponType') || 'Coupon Type'} <span className="text-error">*</span>
                                 </span>
                             </label>
@@ -171,7 +173,7 @@ function CouponForm({ initialData, onSubmit, onCancel, isLoading }) {
                                 value={formData.type}
                                 onChange={handleChange}
                                 className="select select-bordered border-2 text-sm sm:text-base px-4 sm:px-5 py-2.5 sm:py-3"
-                                style={{ borderColor: '#cbd5e1', color: '#1E293B', backgroundColor: '#ffffff' }}
+                                style={{ borderColor: secondaryTextColor, color: primaryTextColor, backgroundColor }}
                             >
                                 <option value="percentage">{t('admin.percentage') || 'Percentage'}</option>
                                 <option value="fixed">{t('admin.fixed') || 'Fixed Amount'}</option>
@@ -181,7 +183,7 @@ function CouponForm({ initialData, onSubmit, onCancel, isLoading }) {
                         {/* Value */}
                         <div className="form-control">
                             <label className="label pb-2">
-                                <span className="label-text font-semibold text-sm sm:text-base" style={{ color: '#1E293B' }}>
+                                <span className="label-text font-semibold text-sm sm:text-base" style={{ color: primaryTextColor }}>
                                     {formData.type === 'percentage'
                                         ? t('admin.discountPercentage') || 'Discount Percentage'
                                         : t('admin.discountAmount') || 'Discount Amount'}{' '}
@@ -197,14 +199,14 @@ function CouponForm({ initialData, onSubmit, onCancel, isLoading }) {
                                     placeholder={formData.type === 'percentage' ? '10' : '100'}
                                     className={`input input-bordered border-2 text-sm sm:text-base w-full px-4 sm:px-5 py-2.5 sm:py-3 pr-10 ${errors.value ? 'input-error' : ''}`}
                                     style={{
-                                        borderColor: errors.value ? '#ef4444' : '#cbd5e1',
-                                        color: '#1E293B',
-                                        backgroundColor: '#ffffff'
+                                        borderColor: errors.value ? errorColor : secondaryTextColor,
+                                        color: primaryTextColor,
+                                        backgroundColor
                                     }}
                                     min="0"
                                     step={formData.type === 'percentage' ? '0.01' : '1'}
                                 />
-                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm sm:text-base font-medium opacity-70" style={{ color: '#2d3748' }}>
+                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm sm:text-base font-medium opacity-70" style={{ color: secondaryTextColor }}>
                                     {formData.type === 'percentage' ? '%' : '৳'}
                                 </span>
                             </div>
@@ -219,7 +221,7 @@ function CouponForm({ initialData, onSubmit, onCancel, isLoading }) {
                         {formData.type === 'percentage' && (
                             <div className="form-control">
                                 <label className="label pb-2">
-                                    <span className="label-text font-semibold text-sm sm:text-base" style={{ color: '#1E293B' }}>
+                                    <span className="label-text font-semibold text-sm sm:text-base" style={{ color: primaryTextColor }}>
                                         {t('admin.maxDiscount') || 'Maximum Discount'} ({t('admin.optional') || 'Optional'})
                                     </span>
                                 </label>
@@ -231,9 +233,9 @@ function CouponForm({ initialData, onSubmit, onCancel, isLoading }) {
                                     placeholder="500"
                                     className={`input input-bordered border-2 text-sm sm:text-base px-4 sm:px-5 py-2.5 sm:py-3 ${errors.maxDiscount ? 'input-error' : ''}`}
                                     style={{
-                                        borderColor: errors.maxDiscount ? '#ef4444' : '#cbd5e1',
-                                        color: '#1E293B',
-                                        backgroundColor: '#ffffff'
+                                        borderColor: errors.maxDiscount ? errorColor : secondaryTextColor,
+                                        color: primaryTextColor,
+                                        backgroundColor
                                     }}
                                     min="0"
                                     step="1"
@@ -249,7 +251,7 @@ function CouponForm({ initialData, onSubmit, onCancel, isLoading }) {
                         {/* Minimum Purchase */}
                         <div className="form-control">
                             <label className="label pb-2">
-                                <span className="label-text font-semibold text-sm sm:text-base" style={{ color: '#1E293B' }}>
+                                <span className="label-text font-semibold text-sm sm:text-base" style={{ color: primaryTextColor }}>
                                     {t('admin.minimumPurchase') || 'Minimum Purchase'} ({t('admin.optional') || 'Optional'})
                                 </span>
                             </label>
@@ -261,9 +263,9 @@ function CouponForm({ initialData, onSubmit, onCancel, isLoading }) {
                                 placeholder="1000"
                                 className={`input input-bordered border-2 text-sm sm:text-base px-4 sm:px-5 py-2.5 sm:py-3 ${errors.minPurchase ? 'input-error' : ''}`}
                                 style={{
-                                    borderColor: errors.minPurchase ? '#ef4444' : '#cbd5e1',
-                                    color: '#1E293B',
-                                    backgroundColor: '#ffffff'
+                                    borderColor: errors.minPurchase ? errorColor : secondaryTextColor,
+                                    color: primaryTextColor,
+                                    backgroundColor
                                 }}
                                 min="0"
                                 step="1"
@@ -278,7 +280,7 @@ function CouponForm({ initialData, onSubmit, onCancel, isLoading }) {
                         {/* Usage Limit */}
                         <div className="form-control">
                             <label className="label pb-2">
-                                <span className="label-text font-semibold text-sm sm:text-base" style={{ color: '#1E293B' }}>
+                                <span className="label-text font-semibold text-sm sm:text-base" style={{ color: primaryTextColor }}>
                                     {t('admin.usageLimit') || 'Usage Limit'} <span className="text-error">*</span>
                                 </span>
                             </label>
@@ -290,9 +292,9 @@ function CouponForm({ initialData, onSubmit, onCancel, isLoading }) {
                                 placeholder="100"
                                 className={`input input-bordered border-2 text-sm sm:text-base px-4 sm:px-5 py-2.5 sm:py-3 ${errors.usageLimit ? 'input-error' : ''}`}
                                 style={{
-                                    borderColor: errors.usageLimit ? '#ef4444' : '#cbd5e1',
-                                    color: '#1E293B',
-                                    backgroundColor: '#ffffff'
+                                    borderColor: errors.usageLimit ? errorColor : secondaryTextColor,
+                                    color: primaryTextColor,
+                                    backgroundColor
                                 }}
                                 min="1"
                                 step="1"
@@ -307,7 +309,7 @@ function CouponForm({ initialData, onSubmit, onCancel, isLoading }) {
                         {/* Expiry Date */}
                         <div className="form-control">
                             <label className="label pb-2">
-                                <span className="label-text font-semibold text-sm sm:text-base" style={{ color: '#1E293B' }}>
+                                <span className="label-text font-semibold text-sm sm:text-base" style={{ color: primaryTextColor }}>
                                     {t('admin.expiryDate') || 'Expiry Date'} ({t('admin.optional') || 'Optional'})
                                 </span>
                             </label>
@@ -318,9 +320,9 @@ function CouponForm({ initialData, onSubmit, onCancel, isLoading }) {
                                 onChange={handleChange}
                                 className={`input input-bordered border-2 text-sm sm:text-base px-4 sm:px-5 py-2.5 sm:py-3 ${errors.expiryDate ? 'input-error' : ''}`}
                                 style={{
-                                    borderColor: errors.expiryDate ? '#ef4444' : '#cbd5e1',
-                                    color: '#1E293B',
-                                    backgroundColor: '#ffffff'
+                                    borderColor: errors.expiryDate ? errorColor : secondaryTextColor,
+                                    color: primaryTextColor,
+                                    backgroundColor
                                 }}
                             />
                             {errors.expiryDate && (
@@ -340,9 +342,9 @@ function CouponForm({ initialData, onSubmit, onCancel, isLoading }) {
                                 checked={formData.isActive}
                                 onChange={handleChange}
                                 className="toggle toggle-primary"
-                                style={{ '--tglbg': '#cbd5e1', '--handleoffset': '1.55em' }}
+                                style={{ '--tglbg': secondaryTextColor, '--handleoffset': '1.55em' }}
                             />
-                            <span className="label-text font-semibold text-sm sm:text-base" style={{ color: '#1E293B' }}>
+                            <span className="label-text font-semibold text-sm sm:text-base" style={{ color: primaryTextColor }}>
                                 {t('admin.active') || 'Active'}
                             </span>
                         </label>
@@ -351,7 +353,7 @@ function CouponForm({ initialData, onSubmit, onCancel, isLoading }) {
                     {/* Description - Full Width */}
                     <div className="form-control pt-2">
                         <label className="label pb-2">
-                            <span className="label-text font-semibold text-sm sm:text-base" style={{ color: '#1E293B' }}>
+                            <span className="label-text font-semibold text-sm sm:text-base" style={{ color: primaryTextColor }}>
                                 {t('admin.description') || 'Description'} ({t('admin.optional') || 'Optional'})
                             </span>
                         </label>
@@ -362,9 +364,9 @@ function CouponForm({ initialData, onSubmit, onCancel, isLoading }) {
                             placeholder={t('admin.couponDescriptionPlaceholder') || 'Enter coupon description...'}
                             className="textarea textarea-bordered border-2 text-sm sm:text-base px-4 sm:px-5 py-2.5 sm:py-3"
                             style={{
-                                borderColor: '#cbd5e1',
-                                color: '#1E293B',
-                                backgroundColor: '#ffffff',
+                                borderColor: secondaryTextColor,
+                                color: primaryTextColor,
+                                backgroundColor,
                                 minHeight: '100px'
                             }}
                             rows="4"
@@ -376,10 +378,18 @@ function CouponForm({ initialData, onSubmit, onCancel, isLoading }) {
                         <button
                             type="submit"
                             className="btn btn-primary text-white flex-1 sm:flex-none px-6 sm:px-8 py-2.5 sm:py-3 text-sm sm:text-base font-semibold transition-all duration-200 hover:shadow-md"
-                            style={{ backgroundColor: '#1E293B' }}
+                            style={{ backgroundColor: buttonColor }}
                             disabled={isLoading}
-                            onMouseEnter={(e) => { if (!isLoading) e.currentTarget.style.backgroundColor = '#0f172a'; }}
-                            onMouseLeave={(e) => { if (!isLoading) e.currentTarget.style.backgroundColor = '#1E293B'; }}
+                            onMouseEnter={(e) => {
+                                if (!isLoading) {
+                                    e.currentTarget.style.backgroundColor = buttonColor.startsWith('#') ? `color-mix(in srgb, ${buttonColor} 80%, black)` : `darken(${buttonColor}, 10%)`;
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (!isLoading) {
+                                    e.currentTarget.style.backgroundColor = buttonColor;
+                                }
+                            }}
                         >
                             {isLoading ? (
                                 <span className="loading loading-spinner loading-sm"></span>
@@ -392,24 +402,24 @@ function CouponForm({ initialData, onSubmit, onCancel, isLoading }) {
                             onClick={onCancel}
                             className="btn flex-1 sm:flex-none px-6 sm:px-8 py-2.5 sm:py-3 text-sm sm:text-base font-semibold transition-all duration-200 hover:shadow-sm"
                             style={{
-                                backgroundColor: '#ffffff',
-                                borderColor: '#cbd5e1',
-                                color: '#64748b',
+                                backgroundColor: backgroundColor,
+                                borderColor: secondaryTextColor,
+                                color: primaryTextColor,
                                 borderWidth: '1px'
                             }}
                             disabled={isLoading}
                             onMouseEnter={(e) => {
                                 if (!isLoading) {
-                                    e.currentTarget.style.backgroundColor = '#f8fafc';
-                                    e.currentTarget.style.borderColor = '#94a3b8';
-                                    e.currentTarget.style.color = '#475569';
+                                    e.currentTarget.style.backgroundColor = secondaryTextColor + '20';
+                                    e.currentTarget.style.borderColor = buttonColor;
+                                    e.currentTarget.style.color = buttonColor;
                                 }
                             }}
                             onMouseLeave={(e) => {
                                 if (!isLoading) {
-                                    e.currentTarget.style.backgroundColor = '#ffffff';
-                                    e.currentTarget.style.borderColor = '#cbd5e1';
-                                    e.currentTarget.style.color = '#64748b';
+                                    e.currentTarget.style.backgroundColor = backgroundColor;
+                                    e.currentTarget.style.borderColor = secondaryTextColor;
+                                    e.currentTarget.style.color = primaryTextColor;
                                 }
                             }}
                         >

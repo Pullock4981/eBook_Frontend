@@ -12,6 +12,7 @@ import { fetchAddresses, createAddress, updateAddress, deleteAddress, selectUser
 import { selectIsAuthenticated } from '../../store/slices/authSlice';
 import AddressForm from '../../components/user/AddressForm';
 import Loading from '../../components/common/Loading';
+import { useThemeColors } from '../../hooks/useThemeColors';
 // Toast notifications - using browser alert for now, can be replaced with toast library
 const toast = {
     success: (message) => alert(message),
@@ -23,6 +24,7 @@ function Addresses() {
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { buttonColor, primaryTextColor, secondaryTextColor, backgroundColor, errorColor } = useThemeColors();
     const isAuthenticated = useSelector(selectIsAuthenticated);
     const addresses = useSelector(selectUserAddresses);
     const isLoading = useSelector(selectUserLoading);
@@ -109,15 +111,15 @@ function Addresses() {
     }
 
     return (
-        <div className="min-h-screen" style={{ backgroundColor: '#EFECE3' }}>
+        <div style={{ backgroundColor }}>
             <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
                 {/* Header */}
                 <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
-                        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2" style={{ color: '#1E293B' }}>
+                        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2" style={{ color: primaryTextColor }}>
                             {t('user.addresses') || 'My Addresses'}
                         </h1>
-                        <p className="text-sm sm:text-base opacity-70" style={{ color: '#2d3748' }}>
+                        <p className="text-sm sm:text-base opacity-70" style={{ color: secondaryTextColor }}>
                             {t('user.addressesDescription') || 'Manage your shipping addresses'}
                         </p>
                     </div>
@@ -125,7 +127,7 @@ function Addresses() {
                         <button
                             onClick={handleAddNew}
                             className="btn btn-primary text-white px-6 py-2.5"
-                            style={{ backgroundColor: '#1E293B' }}
+                            style={{ backgroundColor: buttonColor }}
                         >
                             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -137,8 +139,8 @@ function Addresses() {
 
                 {/* Address Form */}
                 {showForm && (
-                    <div className="mb-6 bg-white rounded-lg shadow-sm p-4 sm:p-6 md:p-8" style={{ border: '1px solid #e2e8f0' }}>
-                        <h2 className="text-xl sm:text-2xl font-bold mb-4" style={{ color: '#1E293B' }}>
+                    <div className="mb-6 bg-base-100 rounded-lg shadow-sm p-4 sm:p-6 md:p-8 border" style={{ borderColor: secondaryTextColor, backgroundColor }}>
+                        <h2 className="text-xl sm:text-2xl font-bold mb-4" style={{ color: primaryTextColor }}>
                             {editingAddress ? (t('user.editAddress') || 'Edit Address') : (t('user.addNewAddress') || 'Add New Address')}
                         </h2>
                         <AddressForm
@@ -154,22 +156,22 @@ function Addresses() {
                 {isLoading ? (
                     <Loading />
                 ) : addresses.length === 0 ? (
-                    <div className="bg-white rounded-lg shadow-sm p-8 sm:p-12 text-center" style={{ border: '1px solid #e2e8f0' }}>
-                        <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#64748b' }}>
+                    <div className="bg-base-100 rounded-lg shadow-sm p-8 sm:p-12 text-center border" style={{ borderColor: secondaryTextColor, backgroundColor }}>
+                        <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: secondaryTextColor }}>
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
-                        <h3 className="text-lg sm:text-xl font-semibold mb-2" style={{ color: '#1E293B' }}>
+                        <h3 className="text-lg sm:text-xl font-semibold mb-2" style={{ color: primaryTextColor }}>
                             {t('user.noAddresses') || 'No Addresses Found'}
                         </h3>
-                        <p className="text-sm sm:text-base opacity-70 mb-6" style={{ color: '#2d3748' }}>
+                        <p className="text-sm sm:text-base opacity-70 mb-6" style={{ color: secondaryTextColor }}>
                             {t('user.noAddressesDescription') || 'Add your first address to get started'}
                         </p>
                         {!showForm && (
                             <button
                                 onClick={handleAddNew}
                                 className="btn btn-primary text-white px-6 py-2.5"
-                                style={{ backgroundColor: '#1E293B' }}
+                                style={{ backgroundColor: buttonColor }}
                             >
                                 {t('user.addAddress') || 'Add Address'}
                             </button>
@@ -180,15 +182,16 @@ function Addresses() {
                         {addresses.map((address) => (
                             <div
                                 key={address._id}
-                                className="bg-white rounded-lg shadow-sm p-4 sm:p-6 border-2 relative"
+                                className="bg-base-100 rounded-lg shadow-sm p-4 sm:p-6 border-2 relative"
                                 style={{
-                                    borderColor: address.isDefault ? '#1E293B' : '#e2e8f0'
+                                    borderColor: address.isDefault ? buttonColor : secondaryTextColor,
+                                    backgroundColor
                                 }}
                             >
                                 {/* Default Badge */}
                                 {address.isDefault && (
                                     <div className="absolute top-4 right-4">
-                                        <span className="badge badge-primary text-white text-xs" style={{ backgroundColor: '#1E293B' }}>
+                                        <span className="badge badge-primary text-white text-xs" style={{ backgroundColor: buttonColor }}>
                                             {t('common.default') || 'Default'}
                                         </span>
                                     </div>
@@ -196,36 +199,42 @@ function Addresses() {
 
                                 {/* Label */}
                                 <div className="mb-3">
-                                    <span className="badge badge-outline text-sm" style={{ borderColor: '#1E293B', color: '#1E293B' }}>
+                                    <span className="badge badge-outline text-sm" style={{ borderColor: buttonColor, color: buttonColor }}>
                                         {address.label || 'Home'}
                                     </span>
                                 </div>
 
                                 {/* Address Details */}
                                 <div className="space-y-2 mb-4">
-                                    <p className="font-semibold text-base sm:text-lg" style={{ color: '#1E293B' }}>
+                                    <p className="font-semibold text-base sm:text-lg" style={{ color: primaryTextColor }}>
                                         {address.recipientName}
                                     </p>
-                                    <p className="text-sm sm:text-base opacity-70" style={{ color: '#2d3748' }}>
+                                    <p className="text-sm sm:text-base opacity-70" style={{ color: secondaryTextColor }}>
                                         {address.recipientMobile}
                                     </p>
-                                    <p className="text-sm sm:text-base opacity-70" style={{ color: '#2d3748' }}>
+                                    <p className="text-sm sm:text-base opacity-70" style={{ color: secondaryTextColor }}>
                                         {address.addressLine1}
                                         {address.addressLine2 && `, ${address.addressLine2}`}
                                     </p>
-                                    <p className="text-sm sm:text-base opacity-70" style={{ color: '#2d3748' }}>
+                                    <p className="text-sm sm:text-base opacity-70" style={{ color: secondaryTextColor }}>
                                         {address.area}, {address.city}, {address.district}
                                         {address.postalCode && ` - ${address.postalCode}`}
                                     </p>
                                 </div>
 
                                 {/* Actions */}
-                                <div className="flex flex-wrap gap-2 pt-4 border-t" style={{ borderColor: '#e2e8f0' }}>
+                                <div className="flex flex-wrap gap-2 pt-4 border-t" style={{ borderColor: secondaryTextColor }}>
                                     {!address.isDefault && (
                                         <button
                                             onClick={() => handleSetDefault(address._id)}
                                             className="btn btn-sm btn-outline flex-1 sm:flex-none px-4 py-2"
-                                            style={{ borderColor: '#1E293B', color: '#1E293B' }}
+                                            style={{ borderColor: buttonColor, color: primaryTextColor, backgroundColor: backgroundColor }}
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.backgroundColor = secondaryTextColor + '20';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.backgroundColor = backgroundColor;
+                                            }}
                                         >
                                             {t('user.setDefault') || 'Set Default'}
                                         </button>
@@ -233,7 +242,7 @@ function Addresses() {
                                     <button
                                         onClick={() => handleEdit(address)}
                                         className="btn btn-sm text-white flex-1 sm:flex-none px-4 py-2"
-                                        style={{ backgroundColor: '#1E293B', borderColor: '#1E293B' }}
+                                        style={{ backgroundColor: buttonColor, borderColor: buttonColor }}
                                     >
                                         {t('common.edit') || 'Edit'}
                                     </button>
@@ -241,8 +250,8 @@ function Addresses() {
                                         onClick={() => handleDelete(address._id)}
                                         className="btn btn-sm text-white flex-1 sm:flex-none hover:opacity-90 transition-all px-4 py-2"
                                         style={{
-                                            backgroundColor: '#ef4444',
-                                            borderColor: '#ef4444'
+                                            backgroundColor: errorColor || '#ef4444',
+                                            borderColor: errorColor || '#ef4444'
                                         }}
                                     >
                                         <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

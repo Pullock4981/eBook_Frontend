@@ -10,10 +10,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { applyCouponCode, removeCouponCode, selectCart, selectCartItemCount } from '../../store/slices/cartSlice';
 import { formatCurrency } from '../../utils/helpers';
 import { Link } from 'react-router-dom';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 function CartSummary() {
     const { t } = useTranslation();
     const dispatch = useDispatch();
+    const { buttonColor, primaryTextColor, secondaryTextColor, backgroundColor } = useThemeColors();
     const { subtotal, discount, total, coupon, isLoading } = useSelector(selectCart);
     const itemCount = useSelector(selectCartItemCount);
 
@@ -58,9 +60,9 @@ function CartSummary() {
     };
 
     return (
-        <div className="card bg-base-100 shadow-lg border-2 sticky top-16 sm:top-20" style={{ borderColor: '#e2e8f0' }}>
+        <div className="card bg-base-100 shadow-lg border-2 sticky top-16 sm:top-20" style={{ borderColor: secondaryTextColor, backgroundColor }}>
             <div className="card-body p-3 sm:p-4 md:p-6">
-                <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-3 sm:mb-4" style={{ color: '#1E293B' }}>
+                <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-3 sm:mb-4" style={{ color: primaryTextColor }}>
                     {t('cart.orderSummary') || 'Order Summary'}
                 </h2>
 
@@ -78,13 +80,13 @@ function CartSummary() {
                                         setCouponCode(e.target.value);
                                         setCouponError(null);
                                     }}
-                                    style={{ borderColor: '#cbd5e1', color: '#1E293B' }}
+                                    style={{ borderColor: secondaryTextColor, color: primaryTextColor, backgroundColor }}
                                 />
                                 <button
                                     type="submit"
                                     className="btn btn-primary text-white px-4 sm:px-6"
                                     disabled={isApplyingCoupon || isLoading}
-                                    style={{ backgroundColor: '#1E293B' }}
+                                    style={{ backgroundColor: buttonColor }}
                                 >
                                     {isApplyingCoupon ? (
                                         <span className="loading loading-spinner loading-sm"></span>
@@ -105,7 +107,7 @@ function CartSummary() {
                                 <p className="text-sm font-medium text-success">
                                     {t('cart.couponApplied') || 'Coupon Applied'}
                                 </p>
-                                <p className="text-xs opacity-70" style={{ color: '#2d3748' }}>
+                                <p className="text-xs opacity-70" style={{ color: secondaryTextColor }}>
                                     {coupon?.code || (typeof coupon === 'string' ? coupon : 'N/A')}
                                 </p>
                                 {discount > 0 && (
@@ -129,12 +131,12 @@ function CartSummary() {
                 )}
 
                 {/* Summary Details */}
-                <div className="space-y-2 sm:space-y-3 border-t border-b py-3 sm:py-4" style={{ borderColor: '#e2e8f0' }}>
+                <div className="space-y-2 sm:space-y-3 border-t border-b py-3 sm:py-4" style={{ borderColor: secondaryTextColor }}>
                     <div className="flex justify-between items-center">
-                        <span className="text-sm sm:text-base" style={{ color: '#2d3748' }}>
+                        <span className="text-sm sm:text-base" style={{ color: secondaryTextColor }}>
                             {t('cart.subtotal') || 'Subtotal'}
                         </span>
-                        <span className="text-sm sm:text-base font-semibold" style={{ color: '#1E293B' }}>
+                        <span className="text-sm sm:text-base font-semibold" style={{ color: primaryTextColor }}>
                             {formatCurrency(subtotal)}
                         </span>
                     </div>
@@ -157,17 +159,17 @@ function CartSummary() {
 
                 {/* Total */}
                 <div className="flex justify-between items-center pt-3 sm:pt-4">
-                    <span className="text-lg sm:text-xl font-bold" style={{ color: '#1E293B' }}>
+                    <span className="text-lg sm:text-xl font-bold" style={{ color: primaryTextColor }}>
                         {t('cart.total') || 'Total'}
                     </span>
-                    <span className="text-xl sm:text-2xl font-bold" style={{ color: '#1E293B' }}>
+                    <span className="text-xl sm:text-2xl font-bold" style={{ color: primaryTextColor }}>
                         {formatCurrency(total)}
                     </span>
                 </div>
 
                 {/* Item Count Display */}
                 <div className="text-center pt-2 pb-1">
-                    <span className="text-xs sm:text-sm opacity-70" style={{ color: '#2d3748' }}>
+                    <span className="text-xs sm:text-sm opacity-70" style={{ color: secondaryTextColor }}>
                         {t('cart.totalItems', { count: itemCount }) || `${itemCount} item(s) total`}
                     </span>
                 </div>
@@ -176,7 +178,7 @@ function CartSummary() {
                 <Link
                     to="/checkout"
                     className="btn btn-primary btn-md sm:btn-lg w-full text-white mt-4 shadow-lg hover:shadow-xl transition-all px-4 sm:px-6"
-                    style={{ backgroundColor: '#1E293B' }}
+                    style={{ backgroundColor: buttonColor }}
                 >
                     {t('cart.proceedToCheckout') || 'Proceed to Checkout'}
                 </Link>
@@ -185,7 +187,7 @@ function CartSummary() {
                 <Link
                     to="/products"
                     className="btn btn-outline btn-md sm:btn-lg w-full mt-2 px-4 sm:px-6"
-                    style={{ borderColor: '#1E293B', color: '#1E293B' }}
+                    style={{ borderColor: buttonColor, color: buttonColor }}
                 >
                     {t('cart.continueShopping') || 'Continue Shopping'}
                 </Link>

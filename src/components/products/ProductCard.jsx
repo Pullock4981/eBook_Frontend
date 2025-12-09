@@ -8,9 +8,11 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { formatCurrency, calculateDiscount } from '../../utils/helpers';
 import { PRODUCT_TYPES } from '../../utils/constants';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 function ProductCard({ product }) {
     const { t } = useTranslation();
+    const { buttonColor, primaryTextColor, secondaryTextColor } = useThemeColors();
 
     if (!product) return null;
 
@@ -68,7 +70,7 @@ function ProductCard({ product }) {
             <div className="card-body flex-grow flex flex-col p-4 sm:p-5">
                 {/* Product Name */}
                 <Link to={productUrl} className="flex-grow">
-                    <h2 className="text-base sm:text-lg font-semibold line-clamp-2 hover:text-primary transition-colors mb-2" style={{ color: '#1E293B' }}>
+                    <h2 className="text-base sm:text-lg font-semibold line-clamp-2 hover:text-primary transition-colors mb-2" style={{ color: primaryTextColor }}>
                         {product.name}
                     </h2>
                 </Link>
@@ -76,11 +78,11 @@ function ProductCard({ product }) {
                 {/* Price Section */}
                 <div className="mt-auto pt-2">
                     <div className="flex items-center gap-2 mb-2">
-                        <span className="text-lg sm:text-xl font-bold" style={{ color: '#1E293B' }}>
+                        <span className="text-lg sm:text-xl font-bold" style={{ color: primaryTextColor }}>
                             {formatCurrency(displayPrice)}
                         </span>
                         {product.discountPrice && (
-                            <span className="text-sm line-through opacity-50" style={{ color: '#2d3748' }}>
+                            <span className="text-sm line-through opacity-50" style={{ color: secondaryTextColor }}>
                                 {formatCurrency(product.price)}
                             </span>
                         )}
@@ -102,7 +104,7 @@ function ProductCard({ product }) {
                     <Link
                         to={productUrl}
                         className="btn btn-sm btn-primary w-full text-white px-4 py-2"
-                        style={{ backgroundColor: '#1E293B' }}
+                        style={{ backgroundColor: buttonColor }}
                     >
                         {t('products.viewDetails') || 'View Details'}
                     </Link>

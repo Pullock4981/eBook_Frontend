@@ -7,9 +7,11 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { formatCurrency } from '../../utils/helpers';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 function OrderCard({ order }) {
     const { t } = useTranslation();
+    const { buttonColor, primaryTextColor, secondaryTextColor, backgroundColor } = useThemeColors();
 
     if (!order) return null;
 
@@ -117,18 +119,18 @@ function OrderCard({ order }) {
     const itemCount = order.items?.length || 0;
 
     return (
-        <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border" style={{ borderColor: '#e2e8f0' }}>
+        <div className="bg-base-100 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border" style={{ borderColor: secondaryTextColor, backgroundColor }}>
             <div className="p-5 sm:p-6">
                 {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4 pb-4 border-b" style={{ borderColor: '#f1f5f9' }}>
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4 pb-4 border-b" style={{ borderColor: secondaryTextColor }}>
                     <div className="flex-grow min-w-0">
-                        <h3 className="text-sm font-semibold mb-1 truncate" style={{ color: '#1E293B' }}>
+                        <h3 className="text-sm font-semibold mb-1 truncate" style={{ color: primaryTextColor }}>
                             {order.orderId || order._id}
                         </h3>
-                        <p className="text-xs text-gray-500" style={{ color: '#64748b' }}>
+                        <p className="text-xs" style={{ color: secondaryTextColor }}>
                             {t('orders.placedOn') || 'Placed on'} {formatDate(order.createdAt)}
                         </p>
-                        <p className="text-xs text-gray-500 mt-1" style={{ color: '#64748b' }}>
+                        <p className="text-xs mt-1" style={{ color: secondaryTextColor }}>
                             {t('orders.items', { count: itemCount }) || `${itemCount} item(s)`}
                         </p>
                     </div>
@@ -143,7 +145,7 @@ function OrderCard({ order }) {
                     <div className="space-y-3">
                         {order.items?.slice(0, 3).map((item, index) => (
                             <div key={index} className="flex items-center gap-3">
-                                <div className="w-14 h-14 rounded-md overflow-hidden bg-gray-100 flex-shrink-0 border" style={{ borderColor: '#e2e8f0' }}>
+                                <div className="w-14 h-14 rounded-md overflow-hidden bg-base-200 flex-shrink-0 border" style={{ borderColor: secondaryTextColor }}>
                                     <img
                                         src={item.productSnapshot?.thumbnail || item.product?.thumbnail || 'https://via.placeholder.com/100'}
                                         alt={item.productSnapshot?.name || item.product?.name || 'Product'}
@@ -154,17 +156,17 @@ function OrderCard({ order }) {
                                     />
                                 </div>
                                 <div className="flex-grow min-w-0">
-                                    <p className="text-sm font-medium truncate mb-0.5" style={{ color: '#1E293B' }}>
+                                    <p className="text-sm font-medium truncate mb-0.5" style={{ color: primaryTextColor }}>
                                         {item.productSnapshot?.name || item.product?.name || 'Product'}
                                     </p>
-                                    <p className="text-xs text-gray-500" style={{ color: '#64748b' }}>
+                                    <p className="text-xs" style={{ color: secondaryTextColor }}>
                                         {t('orders.quantity') || 'Qty'}: {item.quantity} × {formatCurrency(item.price)}
                                     </p>
                                 </div>
                             </div>
                         ))}
                         {itemCount > 3 && (
-                            <p className="text-xs text-center pt-1" style={{ color: '#94a3b8' }}>
+                            <p className="text-xs text-center pt-1" style={{ color: secondaryTextColor }}>
                                 +{itemCount - 3} {t('orders.moreItems') || 'more items'}
                             </p>
                         )}
@@ -172,12 +174,12 @@ function OrderCard({ order }) {
                 </div>
 
                 {/* Total and Actions */}
-                <div className="pt-4 border-t" style={{ borderColor: '#f1f5f9' }}>
+                <div className="pt-4 border-t" style={{ borderColor: secondaryTextColor }}>
                     <div className="flex items-center justify-between mb-4">
-                        <span className="text-sm font-medium text-gray-600" style={{ color: '#64748b' }}>
+                        <span className="text-sm font-medium" style={{ color: secondaryTextColor }}>
                             {t('orders.total') || 'Total'}
                         </span>
-                        <span className="text-base font-bold" style={{ color: '#1E293B' }}>
+                        <span className="text-base font-bold" style={{ color: primaryTextColor }}>
                             {formatCurrency(order.total)}
                         </span>
                     </div>
@@ -185,15 +187,16 @@ function OrderCard({ order }) {
                         to={`/orders/${order._id}`}
                         className="block w-full text-center py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200 hover:shadow-sm"
                         style={{
-                            backgroundColor: '#1E293B',
+                            backgroundColor: buttonColor,
                             color: '#ffffff',
                             border: 'none'
                         }}
                         onMouseEnter={(e) => {
-                            e.target.style.backgroundColor = '#0f172a';
+                            const isDark = buttonColor === '#6B8E6B';
+                            e.target.style.backgroundColor = isDark ? '#5a7a5a' : '#0f172a';
                         }}
                         onMouseLeave={(e) => {
-                            e.target.style.backgroundColor = '#1E293B';
+                            e.target.style.backgroundColor = buttonColor;
                         }}
                     >
                         {t('orders.viewDetails') || 'View Details'}

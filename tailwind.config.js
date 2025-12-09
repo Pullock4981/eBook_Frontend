@@ -4,6 +4,7 @@ export default {
         "./index.html",
         "./src/**/*.{js,ts,jsx,tsx}",
     ],
+    darkMode: ['class', '[data-theme="dark"]'],
     theme: {
         extend: {},
     },
@@ -27,15 +28,15 @@ export default {
                     "error": "#ef4444",          // Red (kept for errors)
                 },
                 dark: {
-                    "primary": "#64748b",        // Muted Blue-Gray (lighter for dark mode)
-                    "secondary": "#6b8e6b",      // Soft Sage Green (lighter)
+                    "primary": "#6b8e6b",        // Button color for dark mode (#6B8E6B)
+                    "secondary": "#64748b",      // Muted Blue-Gray
                     "accent": "#1e293b",         // Deep Slate Blue (as accent in dark)
                     "neutral": "#475569",        // Medium gray
                     "base-100": "#1e293b",       // Deep Slate Blue (from palette)
                     "base-200": "#0f172a",       // Very dark for contrast
                     "base-300": "#334155",       // Slate gray
-                    "info": "#64748b",           // Using secondary
-                    "success": "#6b8e6b",        // Using accent
+                    "info": "#6b8e6b",           // Using primary for info
+                    "success": "#6b8e6b",        // Using primary for success
                     "warning": "#f59e0b",        // Amber
                     "error": "#ef4444",          // Red
                 },

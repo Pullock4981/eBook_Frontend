@@ -13,11 +13,13 @@ import { selectIsAuthenticated } from '../store/slices/authSlice';
 import CartItem from '../components/cart/CartItem';
 import CartSummary from '../components/cart/CartSummary';
 import Loading from '../components/common/Loading';
+import { useThemeColors } from '../hooks/useThemeColors';
 
 function Cart() {
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { buttonColor, primaryTextColor, secondaryTextColor, backgroundColor } = useThemeColors();
     const isAuthenticated = useSelector(selectIsAuthenticated);
     const items = useSelector(selectCartItems);
     const isLoading = useSelector(selectCartLoading);
@@ -43,19 +45,19 @@ function Cart() {
 
     if (!isAuthenticated) {
         return (
-            <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#EFECE3' }}>
+            <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor }}>
                 <div className="text-center">
                     <div className="text-6xl mb-4">🛒</div>
-                    <h2 className="text-2xl font-bold mb-2" style={{ color: '#1E293B' }}>
+                    <h2 className="text-2xl font-bold mb-2" style={{ color: primaryTextColor }}>
                         {t('cart.loginRequired') || 'Login Required'}
                     </h2>
-                    <p className="text-base opacity-70 mb-4" style={{ color: '#2d3748' }}>
+                    <p className="text-base opacity-70 mb-4" style={{ color: secondaryTextColor }}>
                         {t('cart.loginRequiredMessage') || 'Please login to view your cart'}
                     </p>
                     <Link
                         to="/login"
                         className="btn btn-primary text-white"
-                        style={{ backgroundColor: '#1E293B' }}
+                        style={{ backgroundColor: buttonColor }}
                     >
                         {t('nav.login') || 'Login'}
                     </Link>
@@ -65,14 +67,14 @@ function Cart() {
     }
 
     return (
-        <div className="min-h-screen" style={{ backgroundColor: '#EFECE3' }}>
+        <div className="min-h-screen" style={{ backgroundColor }}>
             <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
                 {/* Page Header */}
                 <div className="mb-6">
-                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2" style={{ color: '#1E293B' }}>
+                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2" style={{ color: primaryTextColor }}>
                         {t('nav.cart') || 'Shopping Cart'}
                     </h1>
-                    <p className="text-sm sm:text-base opacity-70" style={{ color: '#2d3748' }}>
+                    <p className="text-sm sm:text-base opacity-70" style={{ color: secondaryTextColor }}>
                         {itemCount > 0
                             ? t('cart.itemsInCart', { count: itemCount }) || `${itemCount} item(s) in your cart`
                             : t('cart.emptyCartMessage') || 'Your cart is empty'}
@@ -125,16 +127,16 @@ function Cart() {
                                 </svg>
                             </div>
                             <div className="text-center">
-                                <h3 className="text-lg sm:text-xl md:text-2xl font-semibold mb-2 sm:mb-3" style={{ color: '#1E293B' }}>
+                                <h3 className="text-lg sm:text-xl md:text-2xl font-semibold mb-2 sm:mb-3" style={{ color: primaryTextColor }}>
                                     {t('cart.emptyCart') || 'Your Cart is Empty'}
                                 </h3>
-                                <p className="text-sm sm:text-base opacity-70 mb-4 sm:mb-6 px-4" style={{ color: '#2d3748' }}>
+                                <p className="text-sm sm:text-base opacity-70 mb-4 sm:mb-6 px-4" style={{ color: secondaryTextColor }}>
                                     {t('cart.emptyCartDescription') || 'Add some products to your cart to get started!'}
                                 </p>
                                 <Link
                                     to="/products"
                                     className="btn btn-primary text-white inline-flex items-center gap-2 btn-sm sm:btn-md"
-                                    style={{ backgroundColor: '#1E293B' }}
+                                    style={{ backgroundColor: buttonColor }}
                                 >
                                     <svg
                                         className="w-4 h-4 sm:w-5 sm:h-5"

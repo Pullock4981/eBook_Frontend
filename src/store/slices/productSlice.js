@@ -156,7 +156,10 @@ const productSlice = createSlice({
             })
             .addCase(fetchProducts.rejected, (state, action) => {
                 state.isLoading = false;
-                state.error = action.payload;
+                // Extract error message from payload (could be string or object)
+                state.error = typeof action.payload === 'string'
+                    ? action.payload
+                    : action.payload?.message || action.error?.message || 'Failed to fetch products';
             })
             // Fetch product by ID
             .addCase(fetchProductById.pending, (state) => {
@@ -226,7 +229,9 @@ const productSlice = createSlice({
             })
             .addCase(searchProducts.rejected, (state, action) => {
                 state.isSearching = false;
-                state.error = action.payload;
+                state.error = typeof action.payload === 'string'
+                    ? action.payload
+                    : action.payload?.message || action.error?.message || 'Failed to search products';
             })
             // Fetch featured products
             .addCase(fetchFeaturedProducts.pending, (state) => {
@@ -238,7 +243,9 @@ const productSlice = createSlice({
             })
             .addCase(fetchFeaturedProducts.rejected, (state, action) => {
                 state.isLoading = false;
-                state.error = action.payload;
+                state.error = typeof action.payload === 'string'
+                    ? action.payload
+                    : action.payload?.message || action.error?.message || 'Failed to fetch featured products';
             })
             // Fetch products by category
             .addCase(fetchProductsByCategory.pending, (state) => {
@@ -252,7 +259,9 @@ const productSlice = createSlice({
             })
             .addCase(fetchProductsByCategory.rejected, (state, action) => {
                 state.isLoading = false;
-                state.error = action.payload;
+                state.error = typeof action.payload === 'string'
+                    ? action.payload
+                    : action.payload?.message || action.error?.message || 'Failed to fetch products by category';
             });
     },
 });

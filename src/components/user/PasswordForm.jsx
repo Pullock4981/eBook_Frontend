@@ -6,9 +6,11 @@
 
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 function PasswordForm({ onSubmit, isLoading = false }) {
     const { t } = useTranslation();
+    const { buttonColor, primaryTextColor, secondaryTextColor, backgroundColor } = useThemeColors();
 
     const [formData, setFormData] = useState({
         currentPassword: '',
@@ -86,7 +88,7 @@ function PasswordForm({ onSubmit, isLoading = false }) {
             {/* Current Password */}
             <div className="form-control w-full">
                 <label className="label pb-2">
-                    <span className="label-text text-sm sm:text-base font-semibold" style={{ color: '#1E293B' }}>
+                    <span className="label-text text-sm sm:text-base font-semibold" style={{ color: primaryTextColor }}>
                         {t('user.currentPassword') || 'Current Password'}
                         <span className="text-error ml-1">*</span>
                     </span>
@@ -100,15 +102,16 @@ function PasswordForm({ onSubmit, isLoading = false }) {
                         className={`input input-bordered w-full h-12 text-base border-2 px-4 pr-12 ${errors.currentPassword ? 'input-error border-error' : ''
                             }`}
                         style={{
-                            backgroundColor: '#ffffff',
-                            color: '#1E293B',
-                            borderColor: errors.currentPassword ? '#EF4444' : '#cbd5e1'
+                            backgroundColor: backgroundColor,
+                            color: primaryTextColor,
+                            borderColor: errors.currentPassword ? '#EF4444' : secondaryTextColor
                         }}
                         placeholder={t('user.enterCurrentPassword') || 'Enter current password'}
                     />
                     <button
                         type="button"
                         className="absolute right-3 top-1/2 transform -translate-y-1/2 btn btn-ghost btn-sm"
+                        style={{ color: secondaryTextColor }}
                         onClick={() => setShowPasswords(prev => ({ ...prev, current: !prev.current }))}
                     >
                         {showPasswords.current ? (
@@ -133,7 +136,7 @@ function PasswordForm({ onSubmit, isLoading = false }) {
             {/* New Password */}
             <div className="form-control w-full">
                 <label className="label pb-2">
-                    <span className="label-text text-sm sm:text-base font-semibold" style={{ color: '#1E293B' }}>
+                    <span className="label-text text-sm sm:text-base font-semibold" style={{ color: primaryTextColor }}>
                         {t('user.newPassword') || 'New Password'}
                         <span className="text-error ml-1">*</span>
                     </span>
@@ -147,15 +150,16 @@ function PasswordForm({ onSubmit, isLoading = false }) {
                         className={`input input-bordered w-full h-12 text-base border-2 px-4 pr-12 ${errors.newPassword ? 'input-error border-error' : ''
                             }`}
                         style={{
-                            backgroundColor: '#ffffff',
-                            color: '#1E293B',
-                            borderColor: errors.newPassword ? '#EF4444' : '#cbd5e1'
+                            backgroundColor: backgroundColor,
+                            color: primaryTextColor,
+                            borderColor: errors.newPassword ? '#EF4444' : secondaryTextColor
                         }}
                         placeholder={t('user.enterNewPassword') || 'Enter new password (min 6 characters)'}
                     />
                     <button
                         type="button"
                         className="absolute right-3 top-1/2 transform -translate-y-1/2 btn btn-ghost btn-sm"
+                        style={{ color: secondaryTextColor }}
                         onClick={() => setShowPasswords(prev => ({ ...prev, new: !prev.new }))}
                     >
                         {showPasswords.new ? (
@@ -180,7 +184,7 @@ function PasswordForm({ onSubmit, isLoading = false }) {
             {/* Confirm Password */}
             <div className="form-control w-full">
                 <label className="label pb-2">
-                    <span className="label-text text-sm sm:text-base font-semibold" style={{ color: '#1E293B' }}>
+                    <span className="label-text text-sm sm:text-base font-semibold" style={{ color: primaryTextColor }}>
                         {t('auth.confirmPassword') || 'Confirm Password'}
                         <span className="text-error ml-1">*</span>
                     </span>
@@ -194,15 +198,16 @@ function PasswordForm({ onSubmit, isLoading = false }) {
                         className={`input input-bordered w-full h-12 text-base border-2 px-4 pr-12 ${errors.confirmPassword ? 'input-error border-error' : ''
                             }`}
                         style={{
-                            backgroundColor: '#ffffff',
-                            color: '#1E293B',
-                            borderColor: errors.confirmPassword ? '#EF4444' : '#cbd5e1'
+                            backgroundColor: backgroundColor,
+                            color: primaryTextColor,
+                            borderColor: errors.confirmPassword ? '#EF4444' : secondaryTextColor
                         }}
                         placeholder={t('auth.confirmPassword') || 'Confirm new password'}
                     />
                     <button
                         type="button"
                         className="absolute right-3 top-1/2 transform -translate-y-1/2 btn btn-ghost btn-sm"
+                        style={{ color: secondaryTextColor }}
                         onClick={() => setShowPasswords(prev => ({ ...prev, confirm: !prev.confirm }))}
                     >
                         {showPasswords.confirm ? (
@@ -229,7 +234,7 @@ function PasswordForm({ onSubmit, isLoading = false }) {
                 <button
                     type="submit"
                     className="btn btn-primary text-white"
-                    style={{ backgroundColor: '#1E293B' }}
+                    style={{ backgroundColor: buttonColor }}
                     disabled={isLoading}
                 >
                     {isLoading ? (

@@ -8,9 +8,11 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ProductCard from './ProductCard';
 import Loading from '../common/Loading';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 function ProductList({ products, isLoading, viewMode = 'grid' }) {
     const { t } = useTranslation();
+    const { buttonColor, primaryTextColor, secondaryTextColor } = useThemeColors();
 
     // Debug log in development
     if (import.meta.env.DEV) {
@@ -30,10 +32,10 @@ function ProductList({ products, isLoading, viewMode = 'grid' }) {
         return (
             <div className="text-center py-12">
                 <div className="text-6xl mb-4">📚</div>
-                <h3 className="text-xl font-semibold mb-2" style={{ color: '#1E293B' }}>
+                <h3 className="text-xl font-semibold mb-2" style={{ color: primaryTextColor }}>
                     {t('products.noProducts') || 'No Products Found'}
                 </h3>
-                <p className="text-base opacity-70" style={{ color: '#2d3748' }}>
+                <p className="text-base opacity-70" style={{ color: secondaryTextColor }}>
                     {t('products.noProductsDescription') || 'Try adjusting your filters or search terms.'}
                 </p>
             </div>
@@ -70,21 +72,21 @@ function ProductList({ products, isLoading, viewMode = 'grid' }) {
 
                             {/* Content */}
                             <div className="flex-grow">
-                                <h3 className="text-lg font-semibold mb-2" style={{ color: '#1E293B' }}>
+                                <h3 className="text-lg font-semibold mb-2" style={{ color: primaryTextColor }}>
                                     {product.name}
                                 </h3>
                                 {product.description && (
-                                    <p className="text-sm opacity-70 line-clamp-2 mb-2" style={{ color: '#2d3748' }}>
+                                    <p className="text-sm opacity-70 line-clamp-2 mb-2" style={{ color: secondaryTextColor }}>
                                         {product.description}
                                     </p>
                                 )}
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <span className="text-lg font-bold" style={{ color: '#1E293B' }}>
+                                        <span className="text-lg font-bold" style={{ color: primaryTextColor }}>
                                             {product.discountPrice || product.price} ৳
                                         </span>
                                         {product.discountPrice && (
-                                            <span className="text-sm line-through opacity-50 ml-2" style={{ color: '#2d3748' }}>
+                                            <span className="text-sm line-through opacity-50 ml-2" style={{ color: secondaryTextColor }}>
                                                 {product.price} ৳
                                             </span>
                                         )}
@@ -92,7 +94,7 @@ function ProductList({ products, isLoading, viewMode = 'grid' }) {
                                     <Link
                                         to={`/products/${product._id}`}
                                         className="btn btn-sm btn-primary text-white"
-                                        style={{ backgroundColor: '#1E293B' }}
+                                        style={{ backgroundColor: buttonColor }}
                                     >
                                         {t('products.viewDetails') || 'View Details'}
                                     </Link>

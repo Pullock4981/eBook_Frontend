@@ -8,9 +8,11 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { selectUserProfile } from '../../store/slices/userSlice';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 function ProfileForm({ onSubmit, isLoading = false }) {
     const { t } = useTranslation();
+    const { buttonColor, primaryTextColor, secondaryTextColor, backgroundColor } = useThemeColors();
     const profile = useSelector(selectUserProfile);
 
     const [isEditing, setIsEditing] = useState(false);
@@ -98,7 +100,7 @@ function ProfileForm({ onSubmit, isLoading = false }) {
     if (!profile) {
         return (
             <div className="text-center py-8">
-                <p className="text-sm opacity-70" style={{ color: '#64748b' }}>
+                <p className="text-sm opacity-70" style={{ color: secondaryTextColor }}>
                     {t('common.loading') || 'Loading profile...'}
                 </p>
             </div>
@@ -113,11 +115,17 @@ function ProfileForm({ onSubmit, isLoading = false }) {
                     <button
                         type="button"
                         onClick={handleEdit}
-                        className="btn btn-outline btn-sm sm:btn-md px-5 py-2.5 text-sm font-medium hover:bg-gray-50 transition-all"
+                        className="btn btn-outline btn-sm sm:btn-md px-5 py-2.5 text-sm font-medium transition-all"
                         style={{
-                            borderColor: '#1E293B',
-                            color: '#1E293B',
-                            backgroundColor: '#ffffff'
+                            borderColor: buttonColor,
+                            color: primaryTextColor,
+                            backgroundColor: backgroundColor
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = secondaryTextColor + '20';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = backgroundColor;
                         }}
                     >
                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -132,7 +140,7 @@ function ProfileForm({ onSubmit, isLoading = false }) {
                 {/* User Name */}
                 <div className="form-control w-full">
                     <label className="label pb-1.5">
-                        <span className="label-text text-sm font-medium" style={{ color: '#1E293B' }}>
+                        <span className="label-text text-sm font-medium" style={{ color: primaryTextColor }}>
                             User Name
                             <span className="text-error ml-1">*</span>
                         </span>
@@ -144,12 +152,12 @@ function ProfileForm({ onSubmit, isLoading = false }) {
                                 name="name"
                                 value={formData.name}
                                 onChange={handleChange}
-                                className={`input input-bordered w-full h-11 text-sm border-2 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-blue-500 ${errors.name ? 'input-error border-error' : ''
+                                className={`input input-bordered w-full h-11 text-sm border-2 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-primary ${errors.name ? 'input-error border-error' : ''
                                     }`}
                                 style={{
-                                    backgroundColor: '#ffffff',
-                                    color: '#1E293B',
-                                    borderColor: errors.name ? '#EF4444' : '#cbd5e1',
+                                    backgroundColor: backgroundColor,
+                                    color: primaryTextColor,
+                                    borderColor: errors.name ? '#EF4444' : secondaryTextColor,
                                     paddingLeft: '16px',
                                     paddingRight: '16px'
                                 }}
@@ -163,9 +171,9 @@ function ProfileForm({ onSubmit, isLoading = false }) {
                         </>
                     ) : (
                         <div className="px-4 py-2.5 min-h-[44px] flex items-center text-sm rounded-lg border-2" style={{
-                            backgroundColor: '#f8fafc',
-                            color: '#1E293B',
-                            borderColor: '#e2e8f0'
+                            backgroundColor: secondaryTextColor + '20',
+                            color: primaryTextColor,
+                            borderColor: secondaryTextColor
                         }}>
                             {profile.profile?.name || profile.name || '-'}
                         </div>
@@ -175,9 +183,9 @@ function ProfileForm({ onSubmit, isLoading = false }) {
                 {/* User Email */}
                 <div className="form-control w-full">
                     <label className="label pb-1.5">
-                        <span className="label-text text-sm font-medium" style={{ color: '#1E293B' }}>
+                        <span className="label-text text-sm font-medium" style={{ color: primaryTextColor }}>
                             User Email
-                            <span className="label-text-alt text-xs opacity-70 ml-2" style={{ color: '#64748b' }}>
+                            <span className="label-text-alt text-xs opacity-70 ml-2" style={{ color: secondaryTextColor }}>
                                 Optional
                             </span>
                         </span>
@@ -189,12 +197,12 @@ function ProfileForm({ onSubmit, isLoading = false }) {
                                 name="email"
                                 value={formData.email}
                                 onChange={handleChange}
-                                className={`input input-bordered w-full h-11 text-sm border-2 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-blue-500 ${errors.email ? 'input-error border-error' : ''
+                                className={`input input-bordered w-full h-11 text-sm border-2 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-primary ${errors.email ? 'input-error border-error' : ''
                                     }`}
                                 style={{
-                                    backgroundColor: '#ffffff',
-                                    color: '#1E293B',
-                                    borderColor: errors.email ? '#EF4444' : '#cbd5e1',
+                                    backgroundColor: backgroundColor,
+                                    color: primaryTextColor,
+                                    borderColor: errors.email ? '#EF4444' : secondaryTextColor,
                                     paddingLeft: '16px',
                                     paddingRight: '16px'
                                 }}
@@ -208,9 +216,9 @@ function ProfileForm({ onSubmit, isLoading = false }) {
                         </>
                     ) : (
                         <div className="px-4 py-2.5 min-h-[44px] flex items-center text-sm rounded-lg border-2" style={{
-                            backgroundColor: '#f8fafc',
-                            color: (profile.profile?.email || profile.email) ? '#1E293B' : '#94a3b8',
-                            borderColor: '#e2e8f0'
+                            backgroundColor: secondaryTextColor + '20',
+                            color: (profile.profile?.email || profile.email) ? primaryTextColor : secondaryTextColor,
+                            borderColor: secondaryTextColor
                         }}>
                             {profile.profile?.email || profile.email || t('common.notProvided') || 'Not provided'}
                         </div>
@@ -220,19 +228,19 @@ function ProfileForm({ onSubmit, isLoading = false }) {
                 {/* Phone Number (Read-only) */}
                 <div className="form-control w-full">
                     <label className="label pb-1.5">
-                        <span className="label-text text-sm font-medium" style={{ color: '#1E293B' }}>
+                        <span className="label-text text-sm font-medium" style={{ color: primaryTextColor }}>
                             Phone Number
                         </span>
                     </label>
                     <div className="px-4 py-2.5 min-h-[44px] flex items-center text-sm rounded-lg border-2" style={{
-                        backgroundColor: '#f1f5f9',
-                        color: '#64748b',
-                        borderColor: '#cbd5e1'
+                        backgroundColor: secondaryTextColor + '20',
+                        color: secondaryTextColor,
+                        borderColor: secondaryTextColor
                     }}>
                         {profile.mobile || '-'}
                     </div>
                     <label className="label pt-1">
-                        <span className="label-text-alt text-xs opacity-70" style={{ color: '#64748b' }}>
+                        <span className="label-text-alt text-xs opacity-70" style={{ color: secondaryTextColor }}>
                             {t('user.mobileCannotChange') || 'Mobile number cannot be changed'}
                         </span>
                     </label>
@@ -240,15 +248,21 @@ function ProfileForm({ onSubmit, isLoading = false }) {
 
                 {/* Action Buttons - Edit Mode */}
                 {isEditing && (
-                    <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 sm:pt-6 border-t" style={{ borderColor: '#e2e8f0' }}>
+                    <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 sm:pt-6 border-t" style={{ borderColor: secondaryTextColor }}>
                         <button
                             type="button"
                             onClick={handleCancel}
-                            className="btn btn-outline w-full sm:w-auto px-6 py-2.5 text-sm font-medium hover:bg-gray-50 transition-all order-2 sm:order-1"
+                            className="btn btn-outline w-full sm:w-auto px-6 py-2.5 text-sm font-medium transition-all order-2 sm:order-1"
                             style={{
-                                borderColor: '#cbd5e1',
-                                color: '#1E293B',
-                                backgroundColor: '#ffffff'
+                                borderColor: secondaryTextColor,
+                                color: primaryTextColor,
+                                backgroundColor: backgroundColor
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = secondaryTextColor + '20';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = backgroundColor;
                             }}
                             disabled={isLoading}
                         >
@@ -258,8 +272,8 @@ function ProfileForm({ onSubmit, isLoading = false }) {
                             type="submit"
                             className="btn btn-primary text-white w-full sm:w-auto px-6 py-2.5 text-sm font-medium shadow-sm hover:shadow-md transition-all order-1 sm:order-2"
                             style={{
-                                backgroundColor: '#1E293B',
-                                borderColor: '#1E293B'
+                                backgroundColor: buttonColor,
+                                borderColor: buttonColor
                             }}
                             disabled={isLoading}
                         >

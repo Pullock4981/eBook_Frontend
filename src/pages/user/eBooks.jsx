@@ -12,11 +12,13 @@ import { fetchUserEBooks, selectEBooks, selectEBookLoading, selectEBookError, cl
 import { selectIsAuthenticated } from '../../store/slices/authSlice';
 import eBookCard from '../../components/ebook/eBookCard';
 import Loading from '../../components/common/Loading';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 function eBooks() {
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { buttonColor, primaryTextColor, secondaryTextColor, backgroundColor } = useThemeColors();
     const isAuthenticated = useSelector(selectIsAuthenticated);
     const eBooks = useSelector(selectEBooks);
     const isLoading = useSelector(selectEBookLoading);
@@ -43,14 +45,14 @@ function eBooks() {
     }
 
     return (
-        <div className="min-h-screen" style={{ backgroundColor: '#EFECE3' }}>
+        <div style={{ backgroundColor }}>
             <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
                 {/* Header */}
                 <div className="mb-6 sm:mb-8">
-                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2" style={{ color: '#1E293B' }}>
+                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2" style={{ color: primaryTextColor }}>
                         {t('ebook.myEBooks') || 'My eBooks'}
                     </h1>
-                    <p className="text-sm sm:text-base opacity-70" style={{ color: '#2d3748' }}>
+                    <p className="text-sm sm:text-base opacity-70" style={{ color: secondaryTextColor }}>
                         {t('ebook.myEBooksDescription') || 'Access and read your purchased eBooks'}
                     </p>
                 </div>
@@ -72,15 +74,15 @@ function eBooks() {
                     </div>
                 ) : eBooks.length === 0 ? (
                     /* Empty State */
-                    <div className="card bg-base-100 shadow-sm border-2" style={{ borderColor: '#e2e8f0' }}>
+                    <div className="card bg-base-100 shadow-sm border-2" style={{ borderColor: secondaryTextColor, backgroundColor }}>
                         <div className="flex flex-col items-center justify-center py-12 sm:py-16 px-4">
-                            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center mb-4 sm:mb-6" style={{ backgroundColor: '#f1f5f9' }}>
+                            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center mb-4 sm:mb-6" style={{ backgroundColor: secondaryTextColor + '20' }}>
                                 <svg
                                     className="w-10 h-10 sm:w-12 sm:h-12"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
-                                    style={{ color: '#94a3b8' }}
+                                    style={{ color: secondaryTextColor }}
                                 >
                                     <path
                                         strokeLinecap="round"
@@ -90,16 +92,16 @@ function eBooks() {
                                     />
                                 </svg>
                             </div>
-                            <h3 className="text-lg sm:text-xl font-semibold mb-2" style={{ color: '#1E293B' }}>
+                            <h3 className="text-lg sm:text-xl font-semibold mb-2" style={{ color: primaryTextColor }}>
                                 {t('ebook.noEBooks') || 'No eBooks Yet'}
                             </h3>
-                            <p className="text-sm sm:text-base text-center opacity-70 mb-6 max-w-md" style={{ color: '#2d3748' }}>
+                            <p className="text-sm sm:text-base text-center opacity-70 mb-6 max-w-md" style={{ color: secondaryTextColor }}>
                                 {t('ebook.noEBooksDescription') || "You haven't purchased any eBooks yet. Browse our collection and start reading!"}
                             </p>
                             <Link
                                 to="/products"
                                 className="btn btn-primary text-white"
-                                style={{ backgroundColor: '#1E293B' }}
+                                style={{ backgroundColor: buttonColor }}
                             >
                                 {t('ebook.browseBooks') || 'Browse Books'}
                             </Link>

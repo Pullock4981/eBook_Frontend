@@ -10,11 +10,13 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { createCoupon, fetchAllCoupons } from '../../../store/slices/couponSlice';
 import CouponForm from '../../../components/admin/CouponForm';
+import { useThemeColors } from '../../../hooks/useThemeColors';
 
 function CouponCreate() {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const { buttonColor, primaryTextColor, secondaryTextColor, backgroundColor } = useThemeColors();
     const [isLoading, setIsLoading] = useState(false);
 
     const handleSubmit = async (formData) => {
@@ -37,18 +39,18 @@ function CouponCreate() {
     };
 
     return (
-        <div className="w-full pb-4" style={{ backgroundColor: '#EFECE3' }}>
+        <div className="w-full pb-4" style={{ backgroundColor }}>
             {/* Header Section */}
             <div className="w-full mb-3 sm:mb-4 md:mb-6 lg:mb-8">
                 <div className="flex items-start gap-3 sm:gap-4 mb-2 px-3 sm:px-0">
                     {/* Vertical indicator */}
-                    <div className="w-1 h-8 sm:h-10 rounded-full flex-shrink-0 mt-1" style={{ backgroundColor: '#1E293B' }}></div>
+                    <div className="w-1 h-8 sm:h-10 rounded-full flex-shrink-0 mt-1" style={{ backgroundColor: buttonColor }}></div>
                     {/* Title and description */}
                     <div className="flex-1 min-w-0">
-                        <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-1 sm:mb-2" style={{ color: '#1E293B' }}>
+                        <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-1 sm:mb-2" style={{ color: primaryTextColor }}>
                             {t('admin.createCoupon') || 'Create Coupon'}
                         </h1>
-                        <p className="text-xs sm:text-sm md:text-base lg:text-lg opacity-70" style={{ color: '#2d3748' }}>
+                        <p className="text-xs sm:text-sm md:text-base lg:text-lg opacity-70" style={{ color: secondaryTextColor }}>
                             {t('admin.createCouponDescription') || 'Add a new discount coupon'}
                         </p>
                     </div>

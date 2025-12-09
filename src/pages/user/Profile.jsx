@@ -13,6 +13,7 @@ import { selectIsAuthenticated, updateUser } from '../../store/slices/authSlice'
 import ProfileForm from '../../components/user/ProfileForm';
 import PasswordForm from '../../components/user/PasswordForm';
 import Loading from '../../components/common/Loading';
+import { useThemeColors } from '../../hooks/useThemeColors';
 // Toast notifications - using browser alert for now, can be replaced with toast library
 const toast = {
     success: (message) => alert(message),
@@ -23,6 +24,7 @@ function Profile() {
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { buttonColor, primaryTextColor, secondaryTextColor, backgroundColor } = useThemeColors();
     const isAuthenticated = useSelector(selectIsAuthenticated);
     const profile = useSelector(selectUserProfile);
     const isLoading = useSelector(selectUserLoading);
@@ -86,26 +88,26 @@ function Profile() {
     }
 
     return (
-        <div className="min-h-screen" style={{ backgroundColor: '#EFECE3' }}>
+        <div style={{ backgroundColor }}>
             <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
                 {/* Header */}
                 <div className="mb-6 sm:mb-8">
-                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2" style={{ color: '#1E293B' }}>
+                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2" style={{ color: primaryTextColor }}>
                         {t('user.profile') || 'My Profile'}
                     </h1>
-                    <p className="text-sm sm:text-base opacity-70" style={{ color: '#2d3748' }}>
+                    <p className="text-sm sm:text-base opacity-70" style={{ color: secondaryTextColor }}>
                         {t('user.profileDescription') || 'Manage your profile information and password'}
                     </p>
                 </div>
 
                 {/* Tabs */}
-                <div className="tabs tabs-boxed mb-6 bg-white p-1 rounded-lg" style={{ border: '1px solid #e2e8f0' }}>
+                <div className="tabs tabs-boxed mb-6 bg-base-100 p-1 rounded-lg border" style={{ borderColor: secondaryTextColor, backgroundColor }}>
                     <button
                         className={`tab flex-1 text-sm sm:text-base font-medium px-3 sm:px-4 py-2 sm:py-2.5 rounded-md transition-all ${activeTab === 'profile' ? 'tab-active' : ''}`}
                         onClick={() => setActiveTab('profile')}
                         style={{
-                            backgroundColor: activeTab === 'profile' ? '#1E293B' : 'transparent',
-                            color: activeTab === 'profile' ? '#ffffff' : '#64748b'
+                            backgroundColor: activeTab === 'profile' ? buttonColor : 'transparent',
+                            color: activeTab === 'profile' ? '#ffffff' : secondaryTextColor
                         }}
                     >
                         {t('user.profileInfo') || 'Profile Information'}
@@ -114,8 +116,8 @@ function Profile() {
                         className={`tab flex-1 text-sm sm:text-base font-medium px-3 sm:px-4 py-2 sm:py-2.5 rounded-md transition-all ${activeTab === 'password' ? 'tab-active' : ''}`}
                         onClick={() => setActiveTab('password')}
                         style={{
-                            backgroundColor: activeTab === 'password' ? '#1E293B' : 'transparent',
-                            color: activeTab === 'password' ? '#ffffff' : '#64748b'
+                            backgroundColor: activeTab === 'password' ? buttonColor : 'transparent',
+                            color: activeTab === 'password' ? '#ffffff' : secondaryTextColor
                         }}
                     >
                         {t('user.changePassword') || 'Change Password'}
@@ -123,7 +125,7 @@ function Profile() {
                 </div>
 
                 {/* Content */}
-                <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 md:p-8" style={{ border: '1px solid #e2e8f0' }}>
+                <div className="bg-base-100 rounded-lg shadow-sm p-4 sm:p-6 md:p-8 border" style={{ borderColor: secondaryTextColor, backgroundColor }}>
                     {activeTab === 'profile' ? (
                         isLoading && !profile ? (
                             <div className="flex justify-center items-center py-12">

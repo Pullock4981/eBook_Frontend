@@ -9,10 +9,12 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { setSearchQuery, searchProducts } from '../../store/slices/productSlice';
 import { debounce } from '../../utils/helpers';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 function ProductSearch({ onSearch }) {
     const { t } = useTranslation();
     const dispatch = useDispatch();
+    const { primaryTextColor, secondaryTextColor, backgroundColor } = useThemeColors();
     const [searchTerm, setSearchTerm] = useState('');
 
     // Debounced search function
@@ -46,21 +48,22 @@ function ProductSearch({ onSearch }) {
                 <input
                     type="text"
                     placeholder={t('products.searchPlaceholder') || 'Search products...'}
-                    className="input input-bordered w-full pl-10 pr-10"
+                    className="input input-bordered w-full pl-9 sm:pl-10 pr-9 sm:pr-10 text-sm sm:text-base"
                     value={searchTerm}
                     onChange={handleChange}
                     style={{
-                        borderColor: '#e2e8f0',
-                        color: '#1E293B',
+                        borderColor: secondaryTextColor,
+                        color: primaryTextColor,
+                        backgroundColor
                     }}
                 />
                 {/* Search Icon */}
                 <svg
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 opacity-50"
+                    className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 opacity-50"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
-                    style={{ color: '#1E293B' }}
+                    style={{ color: secondaryTextColor }}
                 >
                     <path
                         strokeLinecap="round"
@@ -74,11 +77,12 @@ function ProductSearch({ onSearch }) {
                     <button
                         type="button"
                         onClick={handleClear}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 btn btn-ghost btn-xs btn-circle"
+                        className="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 btn btn-ghost btn-xs btn-circle p-1"
+                        style={{ color: secondaryTextColor }}
                         aria-label="Clear search"
                     >
                         <svg
-                            className="w-4 h-4"
+                            className="w-3 h-3 sm:w-4 sm:h-4"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"

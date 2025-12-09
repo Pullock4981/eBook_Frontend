@@ -13,11 +13,13 @@ import { selectIsAuthenticated } from '../../../store/slices/authSlice';
 import Loading from '../../../components/common/Loading';
 import Pagination from '../../../components/common/Pagination';
 import { formatCurrency, formatDate } from '../../../utils/helpers';
+import { useThemeColors } from '../../../hooks/useThemeColors';
 
 function AdminOrderList() {
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { buttonColor, primaryTextColor, secondaryTextColor, backgroundColor } = useThemeColors();
     const isAuthenticated = useSelector(selectIsAuthenticated);
     const orders = useSelector(selectOrders);
     const isLoading = useSelector(selectOrdersLoading);
@@ -130,14 +132,14 @@ function AdminOrderList() {
     }
 
     return (
-        <div style={{ backgroundColor: '#EFECE3' }}>
+        <div style={{ backgroundColor }}>
             <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
                 {/* Page Header */}
-                <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-5 mb-6" style={{ borderColor: '#e2e8f0' }}>
-                    <h1 className="text-2xl sm:text-3xl font-bold mb-1" style={{ color: '#1E293B' }}>
+                <div className="bg-base-100 rounded-lg shadow-sm border p-4 sm:p-5 mb-6" style={{ borderColor: secondaryTextColor, backgroundColor }}>
+                    <h1 className="text-2xl sm:text-3xl font-bold mb-1" style={{ color: primaryTextColor }}>
                         {t('admin.orders.title') || 'Orders Management'}
                     </h1>
-                    <p className="text-sm opacity-70" style={{ color: '#64748b' }}>
+                    <p className="text-sm opacity-70" style={{ color: secondaryTextColor }}>
                         {t('admin.orders.subtitle') || 'View and manage all orders'}
                     </p>
                 </div>
@@ -158,15 +160,15 @@ function AdminOrderList() {
                         <Loading />
                     </div>
                 ) : orders.length === 0 ? (
-                    <div className="bg-white rounded-lg shadow-sm border">
+                    <div className="bg-base-100 rounded-lg shadow-sm border" style={{ borderColor: secondaryTextColor, backgroundColor }}>
                         <div className="flex flex-col items-center justify-center py-12 sm:py-16 px-4">
-                            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center mb-4 sm:mb-6" style={{ backgroundColor: '#f1f5f9' }}>
+                            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center mb-4 sm:mb-6" style={{ backgroundColor: secondaryTextColor + '20' }}>
                                 <svg
                                     className="w-10 h-10 sm:w-12 sm:h-12"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
-                                    style={{ color: '#94a3b8' }}
+                                    style={{ color: secondaryTextColor }}
                                 >
                                     <path
                                         strokeLinecap="round"
@@ -177,10 +179,10 @@ function AdminOrderList() {
                                 </svg>
                             </div>
                             <div className="text-center">
-                                <h3 className="text-lg sm:text-xl md:text-2xl font-semibold mb-2 sm:mb-3" style={{ color: '#1E293B' }}>
+                                <h3 className="text-lg sm:text-xl md:text-2xl font-semibold mb-2 sm:mb-3" style={{ color: primaryTextColor }}>
                                     {t('admin.orders.noOrders') || 'No Orders Found'}
                                 </h3>
-                                <p className="text-sm sm:text-base opacity-70 px-4" style={{ color: '#64748b' }}>
+                                <p className="text-sm sm:text-base opacity-70 px-4" style={{ color: secondaryTextColor }}>
                                     No orders have been placed yet.
                                 </p>
                             </div>
@@ -189,11 +191,11 @@ function AdminOrderList() {
                 ) : (
                     <>
                         {/* Orders Table */}
-                        <div className="bg-white rounded-lg shadow-sm border overflow-hidden" style={{ borderColor: '#e2e8f0' }}>
+                        <div className="bg-base-100 rounded-lg shadow-sm border overflow-hidden" style={{ borderColor: secondaryTextColor, backgroundColor }}>
                             <div className="overflow-x-auto">
                                 <table className="table w-full">
                                     <thead>
-                                        <tr style={{ backgroundColor: '#6B8E6B' }}>
+                                        <tr style={{ backgroundColor: buttonColor }}>
                                             <th className="text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>Order ID</th>
                                             <th className="text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>Customer</th>
                                             <th className="text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>Items</th>
@@ -206,34 +208,41 @@ function AdminOrderList() {
                                     </thead>
                                     <tbody>
                                         {orders.map((order) => (
-                                            <tr key={order._id} className="hover:bg-gray-50 transition-colors border-b" style={{ borderColor: '#e2e8f0' }}>
+                                            <tr key={order._id} className="transition-colors border-b" style={{ borderColor: secondaryTextColor }}
+                                                onMouseEnter={(e) => {
+                                                    e.currentTarget.style.backgroundColor = secondaryTextColor + '20';
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    e.currentTarget.style.backgroundColor = 'transparent';
+                                                }}
+                                            >
                                                 <td className="py-3 px-4">
-                                                    <div className="font-mono text-xs sm:text-sm font-medium" style={{ color: '#1E293B' }}>
+                                                    <div className="font-mono text-xs sm:text-sm font-medium" style={{ color: primaryTextColor }}>
                                                         {order.orderId || order._id}
                                                     </div>
                                                 </td>
                                                 <td className="py-3 px-4">
-                                                    <div className="text-sm font-medium" style={{ color: '#1E293B' }}>
+                                                    <div className="text-sm font-medium" style={{ color: primaryTextColor }}>
                                                         {order.user?.profile?.name || order.user?.mobile || 'N/A'}
                                                     </div>
-                                                    <div className="text-xs opacity-70 mt-0.5" style={{ color: '#64748b' }}>
+                                                    <div className="text-xs opacity-70 mt-0.5" style={{ color: secondaryTextColor }}>
                                                         {order.user?.profile?.email || order.user?.mobile || ''}
                                                     </div>
                                                 </td>
                                                 <td className="py-3 px-4">
-                                                    <div className="text-sm" style={{ color: '#1E293B' }}>
+                                                    <div className="text-sm" style={{ color: primaryTextColor }}>
                                                         {t('orders.items', { count: order.items?.length || 0 }) || `${order.items?.length || 0} item(s)`}
                                                     </div>
                                                 </td>
                                                 <td className="py-3 px-4">
-                                                    <div className="font-semibold text-sm" style={{ color: '#1E293B' }}>
+                                                    <div className="font-semibold text-sm" style={{ color: primaryTextColor }}>
                                                         {formatCurrency(order.total)}
                                                     </div>
                                                 </td>
                                                 <td className="py-3 px-4">{getPaymentStatusBadge(order.paymentStatus)}</td>
                                                 <td className="py-3 px-4">{getStatusBadge(order.orderStatus)}</td>
                                                 <td className="py-3 px-4">
-                                                    <div className="text-xs" style={{ color: '#64748b' }}>
+                                                    <div className="text-xs" style={{ color: secondaryTextColor }}>
                                                         {formatDate(order.createdAt)}
                                                     </div>
                                                 </td>
@@ -246,7 +255,7 @@ function AdminOrderList() {
                                                                 setShowPaymentModal(true);
                                                             }}
                                                             className="btn btn-xs text-white px-3 py-1.5 font-medium transition-all duration-200 hover:shadow-sm"
-                                                            style={{ backgroundColor: '#1E293B', paddingLeft: '0.75rem', paddingRight: '0.75rem', paddingTop: '0.375rem', paddingBottom: '0.375rem' }}
+                                                            style={{ backgroundColor: buttonColor, paddingLeft: '0.75rem', paddingRight: '0.75rem', paddingTop: '0.375rem', paddingBottom: '0.375rem' }}
                                                         >
                                                             {t('admin.orders.updatePayment') || 'Payment'}
                                                         </button>
@@ -257,7 +266,7 @@ function AdminOrderList() {
                                                                 setShowStatusModal(true);
                                                             }}
                                                             className="btn btn-xs text-white px-3 py-1.5 font-medium transition-all duration-200 hover:shadow-sm"
-                                                            style={{ backgroundColor: '#1E293B', paddingLeft: '0.75rem', paddingRight: '0.75rem', paddingTop: '0.375rem', paddingBottom: '0.375rem' }}
+                                                            style={{ backgroundColor: buttonColor, paddingLeft: '0.75rem', paddingRight: '0.75rem', paddingTop: '0.375rem', paddingBottom: '0.375rem' }}
                                                         >
                                                             {t('admin.orders.updateStatus') || 'Status'}
                                                         </button>
@@ -289,13 +298,13 @@ function AdminOrderList() {
                 {/* Payment Status Modal */}
                 {showPaymentModal && selectedOrder && (
                     <div className="modal modal-open">
-                        <div className="modal-box">
-                            <h3 className="font-bold text-lg mb-4" style={{ color: '#1E293B' }}>
+                        <div className="modal-box" style={{ backgroundColor }}>
+                            <h3 className="font-bold text-lg mb-4" style={{ color: primaryTextColor }}>
                                 {t('admin.orders.updatePaymentStatus') || 'Update Payment Status'}
                             </h3>
                             <div className="form-control mb-4">
                                 <label className="label">
-                                    <span className="label-text" style={{ color: '#1E293B' }}>
+                                    <span className="label-text" style={{ color: primaryTextColor }}>
                                         {t('admin.orders.paymentStatus') || 'Payment Status'}
                                     </span>
                                 </label>
@@ -303,7 +312,7 @@ function AdminOrderList() {
                                     className="select select-bordered w-full"
                                     value={paymentStatus}
                                     onChange={(e) => setPaymentStatus(e.target.value)}
-                                    style={{ borderColor: '#cbd5e1', color: '#1E293B' }}
+                                    style={{ borderColor: secondaryTextColor, backgroundColor, color: primaryTextColor }}
                                 >
                                     <option value="pending">Pending</option>
                                     <option value="processing">Processing</option>
@@ -314,7 +323,7 @@ function AdminOrderList() {
                             </div>
                             <div className="form-control mb-4">
                                 <label className="label">
-                                    <span className="label-text" style={{ color: '#1E293B' }}>
+                                    <span className="label-text" style={{ color: primaryTextColor }}>
                                         {t('admin.orders.transactionId') || 'Transaction ID'} ({t('common.optional') || 'Optional'})
                                     </span>
                                 </label>
@@ -324,7 +333,7 @@ function AdminOrderList() {
                                     value={transactionId}
                                     onChange={(e) => setTransactionId(e.target.value)}
                                     placeholder="Enter transaction ID"
-                                    style={{ borderColor: '#cbd5e1', color: '#1E293B' }}
+                                    style={{ borderColor: secondaryTextColor, backgroundColor, color: primaryTextColor }}
                                 />
                             </div>
                             <div className="modal-action">
@@ -335,13 +344,14 @@ function AdminOrderList() {
                                         setSelectedOrder(null);
                                         setTransactionId('');
                                     }}
+                                    style={{ color: primaryTextColor }}
                                 >
                                     {t('common.cancel') || 'Cancel'}
                                 </button>
                                 <button
                                     className="btn btn-primary text-white"
                                     onClick={handleUpdatePaymentStatus}
-                                    style={{ backgroundColor: '#1E293B' }}
+                                    style={{ backgroundColor: buttonColor }}
                                 >
                                     {t('common.update') || 'Update'}
                                 </button>
@@ -358,13 +368,13 @@ function AdminOrderList() {
                 {/* Order Status Modal */}
                 {showStatusModal && selectedOrder && (
                     <div className="modal modal-open">
-                        <div className="modal-box">
-                            <h3 className="font-bold text-lg mb-4" style={{ color: '#1E293B' }}>
+                        <div className="modal-box" style={{ backgroundColor }}>
+                            <h3 className="font-bold text-lg mb-4" style={{ color: primaryTextColor }}>
                                 {t('admin.orders.updateOrderStatus') || 'Update Order Status'}
                             </h3>
                             <div className="form-control mb-4">
                                 <label className="label">
-                                    <span className="label-text" style={{ color: '#1E293B' }}>
+                                    <span className="label-text" style={{ color: primaryTextColor }}>
                                         {t('admin.orders.orderStatus') || 'Order Status'}
                                     </span>
                                 </label>
@@ -372,7 +382,7 @@ function AdminOrderList() {
                                     className="select select-bordered w-full"
                                     value={orderStatus}
                                     onChange={(e) => setOrderStatus(e.target.value)}
-                                    style={{ borderColor: '#cbd5e1', color: '#1E293B' }}
+                                    style={{ borderColor: secondaryTextColor, backgroundColor, color: primaryTextColor }}
                                 >
                                     <option value="pending">Pending</option>
                                     <option value="confirmed">Confirmed</option>
@@ -389,13 +399,14 @@ function AdminOrderList() {
                                         setShowStatusModal(false);
                                         setSelectedOrder(null);
                                     }}
+                                    style={{ color: primaryTextColor }}
                                 >
                                     {t('common.cancel') || 'Cancel'}
                                 </button>
                                 <button
                                     className="btn btn-primary text-white"
                                     onClick={handleUpdateOrderStatus}
-                                    style={{ backgroundColor: '#1E293B' }}
+                                    style={{ backgroundColor: buttonColor }}
                                 >
                                     {t('common.update') || 'Update'}
                                 </button>

@@ -8,9 +8,11 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getCategories, createCategory, deleteCategory } from '../../../services/adminService';
 import Loading from '../../../components/common/Loading';
+import { useThemeColors } from '../../../hooks/useThemeColors';
 
 function CategoryList() {
     const { t } = useTranslation();
+    const { buttonColor, primaryTextColor, secondaryTextColor, backgroundColor, errorColor } = useThemeColors();
     const [categories, setCategories] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -100,23 +102,23 @@ function CategoryList() {
     };
 
     return (
-        <div style={{ backgroundColor: '#EFECE3' }}>
+        <div style={{ backgroundColor }}>
             <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 md:py-8">
                 <div className="space-y-5 sm:space-y-6">
                     {/* Header */}
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-4 bg-white rounded-lg shadow-sm border p-4 sm:p-5" style={{ borderColor: '#e2e8f0' }}>
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-4 bg-base-100 rounded-lg shadow-sm border p-4 sm:p-5" style={{ borderColor: secondaryTextColor, backgroundColor }}>
                         <div className="flex-1 min-w-0">
-                            <h1 className="text-2xl sm:text-3xl font-bold truncate mb-1" style={{ color: '#1E293B' }}>
+                            <h1 className="text-2xl sm:text-3xl font-bold truncate mb-1" style={{ color: primaryTextColor }}>
                                 {t('nav.categoryManagement') || 'Category Management'}
                             </h1>
-                            <p className="text-sm opacity-70" style={{ color: '#64748b' }}>
+                            <p className="text-sm opacity-70" style={{ color: secondaryTextColor }}>
                                 Manage all product categories
                             </p>
                         </div>
                         <button
                             onClick={() => setShowAddForm(!showAddForm)}
                             className="btn btn-primary text-white btn-sm sm:btn-md flex-shrink-0 px-4 py-2.5 font-medium transition-all duration-200 hover:shadow-md"
-                            style={{ backgroundColor: '#1E293B', paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '0.625rem', paddingBottom: '0.625rem' }}
+                            style={{ backgroundColor: buttonColor, paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '0.625rem', paddingBottom: '0.625rem' }}
                         >
                             <svg
                                 className="w-4 h-4 sm:w-5 sm:h-5"
@@ -137,11 +139,11 @@ function CategoryList() {
 
                     {/* Add Category Form */}
                     {showAddForm && (
-                        <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-5" style={{ borderColor: '#e2e8f0' }}>
-                            <h2 className="text-lg font-semibold mb-4" style={{ color: '#1E293B' }}>Add New Category</h2>
+                        <div className="bg-base-100 rounded-lg shadow-sm border p-4 sm:p-5" style={{ borderColor: secondaryTextColor, backgroundColor }}>
+                            <h2 className="text-lg font-semibold mb-4" style={{ color: primaryTextColor }}>Add New Category</h2>
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium mb-2" style={{ color: '#1E293B' }}>
+                                    <label className="block text-sm font-medium mb-2" style={{ color: primaryTextColor }}>
                                         Category Name <span className="text-red-500">*</span>
                                     </label>
                                     <input
@@ -151,12 +153,12 @@ function CategoryList() {
                                         onChange={handleInputChange}
                                         placeholder="Enter category name"
                                         className="input input-bordered w-full border-2 px-4 py-2.5"
-                                        style={{ borderColor: '#cbd5e1', paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '0.625rem', paddingBottom: '0.625rem' }}
+                                        style={{ borderColor: secondaryTextColor, backgroundColor, color: primaryTextColor, paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '0.625rem', paddingBottom: '0.625rem' }}
                                         required
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium mb-2" style={{ color: '#1E293B' }}>
+                                    <label className="block text-sm font-medium mb-2" style={{ color: primaryTextColor }}>
                                         Description
                                     </label>
                                     <textarea
@@ -166,7 +168,7 @@ function CategoryList() {
                                         placeholder="Enter category description (optional)"
                                         rows="3"
                                         className="textarea textarea-bordered w-full border-2 px-4 py-2.5"
-                                        style={{ borderColor: '#cbd5e1', paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '0.625rem', paddingBottom: '0.625rem' }}
+                                        style={{ borderColor: secondaryTextColor, backgroundColor, color: primaryTextColor, paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '0.625rem', paddingBottom: '0.625rem' }}
                                     />
                                 </div>
                                 <div className="flex items-center gap-2">
@@ -177,7 +179,7 @@ function CategoryList() {
                                         onChange={handleInputChange}
                                         className="checkbox checkbox-sm"
                                     />
-                                    <label className="text-sm font-medium" style={{ color: '#1E293B' }}>
+                                    <label className="text-sm font-medium" style={{ color: primaryTextColor }}>
                                         Active
                                     </label>
                                 </div>
@@ -186,7 +188,7 @@ function CategoryList() {
                                         type="submit"
                                         disabled={createLoading}
                                         className="btn btn-primary text-white px-5 py-2.5 font-medium transition-all duration-200 hover:shadow-md"
-                                        style={{ backgroundColor: '#1E293B', paddingLeft: '1.25rem', paddingRight: '1.25rem', paddingTop: '0.625rem', paddingBottom: '0.625rem' }}
+                                        style={{ backgroundColor: buttonColor, paddingLeft: '1.25rem', paddingRight: '1.25rem', paddingTop: '0.625rem', paddingBottom: '0.625rem' }}
                                     >
                                         {createLoading ? (
                                             <>
@@ -208,7 +210,13 @@ function CategoryList() {
                                             });
                                         }}
                                         className="btn btn-outline px-5 py-2.5 font-medium"
-                                        style={{ borderColor: '#1E293B', color: '#1E293B', paddingLeft: '1.25rem', paddingRight: '1.25rem', paddingTop: '0.625rem', paddingBottom: '0.625rem' }}
+                                        style={{ borderColor: buttonColor, color: primaryTextColor, backgroundColor, paddingLeft: '1.25rem', paddingRight: '1.25rem', paddingTop: '0.625rem', paddingBottom: '0.625rem' }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.backgroundColor = secondaryTextColor + '20';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.backgroundColor = backgroundColor;
+                                        }}
                                     >
                                         Cancel
                                     </button>
@@ -230,15 +238,15 @@ function CategoryList() {
                             <Loading />
                         </div>
                     ) : categories.length === 0 ? (
-                        <div className="bg-white rounded-lg shadow-sm border">
+                        <div className="bg-base-100 rounded-lg shadow-sm border" style={{ borderColor: secondaryTextColor, backgroundColor }}>
                             <div className="flex flex-col items-center justify-center py-12 sm:py-16 px-4">
-                                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center mb-4 sm:mb-6" style={{ backgroundColor: '#f1f5f9' }}>
+                                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center mb-4 sm:mb-6" style={{ backgroundColor: secondaryTextColor + '20' }}>
                                     <svg
                                         className="w-10 h-10 sm:w-12 sm:h-12"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
-                                        style={{ color: '#94a3b8' }}
+                                        style={{ color: secondaryTextColor }}
                                     >
                                         <path
                                             strokeLinecap="round"
@@ -249,16 +257,16 @@ function CategoryList() {
                                     </svg>
                                 </div>
                                 <div className="text-center">
-                                    <h3 className="text-lg sm:text-xl md:text-2xl font-semibold mb-2 sm:mb-3" style={{ color: '#1E293B' }}>
+                                    <h3 className="text-lg sm:text-xl md:text-2xl font-semibold mb-2 sm:mb-3" style={{ color: primaryTextColor }}>
                                         No Categories Found
                                     </h3>
-                                    <p className="text-sm sm:text-base opacity-70 mb-4 sm:mb-6 px-4" style={{ color: '#2d3748' }}>
+                                    <p className="text-sm sm:text-base opacity-70 mb-4 sm:mb-6 px-4" style={{ color: secondaryTextColor }}>
                                         Add your first category to get started!
                                     </p>
                                     <button
                                         onClick={() => setShowAddForm(true)}
                                         className="btn btn-primary text-white inline-flex items-center gap-2 btn-sm sm:btn-md"
-                                        style={{ backgroundColor: '#1E293B' }}
+                                        style={{ backgroundColor: buttonColor }}
                                     >
                                         <svg
                                             className="w-4 h-4 sm:w-5 sm:h-5"
@@ -279,11 +287,11 @@ function CategoryList() {
                             </div>
                         </div>
                     ) : (
-                        <div className="bg-white rounded-lg shadow-sm border overflow-hidden" style={{ borderColor: '#e2e8f0' }}>
+                        <div className="bg-base-100 rounded-lg shadow-sm border overflow-hidden" style={{ borderColor: secondaryTextColor, backgroundColor }}>
                             <div className="overflow-x-auto">
                                 <table className="table w-full">
                                     <thead>
-                                        <tr style={{ backgroundColor: '#6B8E6B' }}>
+                                        <tr style={{ backgroundColor: buttonColor }}>
                                             <th className="text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>Name</th>
                                             <th className="hidden md:table-cell text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>Description</th>
                                             <th className="text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>Status</th>
@@ -292,14 +300,21 @@ function CategoryList() {
                                     </thead>
                                     <tbody>
                                         {categories.map((category) => (
-                                            <tr key={category._id || category.id} className="hover:bg-gray-50 transition-colors border-b" style={{ borderColor: '#e2e8f0' }}>
+                                            <tr key={category._id || category.id} className="transition-colors border-b" style={{ borderColor: secondaryTextColor }}
+                                                onMouseEnter={(e) => {
+                                                    e.currentTarget.style.backgroundColor = secondaryTextColor + '20';
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    e.currentTarget.style.backgroundColor = 'transparent';
+                                                }}
+                                            >
                                                 <td className="py-3 px-4">
-                                                    <div className="font-medium text-sm" style={{ color: '#1E293B' }}>
+                                                    <div className="font-medium text-sm" style={{ color: primaryTextColor }}>
                                                         {category.name}
                                                     </div>
                                                 </td>
                                                 <td className="hidden md:table-cell py-3 px-4">
-                                                    <span className="text-xs sm:text-sm opacity-70 line-clamp-2">
+                                                    <span className="text-xs sm:text-sm opacity-70 line-clamp-2" style={{ color: secondaryTextColor }}>
                                                         {category.description || '-'}
                                                     </span>
                                                 </td>
@@ -312,7 +327,7 @@ function CategoryList() {
                                                     <button
                                                         onClick={() => handleDelete(category._id || category.id)}
                                                         className="btn btn-sm text-white px-4 py-2"
-                                                        style={{ backgroundColor: '#dc2626', paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '0.5rem', paddingBottom: '0.5rem' }}
+                                                        style={{ backgroundColor: errorColor || '#dc2626', paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '0.5rem', paddingBottom: '0.5rem' }}
                                                         disabled={deleteLoading === (category._id || category.id)}
                                                     >
                                                         {deleteLoading === (category._id || category.id) ? (

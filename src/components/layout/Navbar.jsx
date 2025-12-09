@@ -19,6 +19,7 @@ import Logo from '../common/Logo';
 import { useTranslation } from 'react-i18next';
 import { getInitials } from '../../utils/helpers';
 import { getCurrentUser } from '../../services/userService';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 function Navbar() {
     const { t } = useTranslation();
@@ -30,6 +31,7 @@ function Navbar() {
     const profile = useSelector(selectUserProfile);
     const cartItemCount = useSelector(selectCartItemCount);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const { buttonColor, primaryTextColor, secondaryTextColor, backgroundColor, isDark } = useThemeColors();
 
     const handleLogout = () => {
         dispatch(logout());
@@ -136,8 +138,8 @@ function Navbar() {
                                 }`}
                             style={
                                 isActive('/')
-                                    ? { backgroundColor: '#1E293B', color: '#ffffff' }
-                                    : { color: '#1E293B' }
+                                    ? { backgroundColor: buttonColor, color: '#ffffff' }
+                                    : { color: primaryTextColor }
                             }
                         >
                             {t('nav.home') || 'Home'}
@@ -152,8 +154,8 @@ function Navbar() {
                                     }`}
                                 style={
                                     isActive('/products')
-                                        ? { backgroundColor: '#1E293B', color: '#ffffff' }
-                                        : { color: '#1E293B' }
+                                        ? { backgroundColor: buttonColor, color: '#ffffff' }
+                                        : { color: primaryTextColor }
                                 }
                             >
                                 {t('nav.products') || 'Products'}
@@ -169,8 +171,8 @@ function Navbar() {
                                     }`}
                                 style={
                                     isActive('/ebooks')
-                                        ? { backgroundColor: '#1E293B', color: '#ffffff' }
-                                        : { color: '#1E293B' }
+                                        ? { backgroundColor: buttonColor, color: '#ffffff' }
+                                        : { color: primaryTextColor }
                                 }
                             >
                                 {t('nav.readPDF') || 'Read PDF'}
@@ -188,8 +190,8 @@ function Navbar() {
                                             }`}
                                         style={
                                             isActive('/dashboard')
-                                                ? { backgroundColor: '#1E293B', color: '#ffffff' }
-                                                : { color: '#1E293B' }
+                                                ? { backgroundColor: buttonColor, color: '#ffffff' }
+                                                : { color: primaryTextColor }
                                         }
                                     >
                                         {t('nav.dashboard') || 'Dashboard'}
@@ -205,8 +207,8 @@ function Navbar() {
                                             }`}
                                         style={
                                             isActive('/admin')
-                                                ? { backgroundColor: '#1E293B', color: '#ffffff' }
-                                                : { color: '#1E293B' }
+                                                ? { backgroundColor: buttonColor, color: '#ffffff' }
+                                                : { color: primaryTextColor }
                                         }
                                     >
                                         {t('nav.adminDashboard') || 'Admin Dashboard'}
@@ -242,7 +244,7 @@ function Navbar() {
                             />
                         </svg>
                         {cartItemCount > 0 && (
-                            <span className="absolute -top-1 -right-1 badge badge-sm badge-primary text-white" style={{ backgroundColor: '#1E293B' }}>
+                            <span className="absolute -top-1 -right-1 badge badge-sm badge-primary text-white" style={{ backgroundColor: buttonColor }}>
                                 {cartItemCount > 99 ? '99+' : cartItemCount}
                             </span>
                         )}
@@ -265,30 +267,30 @@ function Navbar() {
                         <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
                             <div
                                 className="w-10 rounded-full flex items-center justify-center text-white text-sm font-semibold"
-                                style={{ backgroundColor: '#1E293B' }}
+                                style={{ backgroundColor: buttonColor }}
                             >
                                 {user?.profile?.name ? getInitials(user.profile.name) : <span>U</span>}
                             </div>
                         </label>
                         <ul
                             tabIndex={0}
-                            className="menu menu-sm dropdown-content bg-base-100 rounded-lg z-[1] mt-3 w-56 p-3 shadow-xl border-2"
-                            style={{ borderColor: '#e2e8f0', backgroundColor: '#ffffff' }}
+                            className="dropdown-content menu menu-sm rounded-lg z-[1] mt-3 min-w-[200px] max-w-[280px] shadow-xl border"
+                            style={{ borderColor: secondaryTextColor, backgroundColor }}
                         >
                             {/* User Info Section */}
-                            <li className="mb-2 pb-2 border-b" style={{ borderColor: '#e2e8f0' }}>
-                                <div className="flex items-center gap-3 px-2 py-2">
+                            <li className="px-3 pt-3 pb-2 mb-2 border-b" style={{ borderColor: secondaryTextColor }}>
+                                <div className="flex items-center gap-3">
                                     <div
                                         className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-semibold flex-shrink-0"
-                                        style={{ backgroundColor: '#1E293B' }}
+                                        style={{ backgroundColor: buttonColor }}
                                     >
                                         {getUserInitial()}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-semibold text-sm truncate" style={{ color: '#1E293B' }}>
+                                        <p className="font-semibold text-sm truncate" style={{ color: primaryTextColor }}>
                                             {getUserName()}
                                         </p>
-                                        <p className="text-xs truncate opacity-70" style={{ color: '#64748b' }}>
+                                        <p className="text-xs truncate opacity-70" style={{ color: secondaryTextColor }}>
                                             {user?.mobile || user?.email || ''}
                                         </p>
                                     </div>
@@ -300,28 +302,67 @@ function Navbar() {
                                     <li>
                                         <Link
                                             to="/dashboard"
-                                            className={isActive('/dashboard') ? 'bg-base-200' : ''}
-                                            style={{ color: '#1E293B' }}
+                                            className="rounded-lg transition-colors"
+                                            style={{
+                                                color: primaryTextColor,
+                                                backgroundColor: isActive('/dashboard') ? buttonColor + '20' : 'transparent'
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                if (!isActive('/dashboard')) {
+                                                    e.target.style.backgroundColor = secondaryTextColor + '10';
+                                                }
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                if (!isActive('/dashboard')) {
+                                                    e.target.style.backgroundColor = 'transparent';
+                                                }
+                                            }}
                                         >
-                                            {t('nav.profile') || 'Profile'}
+                                            {t('nav.profile')}
                                         </Link>
                                     </li>
                                     <li>
                                         <Link
                                             to="/dashboard/orders"
-                                            className={isActive('/dashboard/orders') ? 'bg-base-200' : ''}
-                                            style={{ color: '#1E293B' }}
+                                            className="rounded-lg transition-colors"
+                                            style={{
+                                                color: primaryTextColor,
+                                                backgroundColor: isActive('/dashboard/orders') ? buttonColor + '20' : 'transparent'
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                if (!isActive('/dashboard/orders')) {
+                                                    e.target.style.backgroundColor = secondaryTextColor + '10';
+                                                }
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                if (!isActive('/dashboard/orders')) {
+                                                    e.target.style.backgroundColor = 'transparent';
+                                                }
+                                            }}
                                         >
-                                            {t('nav.orders') || 'My Orders'}
+                                            {t('nav.orders')}
                                         </Link>
                                     </li>
                                     <li>
                                         <Link
                                             to="/dashboard/ebooks"
-                                            className={isActive('/dashboard/ebooks') ? 'bg-base-200' : ''}
-                                            style={{ color: '#1E293B' }}
+                                            className="rounded-lg transition-colors"
+                                            style={{
+                                                color: primaryTextColor,
+                                                backgroundColor: isActive('/dashboard/ebooks') ? buttonColor + '20' : 'transparent'
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                if (!isActive('/dashboard/ebooks')) {
+                                                    e.target.style.backgroundColor = secondaryTextColor + '10';
+                                                }
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                if (!isActive('/dashboard/ebooks')) {
+                                                    e.target.style.backgroundColor = 'transparent';
+                                                }
+                                            }}
                                         >
-                                            {t('nav.ebooks') || 'My eBooks'}
+                                            {t('nav.ebooks')}
                                         </Link>
                                     </li>
                                 </>
@@ -331,20 +372,44 @@ function Navbar() {
                                 <li>
                                     <Link
                                         to="/admin"
-                                        className={isActive('/admin') ? 'bg-base-200' : ''}
-                                        style={{ color: '#1E293B' }}
+                                        className="rounded-lg transition-colors"
+                                        style={{
+                                            color: primaryTextColor,
+                                            backgroundColor: isActive('/admin') ? buttonColor + '20' : 'transparent'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            if (!isActive('/admin')) {
+                                                e.target.style.backgroundColor = secondaryTextColor + '10';
+                                            }
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            if (!isActive('/admin')) {
+                                                e.target.style.backgroundColor = 'transparent';
+                                            }
+                                        }}
                                     >
-                                        {t('nav.admin') || 'Admin Dashboard'}
+                                        {t('nav.admin')}
                                     </Link>
                                 </li>
                             )}
-                            <li className="mt-2 pt-2 border-t" style={{ borderColor: '#e2e8f0' }}>
+                            <li className="mt-2 pt-2 border-t px-2" style={{ borderColor: secondaryTextColor }}>
                                 <button
                                     onClick={handleLogout}
-                                    className="text-error hover:bg-error hover:text-white transition-colors"
-                                    style={{ color: '#dc2626' }}
+                                    className="rounded-lg transition-colors w-full text-left px-3 py-2"
+                                    style={{
+                                        color: '#dc2626',
+                                        backgroundColor: 'transparent'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.target.style.backgroundColor = '#dc2626';
+                                        e.target.style.color = '#ffffff';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.target.style.backgroundColor = 'transparent';
+                                        e.target.style.color = '#dc2626';
+                                    }}
                                 >
-                                    {t('nav.logout') || 'Logout'}
+                                    {t('nav.logout')}
                                 </button>
                             </li>
                         </ul>
@@ -355,8 +420,8 @@ function Navbar() {
                             to="/login"
                             className="btn btn-outline btn-sm border-2 font-medium"
                             style={{
-                                borderColor: '#1E293B',
-                                color: '#1E293B',
+                                borderColor: buttonColor,
+                                color: primaryTextColor,
                                 backgroundColor: 'transparent'
                             }}
                         >
@@ -366,7 +431,7 @@ function Navbar() {
                             to="/register"
                             className="btn btn-sm font-medium shadow-md"
                             style={{
-                                backgroundColor: '#1E293B',
+                                backgroundColor: buttonColor,
                                 color: '#ffffff',
                                 border: 'none'
                             }}
@@ -384,30 +449,30 @@ function Navbar() {
                             <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
                                 <div
                                     className="w-10 rounded-full flex items-center justify-center text-white text-sm font-semibold"
-                                    style={{ backgroundColor: '#1E293B' }}
+                                    style={{ backgroundColor: buttonColor }}
                                 >
                                     {user?.profile?.name ? getInitials(user.profile.name) : <span>U</span>}
                                 </div>
                             </label>
                             <ul
                                 tabIndex={0}
-                                className="menu menu-sm dropdown-content bg-base-100 rounded-lg z-[1] mt-3 w-56 p-3 shadow-xl border-2"
-                                style={{ borderColor: '#e2e8f0', backgroundColor: '#ffffff' }}
+                                className="menu menu-sm dropdown-content rounded-lg z-[1] mt-3 min-w-[200px] max-w-[280px] p-3 shadow-xl border"
+                                style={{ borderColor: secondaryTextColor, backgroundColor }}
                             >
                                 {/* User Info Section */}
-                                <li className="mb-2 pb-2 border-b" style={{ borderColor: '#e2e8f0' }}>
+                                <li className="mb-2 pb-2 border-b" style={{ borderColor: secondaryTextColor }}>
                                     <div className="flex items-center gap-3 px-2 py-2">
                                         <div
                                             className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-semibold flex-shrink-0"
-                                            style={{ backgroundColor: '#1E293B' }}
+                                            style={{ backgroundColor: buttonColor }}
                                         >
                                             {getUserInitial()}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <p className="font-semibold text-sm truncate" style={{ color: '#1E293B' }}>
+                                            <p className="font-semibold text-sm truncate" style={{ color: primaryTextColor }}>
                                                 {getUserName()}
                                             </p>
-                                            <p className="text-xs truncate opacity-70" style={{ color: '#64748b' }}>
+                                            <p className="text-xs truncate opacity-70" style={{ color: secondaryTextColor }}>
                                                 {user?.mobile || user?.email || ''}
                                             </p>
                                         </div>
@@ -419,28 +484,67 @@ function Navbar() {
                                         <li>
                                             <Link
                                                 to="/dashboard"
-                                                className={isActive('/dashboard') ? 'bg-base-200' : ''}
-                                                style={{ color: '#1E293B' }}
+                                                className="rounded-lg transition-colors"
+                                                style={{
+                                                    color: primaryTextColor,
+                                                    backgroundColor: isActive('/dashboard') ? buttonColor + '20' : 'transparent'
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    if (!isActive('/dashboard')) {
+                                                        e.target.style.backgroundColor = secondaryTextColor + '10';
+                                                    }
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    if (!isActive('/dashboard')) {
+                                                        e.target.style.backgroundColor = 'transparent';
+                                                    }
+                                                }}
                                             >
-                                                {t('nav.profile') || 'Profile'}
+                                                {t('nav.profile')}
                                             </Link>
                                         </li>
                                         <li>
                                             <Link
                                                 to="/dashboard/orders"
-                                                className={isActive('/dashboard/orders') ? 'bg-base-200' : ''}
-                                                style={{ color: '#1E293B' }}
+                                                className="rounded-lg transition-colors"
+                                                style={{
+                                                    color: primaryTextColor,
+                                                    backgroundColor: isActive('/dashboard/orders') ? buttonColor + '20' : 'transparent'
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    if (!isActive('/dashboard/orders')) {
+                                                        e.target.style.backgroundColor = secondaryTextColor + '10';
+                                                    }
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    if (!isActive('/dashboard/orders')) {
+                                                        e.target.style.backgroundColor = 'transparent';
+                                                    }
+                                                }}
                                             >
-                                                {t('nav.orders') || 'My Orders'}
+                                                {t('nav.orders')}
                                             </Link>
                                         </li>
                                         <li>
                                             <Link
                                                 to="/dashboard/ebooks"
-                                                className={isActive('/dashboard/ebooks') ? 'bg-base-200' : ''}
-                                                style={{ color: '#1E293B' }}
+                                                className="rounded-lg transition-colors"
+                                                style={{
+                                                    color: primaryTextColor,
+                                                    backgroundColor: isActive('/dashboard/ebooks') ? buttonColor + '20' : 'transparent'
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    if (!isActive('/dashboard/ebooks')) {
+                                                        e.target.style.backgroundColor = secondaryTextColor + '10';
+                                                    }
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    if (!isActive('/dashboard/ebooks')) {
+                                                        e.target.style.backgroundColor = 'transparent';
+                                                    }
+                                                }}
                                             >
-                                                {t('nav.ebooks') || 'My eBooks'}
+                                                {t('nav.ebooks')}
                                             </Link>
                                         </li>
                                     </>
@@ -450,20 +554,44 @@ function Navbar() {
                                     <li>
                                         <Link
                                             to="/admin"
-                                            className={isActive('/admin') ? 'bg-base-200' : ''}
-                                            style={{ color: '#1E293B' }}
+                                            className="rounded-lg transition-colors"
+                                            style={{
+                                                color: primaryTextColor,
+                                                backgroundColor: isActive('/admin') ? buttonColor + '20' : 'transparent'
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                if (!isActive('/admin')) {
+                                                    e.target.style.backgroundColor = secondaryTextColor + '10';
+                                                }
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                if (!isActive('/admin')) {
+                                                    e.target.style.backgroundColor = 'transparent';
+                                                }
+                                            }}
                                         >
-                                            {t('nav.admin') || 'Admin Dashboard'}
+                                            {t('nav.admin')}
                                         </Link>
                                     </li>
                                 )}
-                                <li className="mt-2 pt-2 border-t" style={{ borderColor: '#e2e8f0' }}>
+                                <li className="mt-2 pt-2 border-t px-2" style={{ borderColor: secondaryTextColor }}>
                                     <button
                                         onClick={handleLogout}
-                                        className="text-error hover:bg-error hover:text-white transition-colors"
-                                        style={{ color: '#dc2626' }}
+                                        className="rounded-lg transition-colors w-full text-left px-3 py-2"
+                                        style={{
+                                            color: '#dc2626',
+                                            backgroundColor: 'transparent'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.target.style.backgroundColor = '#dc2626';
+                                            e.target.style.color = '#ffffff';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.target.style.backgroundColor = 'transparent';
+                                            e.target.style.color = '#dc2626';
+                                        }}
                                     >
-                                        {t('nav.logout') || 'Logout'}
+                                        {t('nav.logout')}
                                     </button>
                                 </li>
                             </ul>
@@ -480,7 +608,7 @@ function Navbar() {
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
-                                style={{ color: '#1E293B' }}
+                                style={{ color: primaryTextColor }}
                             >
                                 <path
                                     strokeLinecap="round"
@@ -522,44 +650,26 @@ function Navbar() {
                     {/* Mobile Menu */}
                     {mobileMenuOpen && (
                         <ul
-                            className="menu menu-sm bg-base-100 rounded-lg z-[50] mt-3 w-72 p-4 shadow-2xl border-2 absolute right-0 top-full"
-                            style={{ borderColor: '#e2e8f0', backgroundColor: '#ffffff' }}
+                            className="menu menu-sm rounded-lg z-[50] mt-3 w-72 p-4 shadow-2xl border-2 absolute right-0 top-full"
+                            style={{ borderColor: secondaryTextColor, backgroundColor }}
                         >
-                            {/* Mobile Theme & Language */}
-                            <li className="flex gap-2 p-2 sm:hidden">
-                                <ThemeToggle />
-                                <LanguageSwitcher />
+                            {/* Mobile Theme & Language - Side by Side */}
+                            <li className="flex flex-row gap-2 p-2 sm:hidden mb-2 items-center justify-start">
+                                <div className="flex-shrink-0">
+                                    <ThemeToggle />
+                                </div>
+                                <div className="flex-shrink-0">
+                                    <LanguageSwitcher />
+                                </div>
                             </li>
-                            <li className="divider sm:hidden"></li>
-
-                            {/* User Info Section - Mobile */}
-                            {isAuthenticated && user && (
-                                <li className="mb-3 pb-3 border-b" style={{ borderColor: '#e2e8f0' }}>
-                                    <div className="flex items-center gap-3 px-2 py-2">
-                                        <div
-                                            className="w-12 h-12 rounded-full flex items-center justify-center text-white text-base font-semibold flex-shrink-0"
-                                            style={{ backgroundColor: '#1E293B' }}
-                                        >
-                                            {getUserInitial()}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="font-semibold text-sm truncate" style={{ color: '#1E293B' }}>
-                                                {getUserName()}
-                                            </p>
-                                            <p className="text-xs truncate opacity-70" style={{ color: '#64748b' }}>
-                                                {user?.mobile || user?.email || ''}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </li>
-                            )}
+                            <li className="divider sm:hidden my-2"></li>
 
                             {/* Mobile Navigation Links */}
                             <li>
                                 <Link
                                     to="/"
                                     className={`px-4 py-2.5 rounded-lg transition-colors ${isActive('/') ? 'bg-primary text-white font-semibold' : 'hover:bg-base-200'}`}
-                                    style={isActive('/') ? { backgroundColor: '#1E293B', color: '#ffffff' } : { color: '#1E293B' }}
+                                    style={isActive('/') ? { backgroundColor: buttonColor, color: '#ffffff' } : { color: primaryTextColor }}
                                     onClick={closeMobileMenu}
                                 >
                                     {t('nav.home') || 'Home'}
@@ -571,7 +681,7 @@ function Navbar() {
                                     <Link
                                         to="/products"
                                         className={`px-4 py-2.5 rounded-lg transition-colors ${isActive('/products') ? 'bg-primary text-white font-semibold' : 'hover:bg-base-200'}`}
-                                        style={isActive('/products') ? { backgroundColor: '#1E293B', color: '#ffffff' } : { color: '#1E293B' }}
+                                        style={isActive('/products') ? { backgroundColor: buttonColor, color: '#ffffff' } : { color: primaryTextColor }}
                                         onClick={closeMobileMenu}
                                     >
                                         {t('nav.products') || 'Products'}
@@ -584,7 +694,7 @@ function Navbar() {
                                     <Link
                                         to="/ebooks"
                                         className={`px-4 py-2.5 rounded-lg transition-colors ${isActive('/ebooks') ? 'bg-primary text-white font-semibold' : 'hover:bg-base-200'}`}
-                                        style={isActive('/ebooks') ? { backgroundColor: '#1E293B', color: '#ffffff' } : { color: '#1E293B' }}
+                                        style={isActive('/ebooks') ? { backgroundColor: buttonColor, color: '#ffffff' } : { color: primaryTextColor }}
                                         onClick={closeMobileMenu}
                                     >
                                         {t('nav.readPDF') || 'Read PDF'}
@@ -597,7 +707,7 @@ function Navbar() {
                                     <Link
                                         to="/cart"
                                         className={`px-4 py-2.5 rounded-lg transition-colors ${isActive('/cart') ? 'bg-primary text-white font-semibold' : 'hover:bg-base-200'}`}
-                                        style={isActive('/cart') ? { backgroundColor: '#1E293B', color: '#ffffff' } : { color: '#1E293B' }}
+                                        style={isActive('/cart') ? { backgroundColor: buttonColor, color: '#ffffff' } : { color: primaryTextColor }}
                                         onClick={closeMobileMenu}
                                     >
                                         {t('nav.cart') || 'Cart'}
@@ -612,7 +722,7 @@ function Navbar() {
                                             <Link
                                                 to="/dashboard"
                                                 className={`px-4 py-2.5 rounded-lg transition-colors ${isActive('/dashboard') ? 'bg-primary text-white font-semibold' : 'hover:bg-base-200'}`}
-                                                style={isActive('/dashboard') ? { backgroundColor: '#1E293B', color: '#ffffff' } : { color: '#1E293B' }}
+                                                style={isActive('/dashboard') ? { backgroundColor: buttonColor, color: '#ffffff' } : { color: primaryTextColor }}
                                                 onClick={closeMobileMenu}
                                             >
                                                 {t('nav.dashboard') || 'Dashboard'}
@@ -625,7 +735,7 @@ function Navbar() {
                                             <Link
                                                 to="/admin"
                                                 className={`px-4 py-2.5 rounded-lg transition-colors ${isActive('/admin') ? 'bg-primary text-white font-semibold' : 'hover:bg-base-200'}`}
-                                                style={isActive('/admin') ? { backgroundColor: '#1E293B', color: '#ffffff' } : { color: '#1E293B' }}
+                                                style={isActive('/admin') ? { backgroundColor: buttonColor, color: '#ffffff' } : { color: primaryTextColor }}
                                                 onClick={closeMobileMenu}
                                             >
                                                 {t('nav.adminDashboard') || 'Admin Dashboard'}
@@ -633,63 +743,104 @@ function Navbar() {
                                         </li>
                                     )}
                                     <li className="divider my-2"></li>
-                                    {/* Show user dashboard links only for non-admin users */}
-                                    {user?.role !== 'admin' && (
+
+                                    {/* Profile Section - Mobile */}
+                                    {isAuthenticated && user && (
                                         <>
-                                            <li>
-                                                <Link
-                                                    to="/dashboard"
-                                                    className={`px-4 py-2.5 rounded-lg transition-colors ${isActive('/dashboard') ? 'bg-base-200' : 'hover:bg-base-200'}`}
-                                                    style={{ color: '#1E293B' }}
-                                                    onClick={closeMobileMenu}
-                                                >
-                                                    {t('nav.profile') || 'Profile'}
-                                                </Link>
+                                            <li className="mb-2 pb-2 border-b" style={{ borderColor: secondaryTextColor }}>
+                                                <div className="flex items-center gap-3 px-2 py-2">
+                                                    <div
+                                                        className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-semibold flex-shrink-0"
+                                                        style={{ backgroundColor: buttonColor }}
+                                                    >
+                                                        {getUserInitial()}
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="font-semibold text-sm truncate" style={{ color: primaryTextColor }}>
+                                                            {getUserName()}
+                                                        </p>
+                                                        <p className="text-xs truncate opacity-70" style={{ color: secondaryTextColor }}>
+                                                            {user?.mobile || user?.email || ''}
+                                                        </p>
+                                                    </div>
+                                                </div>
                                             </li>
-                                            <li>
-                                                <Link
-                                                    to="/dashboard/orders"
-                                                    className={`px-4 py-2.5 rounded-lg transition-colors ${isActive('/dashboard/orders') ? 'bg-base-200' : 'hover:bg-base-200'}`}
-                                                    style={{ color: '#1E293B' }}
-                                                    onClick={closeMobileMenu}
+                                            {/* Show user dashboard links only for non-admin users */}
+                                            {user?.role !== 'admin' && (
+                                                <>
+                                                    <li>
+                                                        <Link
+                                                            to="/dashboard"
+                                                            className="px-4 py-2.5 rounded-lg transition-colors"
+                                                            style={{
+                                                                color: primaryTextColor,
+                                                                backgroundColor: isActive('/dashboard') ? buttonColor + '20' : 'transparent'
+                                                            }}
+                                                            onMouseEnter={(e) => {
+                                                                if (!isActive('/dashboard')) {
+                                                                    e.target.style.backgroundColor = secondaryTextColor + '10';
+                                                                }
+                                                            }}
+                                                            onMouseLeave={(e) => {
+                                                                if (!isActive('/dashboard')) {
+                                                                    e.target.style.backgroundColor = 'transparent';
+                                                                }
+                                                            }}
+                                                            onClick={closeMobileMenu}
+                                                        >
+                                                            {t('nav.profile')}
+                                                        </Link>
+                                                    </li>
+                                                </>
+                                            )}
+                                            {/* Show admin link for admin users in dropdown */}
+                                            {user?.role === 'admin' && (
+                                                <li>
+                                                    <Link
+                                                        to="/admin"
+                                                        className="px-4 py-2.5 rounded-lg transition-colors"
+                                                        style={{
+                                                            color: primaryTextColor,
+                                                            backgroundColor: isActive('/admin') ? buttonColor + '20' : 'transparent'
+                                                        }}
+                                                        onMouseEnter={(e) => {
+                                                            if (!isActive('/admin')) {
+                                                                e.target.style.backgroundColor = secondaryTextColor + '10';
+                                                            }
+                                                        }}
+                                                        onMouseLeave={(e) => {
+                                                            if (!isActive('/admin')) {
+                                                                e.target.style.backgroundColor = 'transparent';
+                                                            }
+                                                        }}
+                                                        onClick={closeMobileMenu}
+                                                    >
+                                                        {t('nav.admin')}
+                                                    </Link>
+                                                </li>
+                                            )}
+                                            <li className="mt-2 pt-2 border-t px-2" style={{ borderColor: secondaryTextColor }}>
+                                                <button
+                                                    onClick={handleLogout}
+                                                    className="px-3 py-2 rounded-lg transition-colors w-full text-left"
+                                                    style={{
+                                                        color: '#dc2626',
+                                                        backgroundColor: 'transparent'
+                                                    }}
+                                                    onMouseEnter={(e) => {
+                                                        e.target.style.backgroundColor = '#dc2626';
+                                                        e.target.style.color = '#ffffff';
+                                                    }}
+                                                    onMouseLeave={(e) => {
+                                                        e.target.style.backgroundColor = 'transparent';
+                                                        e.target.style.color = '#dc2626';
+                                                    }}
                                                 >
-                                                    {t('nav.orders') || 'My Orders'}
-                                                </Link>
-                                            </li>
-                                            <li>
-                                                <Link
-                                                    to="/dashboard/ebooks"
-                                                    className={`px-4 py-2.5 rounded-lg transition-colors ${isActive('/dashboard/ebooks') ? 'bg-base-200' : 'hover:bg-base-200'}`}
-                                                    style={{ color: '#1E293B' }}
-                                                    onClick={closeMobileMenu}
-                                                >
-                                                    {t('nav.ebooks') || 'My eBooks'}
-                                                </Link>
+                                                    {t('nav.logout')}
+                                                </button>
                                             </li>
                                         </>
                                     )}
-                                    {/* Show admin link for admin users in dropdown */}
-                                    {user?.role === 'admin' && (
-                                        <li>
-                                            <Link
-                                                to="/admin"
-                                                className={`px-4 py-2.5 rounded-lg transition-colors ${isActive('/admin') ? 'bg-base-200' : 'hover:bg-base-200'}`}
-                                                style={{ color: '#1E293B' }}
-                                                onClick={closeMobileMenu}
-                                            >
-                                                {t('nav.admin') || 'Admin Dashboard'}
-                                            </Link>
-                                        </li>
-                                    )}
-                                    <li className="mt-2 pt-2 border-t" style={{ borderColor: '#e2e8f0' }}>
-                                        <button
-                                            onClick={handleLogout}
-                                            className="px-4 py-2.5 rounded-lg text-error hover:bg-error hover:text-white transition-colors w-full text-left"
-                                            style={{ color: '#dc2626' }}
-                                        >
-                                            {t('nav.logout') || 'Logout'}
-                                        </button>
-                                    </li>
                                 </>
                             )}
                             {!isAuthenticated && (
@@ -700,8 +851,8 @@ function Navbar() {
                                             to="/login"
                                             className="btn btn-outline btn-block border-2 font-medium mb-2"
                                             style={{
-                                                borderColor: '#1E293B',
-                                                color: '#1E293B',
+                                                borderColor: buttonColor,
+                                                color: primaryTextColor,
                                                 backgroundColor: 'transparent'
                                             }}
                                             onClick={closeMobileMenu}
@@ -714,7 +865,7 @@ function Navbar() {
                                             to="/register"
                                             className="btn btn-block font-medium shadow-md"
                                             style={{
-                                                backgroundColor: '#1E293B',
+                                                backgroundColor: buttonColor,
                                                 color: '#ffffff',
                                                 border: 'none'
                                             }}

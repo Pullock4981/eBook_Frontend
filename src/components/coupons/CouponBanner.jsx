@@ -10,11 +10,13 @@ import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { fetchActiveCoupons } from '../../store/slices/couponSlice';
 import { formatCurrency, formatDate } from '../../utils/helpers';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 function CouponBanner() {
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { buttonColor, primaryTextColor, secondaryTextColor, backgroundColor } = useThemeColors();
     const [coupons, setCoupons] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -58,15 +60,15 @@ function CouponBanner() {
     }
 
     return (
-        <div className="w-full mb-4 sm:mb-5 md:mb-6">
-            <div className="card bg-base-100 border-2 shadow-md" style={{ borderColor: '#e2e8f0' }}>
-                <div className="card-body p-3 sm:p-4 md:p-5 lg:p-6">
-                    {/* Header */}
-                    <div className="flex items-center justify-between mb-3 sm:mb-4">
-                        <div className="flex items-center gap-2 sm:gap-3">
-                            <div className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#1E293B' }}>
+        <div className="w-full mb-3 sm:mb-4">
+            <div className="card bg-base-100 border shadow-sm" style={{ borderColor: secondaryTextColor, backgroundColor }}>
+                <div className="card-body p-2 sm:p-3 md:p-4">
+                    {/* Header - Minimal */}
+                    <div className="flex items-center justify-between mb-2 sm:mb-3">
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                            <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: buttonColor }}>
                                 <svg
-                                    className="w-4 h-4 sm:w-5 sm:h-5 text-white"
+                                    className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -79,41 +81,41 @@ function CouponBanner() {
                                     />
                                 </svg>
                             </div>
-                            <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold truncate" style={{ color: '#1E293B' }}>
+                            <h2 className="text-xs sm:text-sm md:text-base font-semibold truncate" style={{ color: primaryTextColor }}>
                                 {t('coupon.availableCoupons') || 'Available Coupons'}
                             </h2>
                         </div>
                     </div>
 
-                    {/* Coupons Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4">
-                        {coupons.map((coupon) => (
+                    {/* Coupons Grid - Compact */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">
+                        {coupons.slice(0, 5).map((coupon) => (
                             <div
                                 key={coupon._id}
-                                className="bg-white border rounded-lg hover:shadow-md transition-all cursor-pointer"
-                                style={{ borderColor: '#e2e8f0' }}
+                                className="bg-base-200 border rounded-md hover:shadow-sm transition-all cursor-pointer"
+                                style={{ borderColor: secondaryTextColor, backgroundColor }}
                                 onClick={() => navigate('/cart')}
                             >
-                                <div className="p-3 sm:p-4">
-                                    {/* Discount Badge */}
-                                    <div className="flex items-center justify-between mb-2 gap-2">
-                                        <span className="text-xs font-semibold text-white px-2 py-1 rounded flex-shrink-0" style={{ backgroundColor: '#1E293B' }}>
+                                <div className="p-2">
+                                    {/* Discount Badge - Compact */}
+                                    <div className="flex items-center justify-between mb-1.5 sm:mb-2 gap-1 flex-wrap">
+                                        <span className="text-[10px] sm:text-xs font-semibold text-white px-1.5 sm:px-2 py-0.5 sm:py-1 rounded flex-shrink-0" style={{ backgroundColor: buttonColor }}>
                                             {getDiscountDisplay(coupon)}
                                         </span>
                                         {coupon.type === 'percentage' && (
-                                            <span className="text-xs font-medium px-2 py-0.5 rounded flex-shrink-0" style={{ backgroundColor: '#fef3c7', color: '#92400e' }}>
+                                            <span className="text-[10px] sm:text-xs font-medium px-1 sm:px-1.5 py-0.5 rounded flex-shrink-0" style={{ backgroundColor: '#fef3c7', color: '#92400e' }}>
                                                 {t('coupon.off') || 'OFF'}
                                             </span>
                                         )}
                                     </div>
 
-                                    {/* Coupon Code */}
-                                    <div className="mb-2">
-                                        <p className="text-xs mb-1" style={{ color: '#94a3b8' }}>
+                                    {/* Coupon Code - Compact */}
+                                    <div className="mb-1.5 sm:mb-2">
+                                        <p className="text-[10px] sm:text-xs mb-0.5 opacity-70" style={{ color: secondaryTextColor }}>
                                             {t('coupon.code') || 'Code'}
                                         </p>
-                                        <div className="flex items-center gap-2">
-                                            <p className="font-bold text-sm truncate flex-1" style={{ color: '#1E293B' }}>
+                                        <div className="flex items-center gap-1">
+                                            <p className="font-bold text-xs sm:text-sm truncate flex-1" style={{ color: primaryTextColor }}>
                                                 {coupon.code}
                                             </p>
                                             <button
@@ -121,12 +123,12 @@ function CouponBanner() {
                                                     e.stopPropagation();
                                                     handleCopyCode(coupon.code);
                                                 }}
-                                                className="p-1 hover:bg-gray-100 rounded flex-shrink-0 transition-colors"
-                                                style={{ color: '#64748b' }}
+                                                className="p-0.5 sm:p-1 hover:opacity-70 rounded flex-shrink-0 transition-opacity"
+                                                style={{ color: secondaryTextColor }}
                                                 title={t('coupon.copyCode') || 'Copy code'}
                                             >
                                                 <svg
-                                                    className="w-3.5 h-3.5"
+                                                    className="w-3 h-3 sm:w-4 sm:h-4"
                                                     fill="none"
                                                     stroke="currentColor"
                                                     viewBox="0 0 24 24"
@@ -142,19 +144,19 @@ function CouponBanner() {
                                         </div>
                                     </div>
 
-                                    {/* Expiry Date */}
+                                    {/* Expiry Date - Compact */}
                                     {coupon.expiryDate && (
-                                        <div className="mb-2">
-                                            <p className="text-xs" style={{ color: '#94a3b8' }}>
-                                                Expires: <span className="font-medium" style={{ color: '#64748b' }}>{formatDate(coupon.expiryDate)}</span>
+                                        <div className="mb-1 sm:mb-1.5">
+                                            <p className="text-[10px] sm:text-xs opacity-70" style={{ color: secondaryTextColor }}>
+                                                Exp: <span className="font-medium">{formatDate(coupon.expiryDate)}</span>
                                             </p>
                                         </div>
                                     )}
 
-                                    {/* Usage Info */}
-                                    <div className="pt-2 border-t" style={{ borderColor: '#f1f5f9' }}>
-                                        <p className="text-xs" style={{ color: '#94a3b8' }}>
-                                            {coupon.usedCount || 0} / {coupon.usageLimit} {t('coupon.used') || 'used'}
+                                    {/* Usage Info - Compact */}
+                                    <div className="pt-1 sm:pt-1.5 border-t" style={{ borderColor: secondaryTextColor }}>
+                                        <p className="text-[10px] sm:text-xs opacity-70" style={{ color: secondaryTextColor }}>
+                                            {coupon.usedCount || 0}/{coupon.usageLimit}
                                         </p>
                                     </div>
                                 </div>
@@ -162,13 +164,13 @@ function CouponBanner() {
                         ))}
                     </div>
 
-                    {/* View Cart CTA */}
+                    {/* View Cart CTA - Compact */}
                     {coupons.length > 0 && (
-                        <div className="mt-3 sm:mt-4 md:mt-5 text-center">
+                        <div className="mt-2 sm:mt-3 text-center">
                             <button
                                 onClick={() => navigate('/cart')}
-                                className="btn btn-sm sm:btn-md btn-primary text-white px-4 sm:px-6 py-2 sm:py-2.5"
-                                style={{ backgroundColor: '#1E293B' }}
+                                className="btn btn-xs sm:btn-sm btn-primary text-white px-3 sm:px-4 py-1 sm:py-1.5 text-xs sm:text-sm"
+                                style={{ backgroundColor: buttonColor }}
                             >
                                 {t('coupon.useInCart') || 'Use in Cart'}
                             </button>

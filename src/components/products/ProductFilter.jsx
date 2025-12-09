@@ -12,10 +12,12 @@ import { selectFilters } from '../../store/slices/productSlice';
 import { selectMainCategories } from '../../store/slices/categorySlice';
 import { fetchMainCategories } from '../../store/slices/categorySlice';
 import { PRODUCT_TYPES } from '../../utils/constants';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 function ProductFilter({ onFilterChange }) {
     const { t } = useTranslation();
     const dispatch = useDispatch();
+    const { buttonColor, primaryTextColor, secondaryTextColor, backgroundColor } = useThemeColors();
     const filters = useSelector(selectFilters);
     const categories = useSelector(selectMainCategories);
 
@@ -75,15 +77,29 @@ function ProductFilter({ onFilterChange }) {
     };
 
     return (
-        <div className="bg-base-100 p-4 sm:p-6 rounded-lg shadow-sm border" style={{ borderColor: '#e2e8f0' }}>
+        <div className="bg-base-100 p-4 sm:p-6 rounded-lg shadow-sm border" style={{ borderColor: secondaryTextColor, backgroundColor }}>
             <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold" style={{ color: '#1E293B' }}>
+                <h3 className="text-lg font-semibold" style={{ color: primaryTextColor }}>
                     {t('products.filters') || 'Filters'}
                 </h3>
                 <button
                     onClick={handleClearFilters}
-                    className="btn btn-ghost btn-sm text-xs"
-                    style={{ color: '#1E293B' }}
+                    className="text-xs font-medium transition-colors"
+                    style={{
+                        color: buttonColor,
+                        backgroundColor: 'transparent',
+                        border: 'none',
+                        padding: '0',
+                        cursor: 'pointer'
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.color = '#7FB87F';
+                        e.currentTarget.style.opacity = '0.9';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.color = buttonColor;
+                        e.currentTarget.style.opacity = '1';
+                    }}
                 >
                     {t('common.clear') || 'Clear'}
                 </button>
@@ -93,7 +109,7 @@ function ProductFilter({ onFilterChange }) {
                 {/* Product Type Filter */}
                 <div>
                     <label className="label">
-                        <span className="label-text font-medium" style={{ color: '#1E293B' }}>
+                        <span className="label-text font-medium" style={{ color: primaryTextColor }}>
                             {t('products.productType') || 'Product Type'}
                         </span>
                     </label>
@@ -101,7 +117,7 @@ function ProductFilter({ onFilterChange }) {
                         className="select select-bordered w-full"
                         value={localFilters.type || ''}
                         onChange={(e) => handleFilterChange('type', e.target.value)}
-                        style={{ borderColor: '#e2e8f0', color: '#1E293B' }}
+                        style={{ borderColor: secondaryTextColor, color: primaryTextColor, backgroundColor }}
                     >
                         <option value="">{t('products.allTypes') || 'All Types'}</option>
                         <option value={PRODUCT_TYPES.PHYSICAL}>
@@ -116,7 +132,7 @@ function ProductFilter({ onFilterChange }) {
                 {/* Category Filter */}
                 <div>
                     <label className="label">
-                        <span className="label-text font-medium" style={{ color: '#1E293B' }}>
+                        <span className="label-text font-medium" style={{ color: primaryTextColor }}>
                             {t('products.category') || 'Category'}
                         </span>
                     </label>
@@ -124,7 +140,7 @@ function ProductFilter({ onFilterChange }) {
                         className="select select-bordered w-full"
                         value={localFilters.category || ''}
                         onChange={(e) => handleFilterChange('category', e.target.value)}
-                        style={{ borderColor: '#e2e8f0', color: '#1E293B' }}
+                        style={{ borderColor: secondaryTextColor, color: primaryTextColor, backgroundColor }}
                     >
                         <option value="">{t('products.allCategories') || 'All Categories'}</option>
                         {categories.map((category) => (
@@ -138,7 +154,7 @@ function ProductFilter({ onFilterChange }) {
                 {/* Price Range Filter */}
                 <div>
                     <label className="label">
-                        <span className="label-text font-medium" style={{ color: '#1E293B' }}>
+                        <span className="label-text font-medium" style={{ color: primaryTextColor }}>
                             {t('products.priceRange') || 'Price Range'}
                         </span>
                     </label>
@@ -149,7 +165,7 @@ function ProductFilter({ onFilterChange }) {
                             className="input input-bordered w-full"
                             value={priceRange.min}
                             onChange={(e) => handlePriceChange('min', e.target.value)}
-                            style={{ borderColor: '#e2e8f0', color: '#1E293B' }}
+                            style={{ borderColor: secondaryTextColor, color: primaryTextColor, backgroundColor }}
                         />
                         <input
                             type="number"
@@ -157,7 +173,7 @@ function ProductFilter({ onFilterChange }) {
                             className="input input-bordered w-full"
                             value={priceRange.max}
                             onChange={(e) => handlePriceChange('max', e.target.value)}
-                            style={{ borderColor: '#e2e8f0', color: '#1E293B' }}
+                            style={{ borderColor: secondaryTextColor, color: primaryTextColor, backgroundColor }}
                         />
                     </div>
                 </div>
@@ -165,12 +181,12 @@ function ProductFilter({ onFilterChange }) {
                 {/* Featured Products Filter */}
                 <div>
                     <label className="label">
-                        <span className="label-text font-medium" style={{ color: '#1E293B' }}>
+                        <span className="label-text font-medium" style={{ color: primaryTextColor }}>
                             {t('products.showProducts') || 'Show Products'}
                         </span>
                     </label>
                     <div className="space-y-2">
-                        <label className="label cursor-pointer p-3 rounded-lg border-2 hover:bg-base-200 transition-colors" style={{ borderColor: localFilters.isFeatured === undefined || localFilters.isFeatured === false ? '#1E293B' : '#e2e8f0' }}>
+                        <label className="label cursor-pointer p-3 rounded-lg border-2 hover:bg-base-200 transition-colors" style={{ borderColor: localFilters.isFeatured === undefined || localFilters.isFeatured === false ? buttonColor : secondaryTextColor, backgroundColor }}>
                             <div className="flex items-center gap-3">
                                 <input
                                     type="radio"
@@ -178,14 +194,14 @@ function ProductFilter({ onFilterChange }) {
                                     className="radio radio-primary"
                                     checked={localFilters.isFeatured === undefined || localFilters.isFeatured === false}
                                     onChange={() => handleFilterChange('isFeatured', undefined)}
-                                    style={{ accentColor: '#1E293B' }}
+                                    style={{ accentColor: buttonColor }}
                                 />
-                                <span className="label-text font-medium" style={{ color: '#1E293B' }}>
+                                <span className="label-text font-medium" style={{ color: primaryTextColor }}>
                                     {t('products.allProducts') || 'All Products'}
                                 </span>
                             </div>
                         </label>
-                        <label className="label cursor-pointer p-3 rounded-lg border-2 hover:bg-base-200 transition-colors" style={{ borderColor: localFilters.isFeatured === true ? '#1E293B' : '#e2e8f0' }}>
+                        <label className="label cursor-pointer p-3 rounded-lg border-2 hover:bg-base-200 transition-colors" style={{ borderColor: localFilters.isFeatured === true ? buttonColor : secondaryTextColor, backgroundColor }}>
                             <div className="flex items-center gap-3">
                                 <input
                                     type="radio"
@@ -193,9 +209,9 @@ function ProductFilter({ onFilterChange }) {
                                     className="radio radio-primary"
                                     checked={localFilters.isFeatured === true}
                                     onChange={() => handleFilterChange('isFeatured', true)}
-                                    style={{ accentColor: '#1E293B' }}
+                                    style={{ accentColor: buttonColor }}
                                 />
-                                <span className="label-text font-medium" style={{ color: '#1E293B' }}>
+                                <span className="label-text font-medium" style={{ color: primaryTextColor }}>
                                     {t('products.featuredOnly') || 'Featured Only'}
                                 </span>
                             </div>
@@ -206,7 +222,7 @@ function ProductFilter({ onFilterChange }) {
                 {/* Sort By */}
                 <div>
                     <label className="label">
-                        <span className="label-text font-medium" style={{ color: '#1E293B' }}>
+                        <span className="label-text font-medium" style={{ color: primaryTextColor }}>
                             {t('products.sortBy') || 'Sort By'}
                         </span>
                     </label>
@@ -214,7 +230,7 @@ function ProductFilter({ onFilterChange }) {
                         className="select select-bordered w-full"
                         value={localFilters.sortBy || 'createdAt'}
                         onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-                        style={{ borderColor: '#e2e8f0', color: '#1E293B' }}
+                        style={{ borderColor: secondaryTextColor, color: primaryTextColor, backgroundColor }}
                     >
                         <option value="createdAt">{t('products.newest') || 'Newest First'}</option>
                         <option value="price">{t('products.price') || 'Price'}</option>
@@ -226,7 +242,7 @@ function ProductFilter({ onFilterChange }) {
                 {/* Sort Order */}
                 <div>
                     <label className="label">
-                        <span className="label-text font-medium" style={{ color: '#1E293B' }}>
+                        <span className="label-text font-medium" style={{ color: primaryTextColor }}>
                             {t('products.sortOrder') || 'Order'}
                         </span>
                     </label>
@@ -234,7 +250,7 @@ function ProductFilter({ onFilterChange }) {
                         className="select select-bordered w-full"
                         value={localFilters.sortOrder || 'desc'}
                         onChange={(e) => handleFilterChange('sortOrder', e.target.value)}
-                        style={{ borderColor: '#e2e8f0', color: '#1E293B' }}
+                        style={{ borderColor: secondaryTextColor, color: primaryTextColor, backgroundColor }}
                     >
                         <option value="desc">{t('products.descending') || 'Descending'}</option>
                         <option value="asc">{t('products.ascending') || 'Ascending'}</option>
