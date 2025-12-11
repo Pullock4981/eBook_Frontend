@@ -5,7 +5,7 @@
  */
 
 import api from './api';
-import { API_ENDPOINTS } from '../utils/constants';
+import { API_ENDPOINTS, API_BASE_URL } from '../utils/constants';
 
 /**
  * Get user's purchased eBooks
@@ -42,7 +42,8 @@ export const getViewerURL = async (productId) => {
  * @returns {string} PDF URL
  */
 export const getPDFURL = (accessToken) => {
-    const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+    // Use API_BASE_URL from constants for consistency
+    const baseURL = import.meta.env.VITE_API_BASE_URL || API_BASE_URL;
     return `${baseURL}/ebooks/view?token=${accessToken}`;
 };
 
@@ -52,7 +53,8 @@ export const getPDFURL = (accessToken) => {
  * @returns {Promise<Blob>} PDF blob
  */
 export const getPDFBlob = async (accessToken) => {
-    const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+    // Use API_BASE_URL from constants for consistency
+    const baseURL = import.meta.env.VITE_API_BASE_URL || API_BASE_URL;
     const url = `${baseURL}/ebooks/view?token=${accessToken}`;
 
     const response = await api.get(url, {
