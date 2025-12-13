@@ -14,9 +14,12 @@ import { API_ENDPOINTS } from '../utils/constants';
  */
 export const createProduct = async (productData) => {
     try {
+        console.log('Admin Service - Creating Product:', productData);
         const response = await api.post(API_ENDPOINTS.PRODUCTS.LIST, productData);
+        console.log('Admin Service - Product Created:', response);
         return response;
     } catch (error) {
+        console.error('Admin Service - Create Product Error:', error);
         throw error;
     }
 };
@@ -29,9 +32,18 @@ export const createProduct = async (productData) => {
  */
 export const updateProduct = async (id, productData) => {
     try {
+        console.log('Admin Service - Updating Product:', { id, productData });
         const response = await api.put(`${API_ENDPOINTS.PRODUCTS.DETAIL}/${id}`, productData);
+        console.log('Admin Service - Product Updated:', response);
         return response;
     } catch (error) {
+        console.error('Admin Service - Update Product Error:', error);
+        console.error('Admin Service - Error Details:', {
+            message: error.message,
+            status: error.status,
+            data: error.data,
+            errors: error.errors
+        });
         throw error;
     }
 };

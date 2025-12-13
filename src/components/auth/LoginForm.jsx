@@ -11,12 +11,22 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
 import { validateMobile } from '../../utils/helpers';
 import { useNavigate } from 'react-router-dom';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 function LoginForm() {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const { requestOTP, loginWithPassword, isLoading, error, clearAuthError } = useAuth();
     const [showPassword, setShowPassword] = useState(false);
+    const {
+        buttonColor,
+        buttonTextColor,
+        primaryTextColor,
+        secondaryTextColor,
+        inputBackgroundColor,
+        borderColor,
+        errorColor
+    } = useThemeColors();
 
     const {
         register,
@@ -50,8 +60,23 @@ function LoginForm() {
         } else {
             // Request OTP
             const result = await requestOTP(data.mobile);
+            // Debug log
+            console.log('🔑 LoginForm - Full result:', result);
+            console.log('🔑 LoginForm - Result.otp:', result.otp);
+            console.log('🔑 LoginForm - Result.data:', result.data);
+            console.log('🔑 LoginForm - Result.data?.data:', result.data?.data);
+
             if (result.success) {
-                navigate('/verify-otp', { state: { mobile: data.mobile } });
+                // Extract OTP from result (multiple possible paths)
+                const otp = result.otp || result.data?.data?.otp || result.data?.otp || null;
+                console.log('🔑 LoginForm - Final OTP to pass:', otp);
+
+                navigate('/verify-otp', {
+                    state: {
+                        mobile: data.mobile,
+                        otp: otp // Pass OTP to OTP page
+                    }
+                });
             }
         }
     };
@@ -61,7 +86,7 @@ function LoginForm() {
             {/* Mobile Number */}
             <div className="form-control">
                 <label className="label">
-                    <span className="label-text font-medium" style={{ color: '#1E293B' }}>
+                    <span className="label-text font-medium" style={{ color: primaryTextColor }}>
                         {t('auth.login.mobileLabel')}
                     </span>
                 </label>
@@ -70,9 +95,10 @@ function LoginForm() {
                     placeholder={t('auth.login.mobilePlaceholder')}
                     className={`input input-bordered w-full ${errors.mobile ? 'input-error' : ''}`}
                     style={{
-                        backgroundColor: '#ffffff',
-                        borderColor: errors.mobile ? '#ef4444' : '#e2e8f0',
-                        color: '#1E293B',
+                        backgroundColor: inputBackgroundColor,
+                        borderColor: errors.mobile ? errorColor : borderColor,
+                        color: primaryTextColor,
+                        padding: '12px 16px',
                     }}
                     {...register('mobile', {
                         required: t('auth.errors.mobileRequired'),
@@ -94,8 +120,8 @@ function LoginForm() {
             {/* Password (Optional) */}
             <div className="form-control">
                 <label className="label">
-                    <span className="label-text font-medium" style={{ color: '#1E293B' }}>
-                        {t('auth.login.passwordLabel')} <span className="text-sm font-normal text-gray-500">({t('auth.login.optional') || 'Optional'})</span>
+                    <span className="label-text font-medium" style={{ color: primaryTextColor }}>
+                        {t('auth.login.passwordLabel')} <span className="text-sm font-normal" style={{ color: secondaryTextColor }}>({t('auth.login.optional') || 'Optional'})</span>
                     </span>
                 </label>
                 <div className="relative">
@@ -104,9 +130,10 @@ function LoginForm() {
                         placeholder={t('auth.login.passwordPlaceholder') || 'Enter password (leave empty for OTP login)'}
                         className={`input input-bordered w-full ${errors.password ? 'input-error' : ''}`}
                         style={{
-                            backgroundColor: '#ffffff',
-                            borderColor: errors.password ? '#ef4444' : '#e2e8f0',
-                            color: '#1E293B',
+                            backgroundColor: inputBackgroundColor,
+                            borderColor: errors.password ? errorColor : borderColor,
+                            color: primaryTextColor,
+                            padding: '12px 16px',
                         }}
                         {...register('password', {
                             required: false,
@@ -129,7 +156,7 @@ function LoginForm() {
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
-                                style={{ color: '#64748b' }}
+                                style={{ color: secondaryTextColor }}
                             >
                                 <path
                                     strokeLinecap="round"
@@ -144,7 +171,7 @@ function LoginForm() {
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
-                                style={{ color: '#64748b' }}
+                                style={{ color: secondaryTextColor }}
                             >
                                 <path
                                     strokeLinecap="round"
@@ -168,7 +195,7 @@ function LoginForm() {
                     </label>
                 )}
                 <label className="label">
-                    <span className="label-text-alt" style={{ color: '#64748b' }}>
+                    <span className="label-text-alt" style={{ color: secondaryTextColor }}>
                         {t('auth.login.passwordHint') || 'Leave empty to login with OTP'}
                     </span>
                 </label>
@@ -198,8 +225,8 @@ function LoginForm() {
             <div className="form-control mt-6">
                 <button
                     type="submit"
-                    className="btn w-full text-white font-medium"
-                    style={{ backgroundColor: '#1E293B' }}
+                    className="btn w-full font-medium"
+                    style={{ backgroundColor: buttonColor, color: buttonTextColor }}
                     disabled={isLoading}
                 >
                     {isLoading ? (

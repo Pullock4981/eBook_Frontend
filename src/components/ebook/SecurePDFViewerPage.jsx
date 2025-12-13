@@ -12,12 +12,9 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { selectIsAuthenticated, selectUser } from '../../store/slices/authSlice';
-import * as pdfjsLib from 'pdfjs-dist';
+import pdfjsLib from '../../utils/pdfjsConfig'; // Import configured PDF.js
 import Loading from '../common/Loading';
 import { useThemeColors } from '../../hooks/useThemeColors';
-
-// Configure PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 function SecurePDFViewerPage({ productId, pdfURL: initialPdfURL }) {
     const { t } = useTranslation();

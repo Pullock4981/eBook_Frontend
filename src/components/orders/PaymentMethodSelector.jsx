@@ -5,21 +5,47 @@
  */
 
 import { useTranslation } from 'react-i18next';
-
-const PAYMENT_METHODS = [
-    { value: 'sslcommerz', label: 'SSLCommerz', icon: '💳', description: 'Credit/Debit Card' },
-    { value: 'bkash', label: 'bKash', icon: '📱', description: 'Mobile Banking' },
-    { value: 'nagad', label: 'Nagad', icon: '📱', description: 'Mobile Banking' },
-    { value: 'cash_on_delivery', label: 'Cash on Delivery', icon: '💰', description: 'Pay when delivered' }
-];
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 function PaymentMethodSelector({ selectedMethod, onMethodChange }) {
     const { t } = useTranslation();
+    const { cardBackgroundColor, primaryTextColor, secondaryTextColor, borderColor, buttonColor } = useThemeColors();
+
+    const PAYMENT_METHODS = [
+        {
+            value: 'sslcommerz',
+            label: t('checkout.sslcommerzLabel') || 'SSLCommerz',
+            icon: '💳',
+            description: t('checkout.sslcommerzDesc') || 'Credit/Debit Card',
+            accent: '#0b8bd9',
+        },
+        {
+            value: 'bkash',
+            label: t('checkout.bkashLabel') || 'bKash',
+            icon: '📲',
+            description: t('checkout.bkashDesc') || 'Mobile Banking',
+            accent: '#E3106E',
+        },
+        {
+            value: 'nagad',
+            label: t('checkout.nagadLabel') || 'Nagad',
+            icon: '📲',
+            description: t('checkout.nagadDesc') || 'Mobile Banking',
+            accent: '#F5A623',
+        },
+        {
+            value: 'cash_on_delivery',
+            label: t('checkout.codLabel') || 'Cash on Delivery',
+            icon: '💰',
+            description: t('checkout.codDesc') || 'Pay when delivered',
+            accent: '#f59e0b',
+        },
+    ];
 
     return (
-        <div className="card bg-base-100 shadow-sm border-2" style={{ borderColor: '#e2e8f0' }}>
+        <div className="card shadow-sm border-2" style={{ borderColor, backgroundColor: cardBackgroundColor }}>
             <div className="card-body p-4">
-                <h3 className="text-lg font-semibold mb-4" style={{ color: '#1E293B' }}>
+                <h3 className="text-lg font-semibold mb-4" style={{ color: primaryTextColor }}>
                     {t('checkout.paymentMethod') || 'Payment Method'}
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -27,12 +53,12 @@ function PaymentMethodSelector({ selectedMethod, onMethodChange }) {
                         <label
                             key={method.value}
                             className={`flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${selectedMethod === method.value
-                                    ? 'border-primary bg-primary/5'
-                                    : 'border-base-300 hover:border-primary/50'
+                                ? 'border-primary bg-primary/5'
+                                : 'border-base-300 hover:border-primary/50'
                                 }`}
                             style={{
-                                borderColor: selectedMethod === method.value ? '#1E293B' : '#cbd5e1',
-                                backgroundColor: selectedMethod === method.value ? '#f1f5f9' : 'transparent'
+                                borderColor: selectedMethod === method.value ? buttonColor : borderColor,
+                                backgroundColor: selectedMethod === method.value ? `${buttonColor}15` : cardBackgroundColor,
                             }}
                         >
                             <input
@@ -42,15 +68,20 @@ function PaymentMethodSelector({ selectedMethod, onMethodChange }) {
                                 checked={selectedMethod === method.value}
                                 onChange={() => onMethodChange && onMethodChange(method.value)}
                                 className="radio radio-primary"
-                                style={{ accentColor: '#1E293B' }}
+                                style={{ accentColor: buttonColor }}
                             />
                             <div className="flex items-center gap-3 flex-grow">
-                                <span className="text-2xl">{method.icon}</span>
+                                <span
+                                    className="text-xl flex items-center justify-center rounded-full h-9 w-9"
+                                    style={{ backgroundColor: `${method.accent}22`, color: method.accent }}
+                                >
+                                    {method.icon}
+                                </span>
                                 <div>
-                                    <div className="font-semibold text-base" style={{ color: '#1E293B' }}>
+                                    <div className="font-semibold text-base" style={{ color: primaryTextColor }}>
                                         {method.label}
                                     </div>
-                                    <div className="text-xs opacity-70" style={{ color: '#2d3748' }}>
+                                    <div className="text-xs opacity-70" style={{ color: secondaryTextColor }}>
                                         {method.description}
                                     </div>
                                 </div>

@@ -21,15 +21,45 @@ function ProductCreate() {
     const [isLoading, setIsLoading] = useState(false);
 
     const handleSubmit = async (formData) => {
+        console.log('Product Create - Form Data:', formData);
         setIsLoading(true);
         try {
-            await createProduct(formData);
+            const response = await createProduct(formData);
+            console.log('Product Create - Success:', response);
+            
+            // Show success message
+            alert(t('admin.productCreated') || 'Product created successfully!');
+            
             // Refresh products list
             dispatch(fetchProducts({ filters: {}, page: 1, limit: 12 }));
+            
             // Navigate to products list
             navigate('/admin/products');
         } catch (error) {
-            alert(error.message || t('admin.createError') || 'Failed to create product');
+            console.error('Product Create - Error:', error);
+            console.error('Error Details:', {
+                message: error.message,
+                response: error.response,
+                data: error.data,
+                status: error.status
+            });
+            
+            // Better error message
+            let errorMessage = error.message || t('admin.createError') || 'Failed to create product';
+            
+            if (error.data?.message) {
+                errorMessage = error.data.message;
+            } else if (error.response?.data?.message) {
+                errorMessage = error.response.data.message;
+            } else if (error.status === 401) {
+                errorMessage = 'Authentication failed. Please login again.';
+            } else if (error.status === 403) {
+                errorMessage = 'You do not have permission to create products. Admin access required.';
+            } else if (error.status >= 500) {
+                errorMessage = 'Server error. Please try again later.';
+            }
+            
+            alert(errorMessage);
         } finally {
             setIsLoading(false);
         }

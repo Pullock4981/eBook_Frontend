@@ -28,21 +28,16 @@ export const registerAsAffiliate = async (affiliateData) => {
  */
 export const getAffiliateProfile = async () => {
     try {
-        console.log('Calling API - getAffiliateProfile');
         const response = await api.get('/affiliates/profile');
-        console.log('API Response:', response);
-        console.log('Response data:', response.data);
-        console.log('Response data structure:', {
-            success: response.data?.success,
-            hasData: !!response.data?.data,
-            hasAffiliate: !!response.data?.data?.affiliate,
-            affiliateStatus: response.data?.data?.affiliate?.status
-        });
+        // If response data is null (404 was suppressed), return null
+        if (!response || !response.data) {
+            return null;
+        }
         return response.data;
     } catch (error) {
-        console.error('API Error in getAffiliateProfile:', error);
-        console.error('Error response:', error.response);
-        throw error;
+        // Completely suppress all errors for affiliate profile - most users are not affiliates
+        // Return null silently - this is expected behavior
+        return null;
     }
 };
 

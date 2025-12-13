@@ -43,7 +43,26 @@ export const useAuth = () => {
             const response = await authService.register(normalizedMobile, name, password);
 
             dispatch(setLoading(false));
-            return { success: true, data: response };
+            // Extract OTP from response if available
+            // API interceptor returns response.data from axios
+            // Backend response: { success: true, data: { mobile, otp, ... } }
+            // So after interceptor: response = { success: true, data: { mobile, otp, ... } }
+            // OTP is at: response.data.otp
+            const otp = response?.data?.otp || response?.otp || null;
+
+            // Debug log in development
+            if (import.meta.env.DEV) {
+                console.log('🔑 Register - Full response:', response);
+                console.log('🔑 Register - Response.data:', response?.data);
+                console.log('🔑 Register - Response.data.otp:', response?.data?.otp);
+                console.log('🔑 Register - OTP extracted:', otp);
+            }
+
+            return {
+                success: true,
+                data: response,
+                otp: otp // Return OTP for display
+            };
         } catch (error) {
             dispatch(setLoading(false));
             const errorMessage = error.message || error.errors?.[0]?.message || 'Registration failed';
@@ -66,7 +85,22 @@ export const useAuth = () => {
             const response = await authService.requestOTP(normalizedMobile);
 
             dispatch(setLoading(false));
-            return { success: true, data: response };
+            // Extract OTP from response if available
+            // API interceptor returns response.data, so structure is: { success: true, data: { mobile, otp, ... } }
+            const otp = response?.data?.otp || response?.otp || null;
+
+            // Debug log in development
+            if (import.meta.env.DEV) {
+                console.log('🔑 RequestOTP - Full response:', response);
+                console.log('🔑 RequestOTP - Response.data:', response?.data);
+                console.log('🔑 RequestOTP - OTP extracted:', otp);
+            }
+
+            return {
+                success: true,
+                data: response,
+                otp: otp // Return OTP for display
+            };
         } catch (error) {
             dispatch(setLoading(false));
             const errorMessage = error.message || error.errors?.[0]?.message || 'Failed to send OTP';
@@ -149,7 +183,22 @@ export const useAuth = () => {
             const response = await authService.resendOTP(normalizedMobile);
 
             dispatch(setLoading(false));
-            return { success: true, data: response };
+            // Extract OTP from response if available
+            // API interceptor returns response.data, so structure is: { success: true, data: { mobile, otp, ... } }
+            const otp = response?.data?.otp || response?.otp || null;
+
+            // Debug log in development
+            if (import.meta.env.DEV) {
+                console.log('🔑 ResendOTP - Full response:', response);
+                console.log('🔑 ResendOTP - Response.data:', response?.data);
+                console.log('🔑 ResendOTP - OTP extracted:', otp);
+            }
+
+            return {
+                success: true,
+                data: response,
+                otp: otp // Return OTP for display
+            };
         } catch (error) {
             dispatch(setLoading(false));
             const errorMessage = error.message || error.errors?.[0]?.message || 'Failed to resend OTP';

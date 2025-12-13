@@ -18,11 +18,21 @@ import OrderSummary from '../components/orders/OrderSummary';
 import CartItem from '../components/cart/CartItem';
 import Loading from '../components/common/Loading';
 import { PRODUCT_TYPES } from '../utils/constants';
+import { useThemeColors } from '../hooks/useThemeColors';
 
 function Checkout() {
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const {
+        backgroundColor,
+        cardBackgroundColor,
+        primaryTextColor,
+        secondaryTextColor,
+        buttonColor,
+        buttonTextColor,
+        borderColor,
+    } = useThemeColors();
     const isAuthenticated = useSelector(selectIsAuthenticated);
     const items = useSelector(selectCartItems);
     const { subtotal, discount, total } = useSelector(selectCart);
@@ -147,7 +157,7 @@ function Checkout() {
 
     if (!isAuthenticated || isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#EFECE3' }}>
+            <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor }}>
                 <Loading />
             </div>
         );
@@ -158,14 +168,14 @@ function Checkout() {
     }
 
     return (
-        <div className="min-h-screen" style={{ backgroundColor: '#EFECE3' }}>
+        <div className="min-h-screen" style={{ backgroundColor }}>
             <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
                 {/* Page Header */}
                 <div className="mb-6">
-                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2" style={{ color: '#1E293B' }}>
+                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2" style={{ color: primaryTextColor }}>
                         {t('checkout.title') || 'Checkout'}
                     </h1>
-                    <p className="text-sm sm:text-base opacity-70" style={{ color: '#2d3748' }}>
+                    <p className="text-sm sm:text-base opacity-70" style={{ color: secondaryTextColor }}>
                         {t('checkout.subtitle') || 'Review your order and complete your purchase'}
                     </p>
                 </div>
@@ -197,9 +207,9 @@ function Checkout() {
                     {/* Left Column - Forms */}
                     <div className="lg:col-span-2 space-y-3 sm:space-y-4 md:space-y-6">
                         {/* Cart Items Review */}
-                        <div className="card bg-base-100 shadow-sm border-2" style={{ borderColor: '#e2e8f0' }}>
+                        <div className="card shadow-sm border-2" style={{ borderColor, backgroundColor: cardBackgroundColor }}>
                             <div className="card-body p-4">
-                                <h3 className="text-lg font-semibold mb-4" style={{ color: '#1E293B' }}>
+                                <h3 className="text-lg font-semibold mb-4" style={{ color: primaryTextColor }}>
                                     {t('checkout.orderItems') || 'Order Items'}
                                 </h3>
                                 <div className="space-y-3">
@@ -220,12 +230,12 @@ function Checkout() {
                                 hasPhysicalProducts={hasPhysicalProducts}
                             />
                         ) : (
-                            <div className="card bg-base-100 shadow-sm border-2" style={{ borderColor: '#e2e8f0' }}>
+                            <div className="card shadow-sm border-2" style={{ borderColor, backgroundColor: cardBackgroundColor }}>
                                 <div className="card-body p-4">
-                                    <h3 className="text-lg font-semibold mb-2" style={{ color: '#1E293B' }}>
+                                    <h3 className="text-lg font-semibold mb-2" style={{ color: primaryTextColor }}>
                                         {t('checkout.shippingAddress') || 'Shipping Address'}
                                     </h3>
-                                    <p className="text-sm opacity-70" style={{ color: '#2d3748' }}>
+                                    <p className="text-sm opacity-70" style={{ color: secondaryTextColor }}>
                                         {t('checkout.digitalProductNoAddress') || 'No shipping address required for digital products.'}
                                     </p>
                                 </div>
@@ -239,9 +249,9 @@ function Checkout() {
                         />
 
                         {/* Order Notes (Optional) */}
-                        <div className="card bg-base-100 shadow-sm border-2" style={{ borderColor: '#e2e8f0' }}>
+                        <div className="card shadow-sm border-2" style={{ borderColor, backgroundColor: cardBackgroundColor }}>
                             <div className="card-body p-4">
-                                <h3 className="text-lg font-semibold mb-4" style={{ color: '#1E293B' }}>
+                                <h3 className="text-lg font-semibold mb-4" style={{ color: primaryTextColor }}>
                                     {t('checkout.orderNotes') || 'Order Notes'} ({t('common.optional') || 'Optional'})
                                 </h3>
                                 <textarea
@@ -250,7 +260,7 @@ function Checkout() {
                                     placeholder={t('checkout.notesPlaceholder') || 'Any special instructions for your order...'}
                                     value={notes}
                                     onChange={(e) => setNotes(e.target.value)}
-                                    style={{ borderColor: '#cbd5e1', color: '#1E293B' }}
+                                    style={{ borderColor, color: primaryTextColor, backgroundColor: cardBackgroundColor }}
                                 />
                             </div>
                         </div>
@@ -263,7 +273,7 @@ function Checkout() {
                         {/* Place Order Button */}
                         <button
                             className="btn btn-primary btn-lg w-full text-white mt-4 shadow-lg hover:shadow-xl transition-all"
-                            style={{ backgroundColor: '#1E293B' }}
+                            style={{ backgroundColor: buttonColor, color: buttonTextColor, borderColor: buttonColor }}
                             onClick={handlePlaceOrder}
                             disabled={orderLoading || (hasPhysicalProducts && !shippingAddress) || !paymentMethod}
                         >
@@ -285,7 +295,7 @@ function Checkout() {
                         {/* Back to Cart */}
                         <button
                             className="btn btn-outline btn-lg w-full mt-2"
-                            style={{ borderColor: '#1E293B', color: '#1E293B' }}
+                            style={{ borderColor: buttonColor, color: buttonColor }}
                             onClick={() => navigate('/cart')}
                         >
                             {t('checkout.backToCart') || 'Back to Cart'}

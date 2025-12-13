@@ -84,7 +84,14 @@ export const checkeBookAccess = async (productId) => {
         const response = await api.get(`${API_ENDPOINTS.EBOOK.ACCESS}/${productId}/access`);
         return response?.success === true || (response?.data && response.data.accessToken) ? true : false;
     } catch (error) {
-        // If 404 or 403, user doesn't have access
+        // If 404 or 403, user doesn't have access - this is expected for non-purchased products
+        // Don't log as error since it's a normal case
+        if (error.status === 404 || error.status === 404 || error.status === 403 || error.status === 403) {
+            // User doesn't have access - this is normal, not an error
+            return false;
+        }
+        // For other errors, log but still return false
+        console.warn('eBook access check error:', error.message);
         return false;
     }
 };

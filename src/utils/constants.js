@@ -6,7 +6,7 @@
  */
 
 // API Configuration
-// Production backend URL: https://e-book-backend-tau.vercel.app/api
+// Production backend URL: http://localhost:5000/api
 const getDefaultAPIURL = () => {
     // If VITE_API_BASE_URL is set, use it (highest priority)
     if (import.meta.env.VITE_API_BASE_URL) {
@@ -14,7 +14,7 @@ const getDefaultAPIURL = () => {
     }
     // Default to production backend URL for all environments
     // For local development, create .env file with: VITE_API_BASE_URL=http://localhost:5000/api
-    return 'https://e-book-backend-tau.vercel.app/api';
+    return 'http://localhost:5000/api';
 };
 
 export const API_BASE_URL = getDefaultAPIURL();

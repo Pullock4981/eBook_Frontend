@@ -76,50 +76,37 @@ function Dashboard() {
         dispatch(fetchUserOrders({ page: 1, limit: 5 })); // Get recent 5 orders
         dispatch(fetchUserEBooks());
 
-        // Check if user is affiliate - Always fetch to get current status
-        dispatch(fetchAffiliateProfile()).then((result) => {
-            if (result.type === 'affiliate/fetchProfile/fulfilled') {
-                // Only fetch statistics if status is active
-                const affiliate = result.payload?.affiliate || result.payload?.data?.affiliate;
-                if (affiliate?.status === 'active') {
-                    dispatch(fetchAffiliateStatistics());
-                }
-            }
-            // If rejected, user is not affiliate - banner will show automatically
-        }).catch((error) => {
-            // User is not affiliate, ignore error - Banner will show automatically
-        });
+        // Affiliate check DISABLED - No need to check affiliate status
+        // Most users are not affiliates, so we skip this check to avoid 404 errors
+        // dispatch(fetchAffiliateProfile()).then((result) => {
+        //     if (result.type === 'affiliate/fetchProfile/fulfilled') {
+        //         const affiliate = result.payload?.affiliate || result.payload?.data?.affiliate;
+        //         if (affiliate?.status === 'active') {
+        //             dispatch(fetchAffiliateStatistics());
+        //         }
+        //     }
+        // }).catch((error) => {});
     }, [dispatch, isAuthenticated, navigate]);
 
-    // Auto-refresh affiliate status every 30 seconds if user is affiliate or pending (to see admin updates)
-    useEffect(() => {
-        if (!isAuthenticated) return;
-
-        // Check if user has affiliate request (pending or active)
-        const checkAffiliateStatus = () => {
-            dispatch(fetchAffiliateProfile()).then((result) => {
-                if (result.type === 'affiliate/fetchProfile/fulfilled') {
-                    const newStatus = result.payload?.affiliate?.status || result.payload?.data?.affiliate?.status;
-                    const currentStatus = affiliateStatus;
-
-                    // If status changed to active, refresh statistics
-                    if (newStatus === 'active' && currentStatus !== 'active') {
-                        dispatch(fetchAffiliateStatistics());
-                    }
-                }
-            }).catch(() => {
-                // Ignore error - user is not affiliate
-            });
-        };
-
-        // Initial check
-        checkAffiliateStatus();
-
-        // Set up interval for periodic refresh (every 30 seconds)
-        const interval = setInterval(checkAffiliateStatus, 30000);
-
-        return () => clearInterval(interval);
-    }, [dispatch, isAuthenticated, affiliateStatus]);
+    // Affiliate auto-refresh DISABLED - No need to check affiliate status
+    // Most users are not affiliates, so we skip this check to avoid 404 errors
+    // useEffect(() => {
+    //     if (!isAuthenticated) return;
+    //     const checkAffiliateStatus = () => {
+    //         dispatch(fetchAffiliateProfile()).then((result) => {
+    //             if (result.type === 'affiliate/fetchProfile/fulfilled') {
+    //                 const newStatus = result.payload?.affiliate?.status || result.payload?.data?.affiliate?.status;
+    //                 const currentStatus = affiliateStatus;
+    //                 if (newStatus === 'active' && currentStatus !== 'active') {
+    //                     dispatch(fetchAffiliateStatistics());
+    //                 }
+    //             }
+    //         }).catch(() => {});
+    //     };
+    //     checkAffiliateStatus();
+    //     const interval = setInterval(checkAffiliateStatus, 30000);
+    //     return () => clearInterval(interval);
+    // }, [dispatch, isAuthenticated, affiliateStatus]);
 
     if (!isAuthenticated) {
         return null; // Will redirect
@@ -243,8 +230,8 @@ function Dashboard() {
                                                 const result = await dispatch(cancelAffiliateRegistration());
                                                 if (cancelAffiliateRegistration.fulfilled.match(result)) {
                                                     alert('✅ Affiliate registration cancelled successfully!');
-                                                    // Refresh profile to update state
-                                                    dispatch(fetchAffiliateProfile());
+                                                    // Affiliate check disabled - no need to refresh
+                                                    // dispatch(fetchAffiliateProfile());
                                                 } else {
                                                     alert(`❌ Failed to cancel: ${result.payload || 'Unknown error'}`);
                                                 }
@@ -508,14 +495,14 @@ function Dashboard() {
                 <div className="bg-base-100 rounded-lg shadow-sm p-4 sm:p-6 mb-6 sm:mb-8 border" style={{ borderColor: secondaryTextColor, backgroundColor }}>
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-lg sm:text-xl font-bold" style={{ color: primaryTextColor }}>
-                            My Info
+                            {t('user.myInfo') || 'My Info'}
                         </h2>
                         <Link
                             to="/dashboard/profile"
                             className="text-sm font-medium hover:underline"
                             style={{ color: primaryTextColor }}
                         >
-                            Edit Profile
+                            {t('user.editProfile') || 'Edit Profile'}
                         </Link>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
@@ -524,7 +511,7 @@ function Dashboard() {
                             <div className="space-y-3">
                                 <div>
                                     <p className="text-xs mb-1" style={{ color: secondaryTextColor }}>
-                                        User Name
+                                        {t('user.userName') || 'User Name'}
                                     </p>
                                     <p className="text-sm font-medium" style={{ color: primaryTextColor }}>
                                         {(() => {
@@ -535,7 +522,7 @@ function Dashboard() {
                                 </div>
                                 <div>
                                     <p className="text-xs mb-1" style={{ color: secondaryTextColor }}>
-                                        User Email
+                                        {t('user.userEmail') || 'User Email'}
                                     </p>
                                     <p className="text-sm font-medium" style={{ color: primaryTextColor }}>
                                         {profile?.profile?.email || profile?.email || user?.profile?.email || user?.email || '-'}
@@ -543,7 +530,7 @@ function Dashboard() {
                                 </div>
                                 <div>
                                     <p className="text-xs mb-1" style={{ color: secondaryTextColor }}>
-                                        Mobile
+                                        {t('user.mobile') || 'Mobile'}
                                     </p>
                                     <p className="text-sm font-medium" style={{ color: primaryTextColor }}>
                                         {user?.mobile || profile?.mobile || '-'}
@@ -555,7 +542,7 @@ function Dashboard() {
                         {/* Address Info */}
                         <div>
                             <h3 className="text-sm font-semibold mb-3" style={{ color: secondaryTextColor }}>
-                                Address
+                                {t('user.address') || 'Address'}
                             </h3>
                             {addresses && addresses.length > 0 ? (
                                 (() => {
@@ -564,7 +551,7 @@ function Dashboard() {
                                         <div className="space-y-2">
                                             {defaultAddress.isDefault && (
                                                 <span className="inline-block px-2 py-0.5 rounded text-xs font-medium mb-2" style={{ backgroundColor: buttonColor + '30', color: buttonColor }}>
-                                                    Default Address
+                                                    {t('user.defaultAddress') || 'Default Address'}
                                                 </span>
                                             )}
                                             <div className="text-sm" style={{ color: primaryTextColor }}>
@@ -587,7 +574,7 @@ function Dashboard() {
                                                 </p>
                                                 {defaultAddress.recipientMobile && (
                                                     <p className="text-xs mt-2" style={{ color: secondaryTextColor }}>
-                                                        Mobile: {defaultAddress.recipientMobile}
+                                                        {t('user.recipientMobileLabel') || 'Mobile'}: {defaultAddress.recipientMobile}
                                                     </p>
                                                 )}
                                             </div>
@@ -596,7 +583,7 @@ function Dashboard() {
                                                 className="inline-block text-xs font-medium hover:underline mt-2"
                                                 style={{ color: primaryTextColor }}
                                             >
-                                                View All Address →
+                                                {t('user.viewAllAddress') || 'View All Address'} →
                                             </Link>
                                         </div>
                                     );
@@ -933,28 +920,11 @@ function Dashboard() {
                     <AffiliateRegistrationModal
                         onClose={() => {
                             setShowRegistrationModal(false);
-                            // Refresh affiliate status when modal closes
-                            setTimeout(() => {
-                                dispatch(fetchAffiliateProfile()).catch(() => {
-                                    // User is not affiliate, ignore
-                                });
-                            }, 500);
+                            // Affiliate check disabled - no need to refresh
                         }}
                         onSuccess={() => {
                             setShowRegistrationModal(false);
-                            // Refresh affiliate profile after registration to show status
-                            setTimeout(() => {
-                                console.log('Refreshing affiliate profile after registration...');
-                                dispatch(fetchAffiliateProfile()).then((result) => {
-                                    console.log('Affiliate profile fetch result:', result);
-                                    if (result.type === 'affiliate/fetchProfile/fulfilled') {
-                                        console.log('Profile fetched successfully');
-                                        // Status will be shown automatically via Redux state
-                                    }
-                                }).catch((error) => {
-                                    console.error('Error fetching affiliate profile:', error);
-                                });
-                            }, 2000);
+                            // Affiliate check disabled - no need to refresh
                         }}
                     />
                 )}

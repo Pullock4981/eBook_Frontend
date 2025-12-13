@@ -3,7 +3,7 @@
 ## ✅ **Backend URL Configured**
 
 Frontend এখন production backend ব্যবহার করবে:
-- **Backend URL:** `https://e-book-backend-tau.vercel.app/api`
+- **Backend URL:** `http://localhost:5000/api`
 
 ---
 
@@ -42,7 +42,7 @@ Netlify Dashboard → **Site settings** → **Environment variables**:
 
 **Add if needed:**
 ```
-VITE_API_BASE_URL=https://e-book-backend-tau.vercel.app/api
+VITE_API_BASE_URL=http://localhost:5000/api
 ```
 
 **Note:** Default-এ production URL already set আছে `constants.js`-এ, তাই optional।
@@ -113,7 +113,7 @@ https://your-site.netlify.app
 ### **Issue 3: API Connection Fails**
 
 **Check:**
-- Backend URL correct: `https://e-book-backend-tau.vercel.app/api`
+- Backend URL correct: `http://localhost:5000/api`
 - CORS enabled in backend
 - Network tab-এ error messages
 
@@ -137,7 +137,7 @@ https://your-site.netlify.app
 
 ### **Required (Optional - already in code):**
 ```
-VITE_API_BASE_URL=https://e-book-backend-tau.vercel.app/api
+VITE_API_BASE_URL=http://localhost:5000/api
 ```
 
 ### **Optional:**
@@ -184,8 +184,8 @@ VITE_DEBUG_MODE=false
 
 ## 🔗 **Links:**
 
-- **Backend API:** https://e-book-backend-tau.vercel.app/api
-- **Backend Health:** https://e-book-backend-tau.vercel.app/api/health
+- **Backend API:** http://localhost:5000/api
+- **Backend Health:** http://localhost:5000/api/health
 - **Netlify Dashboard:** https://app.netlify.com
 
 ---

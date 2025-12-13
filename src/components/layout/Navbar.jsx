@@ -57,6 +57,18 @@ function Navbar() {
         setMobileMenuOpen(false);
     }, [location.pathname]);
 
+    // Prevent body scroll when mobile menu open
+    useEffect(() => {
+        if (mobileMenuOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [mobileMenuOpen]);
+
     // Auto-refresh user data to detect role changes (e.g., manually made admin)
     useEffect(() => {
         if (!isAuthenticated) return;
@@ -650,7 +662,7 @@ function Navbar() {
                     {/* Mobile Menu */}
                     {mobileMenuOpen && (
                         <ul
-                            className="menu menu-sm rounded-lg z-[50] mt-3 w-72 p-4 shadow-2xl border-2 absolute right-0 top-full"
+                            className="menu menu-sm rounded-lg z-[50] w-80 max-w-[88vw] p-4 shadow-2xl border-2 fixed right-3 top-20 max-h-[75vh] overflow-hidden bg-base-100"
                             style={{ borderColor: secondaryTextColor, backgroundColor }}
                         >
                             {/* Mobile Theme & Language - Side by Side */}

@@ -11,12 +11,22 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
 import { validateMobile } from '../../utils/helpers';
 import { useNavigate } from 'react-router-dom';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 function RegisterForm() {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const { register: registerUser, isLoading, error, clearAuthError } = useAuth();
     const [showPassword, setShowPassword] = useState(false);
+    const {
+        buttonColor,
+        buttonTextColor,
+        primaryTextColor,
+        secondaryTextColor,
+        inputBackgroundColor,
+        borderColor,
+        errorColor
+    } = useThemeColors();
 
     const {
         register,
@@ -27,8 +37,25 @@ function RegisterForm() {
     const onSubmit = async (data) => {
         clearAuthError();
         const result = await registerUser(data.mobile, data.name, data.password);
+
+        // Debug log
+        console.log('🔑 RegisterForm - Full result:', result);
+        console.log('🔑 RegisterForm - Result.otp:', result.otp);
+        console.log('🔑 RegisterForm - Result.data:', result.data);
+        console.log('🔑 RegisterForm - Result.data?.data:', result.data?.data);
+
         if (result.success) {
-            navigate('/verify-otp', { state: { mobile: data.mobile, isRegistration: true } });
+            // Extract OTP from result (multiple possible paths)
+            const otp = result.otp || result.data?.data?.otp || result.data?.otp || null;
+            console.log('🔑 RegisterForm - Final OTP to pass:', otp);
+
+            navigate('/verify-otp', {
+                state: {
+                    mobile: data.mobile,
+                    isRegistration: true,
+                    otp: otp // Pass OTP to OTP page
+                }
+            });
         }
     };
 
@@ -37,7 +64,7 @@ function RegisterForm() {
             {/* Name */}
             <div className="form-control">
                 <label className="label">
-                    <span className="label-text font-medium" style={{ color: '#1E293B' }}>
+                    <span className="label-text font-medium" style={{ color: primaryTextColor }}>
                         {t('auth.register.nameLabel') || 'Full Name'}
                     </span>
                 </label>
@@ -46,9 +73,10 @@ function RegisterForm() {
                     placeholder={t('auth.register.namePlaceholder') || 'Enter your full name'}
                     className={`input input-bordered w-full ${errors.name ? 'input-error' : ''}`}
                     style={{
-                        backgroundColor: '#ffffff',
-                        borderColor: errors.name ? '#ef4444' : '#e2e8f0',
-                        color: '#1E293B',
+                        backgroundColor: inputBackgroundColor,
+                        borderColor: errors.name ? errorColor : borderColor,
+                        color: primaryTextColor,
+                        padding: '12px 16px',
                     }}
                     {...register('name', {
                         required: t('auth.errors.nameRequired') || 'Name is required',
@@ -68,7 +96,7 @@ function RegisterForm() {
             {/* Mobile Number */}
             <div className="form-control">
                 <label className="label">
-                    <span className="label-text font-medium" style={{ color: '#1E293B' }}>
+                    <span className="label-text font-medium" style={{ color: primaryTextColor }}>
                         {t('auth.register.mobileLabel')}
                     </span>
                 </label>
@@ -77,9 +105,10 @@ function RegisterForm() {
                     placeholder={t('auth.register.mobilePlaceholder')}
                     className={`input input-bordered w-full ${errors.mobile ? 'input-error' : ''}`}
                     style={{
-                        backgroundColor: '#ffffff',
-                        borderColor: errors.mobile ? '#ef4444' : '#e2e8f0',
-                        color: '#1E293B',
+                        backgroundColor: inputBackgroundColor,
+                        borderColor: errors.mobile ? errorColor : borderColor,
+                        color: primaryTextColor,
+                        padding: '12px 16px',
                     }}
                     {...register('mobile', {
                         required: t('auth.errors.mobileRequired'),
@@ -101,7 +130,7 @@ function RegisterForm() {
             {/* Password */}
             <div className="form-control">
                 <label className="label">
-                    <span className="label-text font-medium" style={{ color: '#1E293B' }}>
+                    <span className="label-text font-medium" style={{ color: primaryTextColor }}>
                         {t('auth.register.passwordLabel') || 'Password'}
                     </span>
                 </label>
@@ -111,9 +140,10 @@ function RegisterForm() {
                         placeholder={t('auth.register.passwordPlaceholder') || 'Enter your password'}
                         className={`input input-bordered w-full ${errors.password ? 'input-error' : ''}`}
                         style={{
-                            backgroundColor: '#ffffff',
-                            borderColor: errors.password ? '#ef4444' : '#e2e8f0',
-                            color: '#1E293B',
+                            backgroundColor: inputBackgroundColor,
+                            borderColor: errors.password ? errorColor : borderColor,
+                            color: primaryTextColor,
+                            padding: '12px 16px',
                         }}
                         {...register('password', {
                             required: t('auth.errors.passwordRequired') || 'Password is required',
@@ -134,7 +164,7 @@ function RegisterForm() {
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
-                                style={{ color: '#64748b' }}
+                                style={{ color: secondaryTextColor }}
                             >
                                 <path
                                     strokeLinecap="round"
@@ -149,7 +179,7 @@ function RegisterForm() {
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
-                                style={{ color: '#64748b' }}
+                                style={{ color: secondaryTextColor }}
                             >
                                 <path
                                     strokeLinecap="round"
@@ -198,8 +228,8 @@ function RegisterForm() {
             <div className="form-control mt-6">
                 <button
                     type="submit"
-                    className="btn w-full text-white font-medium"
-                    style={{ backgroundColor: '#1E293B' }}
+                    className="btn w-full font-medium"
+                    style={{ backgroundColor: buttonColor, color: buttonTextColor }}
                     disabled={isLoading}
                 >
                     {isLoading ? (

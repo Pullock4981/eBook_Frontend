@@ -20,7 +20,7 @@ export const uploadSingleImage = async (file, onProgress) => {
 
         const response = await api.post('/upload/image', formData, {
             headers: {
-                'Content-Type': 'multipart/form-data',
+                // Don't set Content-Type - axios will set it automatically with boundary
             },
             onUploadProgress: (progressEvent) => {
                 if (onProgress && progressEvent.total) {
@@ -30,10 +30,12 @@ export const uploadSingleImage = async (file, onProgress) => {
                     onProgress(percentCompleted);
                 }
             },
+            timeout: 60000, // 1 minute for image uploads
         });
 
         return response;
     } catch (error) {
+        console.error('Upload Single Image Error:', error);
         throw error;
     }
 };
@@ -53,7 +55,7 @@ export const uploadMultipleImages = async (files, onProgress) => {
 
         const response = await api.post('/upload/images', formData, {
             headers: {
-                'Content-Type': 'multipart/form-data',
+                // Don't set Content-Type - axios will set it automatically with boundary
             },
             onUploadProgress: (progressEvent) => {
                 if (onProgress && progressEvent.total) {
@@ -63,10 +65,12 @@ export const uploadMultipleImages = async (files, onProgress) => {
                     onProgress(percentCompleted);
                 }
             },
+            timeout: 120000, // 2 minutes for multiple image uploads
         });
 
         return response;
     } catch (error) {
+        console.error('Upload Multiple Images Error:', error);
         throw error;
     }
 };

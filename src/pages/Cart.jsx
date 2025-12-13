@@ -19,7 +19,7 @@ function Cart() {
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const { buttonColor, primaryTextColor, secondaryTextColor, backgroundColor } = useThemeColors();
+    const { buttonColor, primaryTextColor, secondaryTextColor, backgroundColor, cardBackgroundColor, borderColor } = useThemeColors();
     const isAuthenticated = useSelector(selectIsAuthenticated);
     const items = useSelector(selectCartItems);
     const isLoading = useSelector(selectCartLoading);
@@ -108,15 +108,15 @@ function Cart() {
                     </div>
                 ) : items.length === 0 ? (
                     /* Empty Cart */
-                    <div className="card bg-base-100 shadow-sm">
+                    <div className="card shadow-sm border" style={{ backgroundColor: cardBackgroundColor, borderColor }}>
                         <div className="flex flex-col items-center justify-center py-12 sm:py-16 px-4">
-                            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center mb-4 sm:mb-6" style={{ backgroundColor: '#f1f5f9' }}>
+                            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center mb-4 sm:mb-6" style={{ backgroundColor: borderColor }}>
                                 <svg
                                     className="w-10 h-10 sm:w-12 sm:h-12"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
-                                    style={{ color: '#94a3b8' }}
+                                    style={{ color: secondaryTextColor }}
                                 >
                                     <path
                                         strokeLinecap="round"

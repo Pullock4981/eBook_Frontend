@@ -5,6 +5,8 @@ import { useSelector } from 'react-redux';
 import { selectTheme } from './store/slices/themeSlice';
 import { useEffect } from 'react';
 import AppRoutes from './routes/AppRoutes';
+// Import PDF.js config early to ensure worker is configured before any PDF operations
+import './utils/pdfjsConfig';
 
 function AppContent() {
     const theme = useSelector(selectTheme);

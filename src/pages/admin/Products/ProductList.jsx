@@ -235,189 +235,297 @@ function ProductList() {
                             </div>
                         </div>
                     ) : (
-                        /* Products Table - Only show when products exist */
-                        <div className="bg-base-100 rounded-lg shadow-sm border overflow-hidden" style={{ borderColor: secondaryTextColor, backgroundColor }}>
-                            <div className="overflow-x-auto">
-                                <table className="table w-full">
-                                    <thead>
-                                        <tr style={{ backgroundColor: buttonColor }}>
-                                            <th className="text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>{t('admin.image') || 'Image'}</th>
-                                            <th className="text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>{t('admin.name') || 'Name'}</th>
-                                            <th className="hidden md:table-cell text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>{t('admin.type') || 'Type'}</th>
-                                            <th className="hidden lg:table-cell text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>{t('admin.category') || 'Category'}</th>
-                                            <th className="text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>{t('admin.price') || 'Price'}</th>
-                                            <th className="hidden md:table-cell text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>{t('admin.stock') || 'Stock'}</th>
-                                            <th className="hidden lg:table-cell text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>{t('admin.status') || 'Status'}</th>
-                                            <th className="text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>{t('admin.actions') || 'Actions'}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {products.map((product) => (
-                                            <tr key={product._id} className="transition-colors border-b" style={{ borderColor: secondaryTextColor }}
-                                                onMouseEnter={(e) => {
-                                                    e.currentTarget.style.backgroundColor = secondaryTextColor + '20';
-                                                }}
-                                                onMouseLeave={(e) => {
-                                                    e.currentTarget.style.backgroundColor = 'transparent';
-                                                }}
-                                            >
-                                                <td className="py-3 px-4">
-                                                    <div className="avatar">
-                                                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded overflow-hidden border" style={{ borderColor: secondaryTextColor }}>
-                                                            <img
-                                                                src={product.images?.[0] || 'https://via.placeholder.com/100?text=No+Image'}
-                                                                alt={product.name}
-                                                                className="w-full h-full object-cover"
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className="py-3 px-4">
-                                                    <div className="font-medium text-xs sm:text-sm" style={{ color: primaryTextColor }}>
-                                                        <div className="line-clamp-1">{product.name}</div>
-                                                        <div className="md:hidden mt-1">
+                        <>
+                            {/* Mobile Card View - Below md breakpoint */}
+                            <div className="md:hidden space-y-3">
+                                {products.map((product) => (
+                                    <div
+                                        key={product._id}
+                                        className="bg-base-100 rounded-lg shadow-sm border p-4"
+                                        style={{ borderColor: secondaryTextColor, backgroundColor }}
+                                    >
+                                        <div className="flex gap-3">
+                                            {/* Product Image */}
+                                            <div className="flex-shrink-0">
+                                                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded overflow-hidden border" style={{ borderColor: secondaryTextColor }}>
+                                                    <img
+                                                        src={product.images?.[0] || 'https://via.placeholder.com/100?text=No+Image'}
+                                                        alt={product.name}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                </div>
+                                            </div>
+                                            
+                                            {/* Product Info */}
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-start justify-between gap-2 mb-2">
+                                                    <div className="flex-1 min-w-0">
+                                                        <h3 className="font-semibold text-sm sm:text-base line-clamp-2 mb-1" style={{ color: primaryTextColor }}>
+                                                            {product.name}
+                                                        </h3>
+                                                        <div className="flex items-center gap-2 flex-wrap">
                                                             <span
                                                                 className="badge badge-xs px-2 py-0.5 font-medium"
                                                                 style={product.type === PRODUCT_TYPES.PHYSICAL ? { backgroundColor: buttonColor, color: '#ffffff', border: 'none' } : { backgroundColor: secondaryTextColor, color: '#ffffff', border: 'none' }}
                                                             >
                                                                 {product.type === PRODUCT_TYPES.PHYSICAL ? t('products.physical') : t('products.digital')}
                                                             </span>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className="hidden md:table-cell py-3 px-4">
-                                                    <span
-                                                        className="badge badge-sm px-2 py-1 font-medium"
-                                                        style={product.type === PRODUCT_TYPES.PHYSICAL ? { backgroundColor: buttonColor, color: '#ffffff', border: 'none' } : { backgroundColor: secondaryTextColor, color: '#ffffff', border: 'none' }}
-                                                    >
-                                                        {product.type === PRODUCT_TYPES.PHYSICAL ? t('products.physical') : t('products.digital')}
-                                                    </span>
-                                                </td>
-                                                <td className="hidden lg:table-cell py-3 px-4">
-                                                    <span className="text-xs sm:text-sm opacity-70" style={{ color: secondaryTextColor }}>{product.category?.name || '-'}</span>
-                                                </td>
-                                                <td className="py-3 px-4">
-                                                    <div>
-                                                        <div className="font-medium text-xs sm:text-sm" style={{ color: primaryTextColor }}>
-                                                            {formatCurrency(product.discountPrice || product.price)}
-                                                        </div>
-                                                        {product.discountPrice && (
-                                                            <div className="text-xs line-through opacity-50" style={{ color: secondaryTextColor }}>
-                                                                {formatCurrency(product.price)}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </td>
-                                                <td className="hidden md:table-cell py-3 px-4">
-                                                    {product.type === PRODUCT_TYPES.PHYSICAL ? (
-                                                        <span className={`text-xs sm:text-sm font-medium ${product.stock > 0 ? 'text-success' : 'text-error'}`}>
-                                                            {product.stock || 0}
-                                                        </span>
-                                                    ) : (
-                                                        <span className="text-xs opacity-50">-</span>
-                                                    )}
-                                                </td>
-                                                <td className="hidden lg:table-cell py-3 px-4">
-                                                    <div className="flex flex-col gap-1.5">
-                                                        <span className={`badge badge-xs px-2 py-0.5 ${product.isActive ? 'badge-success' : 'badge-error'}`}>
-                                                            {product.isActive ? t('admin.active') : t('admin.inactive')}
-                                                        </span>
-                                                        {product.isFeatured && (
-                                                            <span className="badge badge-xs badge-warning px-2 py-0.5">
-                                                                {t('admin.featured')}
+                                                            <span className={`badge badge-xs px-2 py-0.5 ${product.isActive ? 'badge-success' : 'badge-error'}`}>
+                                                                {product.isActive ? t('admin.active') : t('admin.inactive')}
                                                             </span>
-                                                        )}
-                                                    </div>
-                                                </td>
-                                                <td className="py-3 px-4">
-                                                    <div className="flex flex-col sm:flex-row gap-2">
-                                                        <Link
-                                                            to={`/products/${product._id}`}
-                                                            className="btn btn-sm btn-primary text-white flex-1 sm:flex-initial px-3 py-1.5 font-medium transition-all duration-200 hover:shadow-sm"
-                                                            style={{ backgroundColor: buttonColor, paddingLeft: '0.75rem', paddingRight: '0.75rem', paddingTop: '0.375rem', paddingBottom: '0.375rem' }}
-                                                        >
-                                                            <svg
-                                                                className="w-4 h-4"
-                                                                fill="none"
-                                                                stroke="currentColor"
-                                                                viewBox="0 0 24 24"
-                                                            >
-                                                                <path
-                                                                    strokeLinecap="round"
-                                                                    strokeLinejoin="round"
-                                                                    strokeWidth={2}
-                                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                                                                />
-                                                                <path
-                                                                    strokeLinecap="round"
-                                                                    strokeLinejoin="round"
-                                                                    strokeWidth={2}
-                                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                                                                />
-                                                            </svg>
-                                                            <span className="hidden sm:inline">{t('common.view') || 'View'}</span>
-                                                        </Link>
-                                                        <Link
-                                                            to={`/admin/products/${product._id}/edit`}
-                                                            className="btn btn-sm btn-outline flex-1 sm:flex-initial px-3 py-1.5 font-medium transition-all duration-200 hover:shadow-sm"
-                                                            style={{ borderColor: buttonColor, color: primaryTextColor, backgroundColor, paddingLeft: '0.75rem', paddingRight: '0.75rem', paddingTop: '0.375rem', paddingBottom: '0.375rem' }}
-                                                            onMouseEnter={(e) => {
-                                                                e.currentTarget.style.backgroundColor = secondaryTextColor + '20';
-                                                            }}
-                                                            onMouseLeave={(e) => {
-                                                                e.currentTarget.style.backgroundColor = backgroundColor;
-                                                            }}
-                                                        >
-                                                            <svg
-                                                                className="w-4 h-4"
-                                                                fill="none"
-                                                                stroke="currentColor"
-                                                                viewBox="0 0 24 24"
-                                                            >
-                                                                <path
-                                                                    strokeLinecap="round"
-                                                                    strokeLinejoin="round"
-                                                                    strokeWidth={2}
-                                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                                                />
-                                                            </svg>
-                                                            <span className="hidden sm:inline">{t('common.edit') || 'Edit'}</span>
-                                                        </Link>
-                                                        <button
-                                                            onClick={() => handleDelete(product._id)}
-                                                            className="btn btn-sm text-white flex-1 sm:flex-initial px-4 py-2"
-                                                            style={{ backgroundColor: errorColor || '#dc2626', paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '0.5rem', paddingBottom: '0.5rem' }}
-                                                            disabled={deleteLoading === product._id}
-                                                        >
-                                                            {deleteLoading === product._id ? (
-                                                                <span className="loading loading-spinner loading-xs"></span>
-                                                            ) : (
-                                                                <>
-                                                                    <svg
-                                                                        className="w-4 h-4"
-                                                                        fill="none"
-                                                                        stroke="currentColor"
-                                                                        viewBox="0 0 24 24"
-                                                                    >
-                                                                        <path
-                                                                            strokeLinecap="round"
-                                                                            strokeLinejoin="round"
-                                                                            strokeWidth={2}
-                                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                                                        />
-                                                                    </svg>
-                                                                    <span className="hidden sm:inline">{t('common.delete') || 'Delete'}</span>
-                                                                </>
+                                                            {product.isFeatured && (
+                                                                <span className="badge badge-xs badge-warning px-2 py-0.5">
+                                                                    {t('admin.featured')}
+                                                                </span>
                                                             )}
-                                                        </button>
+                                                        </div>
                                                     </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                                </div>
+                                                
+                                                {/* Price */}
+                                                <div className="mb-2">
+                                                    <div className="font-semibold text-sm" style={{ color: primaryTextColor }}>
+                                                        {formatCurrency(product.discountPrice || product.price)}
+                                                    </div>
+                                                    {product.discountPrice && (
+                                                        <div className="text-xs line-through opacity-50" style={{ color: secondaryTextColor }}>
+                                                            {formatCurrency(product.price)}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                
+                                                {/* Additional Info */}
+                                                <div className="flex items-center gap-3 text-xs mb-3" style={{ color: secondaryTextColor }}>
+                                                    {product.category?.name && (
+                                                        <span className="opacity-70">Category: {product.category.name}</span>
+                                                    )}
+                                                    {product.type === PRODUCT_TYPES.PHYSICAL && (
+                                                        <span className={`font-medium ${product.stock > 0 ? 'text-success' : 'text-error'}`}>
+                                                            Stock: {product.stock || 0}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                
+                                                {/* Actions */}
+                                                <div className="flex gap-2">
+                                                    <Link
+                                                        to={`/products/${product._id}`}
+                                                        className="btn btn-sm btn-primary text-white flex-1 px-2 py-1.5 text-xs font-medium"
+                                                        style={{ backgroundColor: buttonColor }}
+                                                    >
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                        </svg>
+                                                        <span>{t('common.view') || 'View'}</span>
+                                                    </Link>
+                                                    <Link
+                                                        to={`/admin/products/${product._id}/edit`}
+                                                        className="btn btn-sm btn-outline flex-1 px-2 py-1.5 text-xs font-medium"
+                                                        style={{ borderColor: buttonColor, color: primaryTextColor, backgroundColor }}
+                                                    >
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                        </svg>
+                                                        <span>{t('common.edit') || 'Edit'}</span>
+                                                    </Link>
+                                                    <button
+                                                        onClick={() => handleDelete(product._id)}
+                                                        className="btn btn-sm text-white px-2 py-1.5 text-xs font-medium"
+                                                        style={{ backgroundColor: errorColor || '#dc2626' }}
+                                                        disabled={deleteLoading === product._id}
+                                                    >
+                                                        {deleteLoading === product._id ? (
+                                                            <span className="loading loading-spinner loading-xs"></span>
+                                                        ) : (
+                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                            </svg>
+                                                        )}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
-                        </div>
+
+                            {/* Desktop Table View - md and above */}
+                            <div className="hidden md:block bg-base-100 rounded-lg shadow-sm border overflow-hidden" style={{ borderColor: secondaryTextColor, backgroundColor }}>
+                                <div className="overflow-x-auto">
+                                    <table className="table w-full">
+                                        <thead>
+                                            <tr style={{ backgroundColor: buttonColor }}>
+                                                <th className="text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>{t('admin.image') || 'Image'}</th>
+                                                <th className="text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>{t('admin.name') || 'Name'}</th>
+                                                <th className="hidden md:table-cell text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>{t('admin.type') || 'Type'}</th>
+                                                <th className="hidden lg:table-cell text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>{t('admin.category') || 'Category'}</th>
+                                                <th className="text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>{t('admin.price') || 'Price'}</th>
+                                                <th className="hidden md:table-cell text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>{t('admin.stock') || 'Stock'}</th>
+                                                <th className="hidden lg:table-cell text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>{t('admin.status') || 'Status'}</th>
+                                                <th className="text-xs sm:text-sm font-semibold py-3 px-4" style={{ color: '#ffffff' }}>{t('admin.actions') || 'Actions'}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {products.map((product) => (
+                                                <tr key={product._id} className="transition-colors border-b" style={{ borderColor: secondaryTextColor }}
+                                                    onMouseEnter={(e) => {
+                                                        e.currentTarget.style.backgroundColor = secondaryTextColor + '20';
+                                                    }}
+                                                    onMouseLeave={(e) => {
+                                                        e.currentTarget.style.backgroundColor = 'transparent';
+                                                    }}
+                                                >
+                                                    <td className="py-3 px-4">
+                                                        <div className="avatar">
+                                                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded overflow-hidden border" style={{ borderColor: secondaryTextColor }}>
+                                                                <img
+                                                                    src={product.images?.[0] || 'https://via.placeholder.com/100?text=No+Image'}
+                                                                    alt={product.name}
+                                                                    className="w-full h-full object-cover"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="py-3 px-4">
+                                                        <div className="font-medium text-xs sm:text-sm" style={{ color: primaryTextColor }}>
+                                                            <div className="line-clamp-1">{product.name}</div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="hidden md:table-cell py-3 px-4">
+                                                        <span
+                                                            className="badge badge-sm px-2 py-1 font-medium"
+                                                            style={product.type === PRODUCT_TYPES.PHYSICAL ? { backgroundColor: buttonColor, color: '#ffffff', border: 'none' } : { backgroundColor: secondaryTextColor, color: '#ffffff', border: 'none' }}
+                                                        >
+                                                            {product.type === PRODUCT_TYPES.PHYSICAL ? t('products.physical') : t('products.digital')}
+                                                        </span>
+                                                    </td>
+                                                    <td className="hidden lg:table-cell py-3 px-4">
+                                                        <span className="text-xs sm:text-sm opacity-70" style={{ color: secondaryTextColor }}>{product.category?.name || '-'}</span>
+                                                    </td>
+                                                    <td className="py-3 px-4">
+                                                        <div>
+                                                            <div className="font-medium text-xs sm:text-sm" style={{ color: primaryTextColor }}>
+                                                                {formatCurrency(product.discountPrice || product.price)}
+                                                            </div>
+                                                            {product.discountPrice && (
+                                                                <div className="text-xs line-through opacity-50" style={{ color: secondaryTextColor }}>
+                                                                    {formatCurrency(product.price)}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                    <td className="hidden md:table-cell py-3 px-4">
+                                                        {product.type === PRODUCT_TYPES.PHYSICAL ? (
+                                                            <span className={`text-xs sm:text-sm font-medium ${product.stock > 0 ? 'text-success' : 'text-error'}`}>
+                                                                {product.stock || 0}
+                                                            </span>
+                                                        ) : (
+                                                            <span className="text-xs opacity-50">-</span>
+                                                        )}
+                                                    </td>
+                                                    <td className="hidden lg:table-cell py-3 px-4">
+                                                        <div className="flex flex-col gap-1.5">
+                                                            <span className={`badge badge-xs px-2 py-0.5 ${product.isActive ? 'badge-success' : 'badge-error'}`}>
+                                                                {product.isActive ? t('admin.active') : t('admin.inactive')}
+                                                            </span>
+                                                            {product.isFeatured && (
+                                                                <span className="badge badge-xs badge-warning px-2 py-0.5">
+                                                                    {t('admin.featured')}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                    <td className="py-3 px-4">
+                                                        <div className="flex flex-col sm:flex-row gap-2">
+                                                            <Link
+                                                                to={`/products/${product._id}`}
+                                                                className="btn btn-sm btn-primary text-white flex-1 sm:flex-initial px-3 py-1.5 font-medium transition-all duration-200 hover:shadow-sm"
+                                                                style={{ backgroundColor: buttonColor, paddingLeft: '0.75rem', paddingRight: '0.75rem', paddingTop: '0.375rem', paddingBottom: '0.375rem' }}
+                                                            >
+                                                                <svg
+                                                                    className="w-4 h-4"
+                                                                    fill="none"
+                                                                    stroke="currentColor"
+                                                                    viewBox="0 0 24 24"
+                                                                >
+                                                                    <path
+                                                                        strokeLinecap="round"
+                                                                        strokeLinejoin="round"
+                                                                        strokeWidth={2}
+                                                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                                                    />
+                                                                    <path
+                                                                        strokeLinecap="round"
+                                                                        strokeLinejoin="round"
+                                                                        strokeWidth={2}
+                                                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                                                    />
+                                                                </svg>
+                                                                <span className="hidden sm:inline">{t('common.view') || 'View'}</span>
+                                                            </Link>
+                                                            <Link
+                                                                to={`/admin/products/${product._id}/edit`}
+                                                                className="btn btn-sm btn-outline flex-1 sm:flex-initial px-3 py-1.5 font-medium transition-all duration-200 hover:shadow-sm"
+                                                                style={{ borderColor: buttonColor, color: primaryTextColor, backgroundColor, paddingLeft: '0.75rem', paddingRight: '0.75rem', paddingTop: '0.375rem', paddingBottom: '0.375rem' }}
+                                                                onMouseEnter={(e) => {
+                                                                    e.currentTarget.style.backgroundColor = secondaryTextColor + '20';
+                                                                }}
+                                                                onMouseLeave={(e) => {
+                                                                    e.currentTarget.style.backgroundColor = backgroundColor;
+                                                                }}
+                                                            >
+                                                                <svg
+                                                                    className="w-4 h-4"
+                                                                    fill="none"
+                                                                    stroke="currentColor"
+                                                                    viewBox="0 0 24 24"
+                                                                >
+                                                                    <path
+                                                                        strokeLinecap="round"
+                                                                        strokeLinejoin="round"
+                                                                        strokeWidth={2}
+                                                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                                                    />
+                                                                </svg>
+                                                                <span className="hidden sm:inline">{t('common.edit') || 'Edit'}</span>
+                                                            </Link>
+                                                            <button
+                                                                onClick={() => handleDelete(product._id)}
+                                                                className="btn btn-sm text-white flex-1 sm:flex-initial px-4 py-2"
+                                                                style={{ backgroundColor: errorColor || '#dc2626', paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '0.5rem', paddingBottom: '0.5rem' }}
+                                                                disabled={deleteLoading === product._id}
+                                                            >
+                                                                {deleteLoading === product._id ? (
+                                                                    <span className="loading loading-spinner loading-xs"></span>
+                                                                ) : (
+                                                                    <>
+                                                                        <svg
+                                                                            className="w-4 h-4"
+                                                                            fill="none"
+                                                                            stroke="currentColor"
+                                                                            viewBox="0 0 24 24"
+                                                                        >
+                                                                            <path
+                                                                                strokeLinecap="round"
+                                                                                strokeLinejoin="round"
+                                                                                strokeWidth={2}
+                                                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                                                            />
+                                                                        </svg>
+                                                                        <span className="hidden sm:inline">{t('common.delete') || 'Delete'}</span>
+                                                                    </>
+                                                                )}
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </>
                     )}
 
                     {/* Pagination */}

@@ -12,17 +12,11 @@ export const fetchAffiliateProfile = createAsyncThunk(
     async (_, { rejectWithValue }) => {
         try {
             const response = await affiliateService.getAffiliateProfile();
-            console.log('=== Redux Thunk - fetchAffiliateProfile ===');
-            console.log('Redux Thunk - Full response:', response);
-            console.log('Redux Thunk - Response type:', typeof response);
-            console.log('Redux Thunk - Response keys:', response ? Object.keys(response) : []);
-            console.log('Redux Thunk - Response structure:', {
-                success: response?.success,
-                hasData: !!response?.data,
-                hasAffiliate: !!response?.data?.affiliate,
-                affiliateStatus: response?.data?.affiliate?.status,
-                directAffiliate: !!response?.affiliate
-            });
+
+            // If service returns null (404 - user is not affiliate), silently return NOT_AFFILIATE
+            if (!response) {
+                return rejectWithValue('NOT_AFFILIATE');
+            }
 
             // Backend returns: { success: true, data: { affiliate: {...} } }
             // Service returns: response.data from axios which is { success: true, data: { affiliate: {...} } }
@@ -32,32 +26,21 @@ export const fetchAffiliateProfile = createAsyncThunk(
             if (response?.success && response?.data?.affiliate) {
                 // Standard structure: { success: true, data: { affiliate: {...} } }
                 affiliateData = response.data;
-                console.log('Redux Thunk - Using standard structure (response.data)');
             } else if (response?.data?.affiliate) {
                 // Nested structure: { data: { affiliate: {...} } }
                 affiliateData = response.data;
-                console.log('Redux Thunk - Using nested structure (response.data)');
             } else if (response?.affiliate) {
                 // Direct structure: { affiliate: {...} }
                 affiliateData = { affiliate: response.affiliate };
-                console.log('Redux Thunk - Using direct structure (response.affiliate)');
             } else {
-                console.warn('Redux Thunk - No affiliate found in response');
-                console.warn('Redux Thunk - Full response:', JSON.stringify(response, null, 2));
-                throw new Error('Affiliate not found');
-            }
-
-            console.log('Redux Thunk - Returning affiliateData:', affiliateData);
-            return affiliateData; // This should be { affiliate: {...} }
-        } catch (error) {
-            console.error('Redux Thunk - Error:', error);
-            console.error('Redux Thunk - Error response:', error.response);
-            // If 404 (not found), it's normal - user is not affiliate
-            if (error.response?.status === 404) {
-                console.log('Redux Thunk - 404 error, user is not affiliate');
+                // No affiliate found - this is normal
                 return rejectWithValue('NOT_AFFILIATE');
             }
-            return rejectWithValue(error.response?.data?.message || error.message || 'Failed to fetch affiliate profile');
+
+            return affiliateData; // This should be { affiliate: {...} }
+        } catch (error) {
+            // Any error means user is not affiliate - silently handle
+            return rejectWithValue('NOT_AFFILIATE');
         }
     }
 );

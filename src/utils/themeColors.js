@@ -50,6 +50,33 @@ export const getBackgroundColor = (theme) => {
 };
 
 /**
+ * Get card background color based on theme
+ * @param {string} theme - 'light' or 'dark'
+ * @returns {string} - Hex color code
+ */
+export const getCardBackgroundColor = (theme) => {
+    return theme === 'dark' ? '#334155' : '#FFFFFF';
+};
+
+/**
+ * Get input background color based on theme
+ * @param {string} theme - 'light' or 'dark'
+ * @returns {string} - Hex color code
+ */
+export const getInputBackgroundColor = (theme) => {
+    return theme === 'dark' ? '#475569' : '#FFFFFF';
+};
+
+/**
+ * Get border color based on theme
+ * @param {string} theme - 'light' or 'dark'
+ * @returns {string} - Hex color code
+ */
+export const getBorderColor = (theme) => {
+    return theme === 'dark' ? '#64748B' : '#e2e8f0';
+};
+
+/**
  * Get error color (same for both themes)
  * @returns {string} - Hex color code
  */

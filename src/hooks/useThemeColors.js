@@ -6,7 +6,7 @@
 
 import { useSelector } from 'react-redux';
 import { selectTheme } from '../store/slices/themeSlice';
-import { getButtonColor, getButtonTextColor, getPrimaryTextColor, getSecondaryTextColor, getBackgroundColor, getErrorColor, getSuccessColor, getWarningColor, getInfoColor } from '../utils/themeColors';
+import { getButtonColor, getButtonTextColor, getPrimaryTextColor, getSecondaryTextColor, getBackgroundColor, getCardBackgroundColor, getInputBackgroundColor, getBorderColor, getErrorColor, getSuccessColor, getWarningColor, getInfoColor } from '../utils/themeColors';
 
 export const useThemeColors = () => {
     const theme = useSelector(selectTheme);
@@ -19,6 +19,9 @@ export const useThemeColors = () => {
         primaryTextColor: getPrimaryTextColor(theme),
         secondaryTextColor: getSecondaryTextColor(theme),
         backgroundColor: getBackgroundColor(theme),
+        cardBackgroundColor: getCardBackgroundColor(theme),
+        inputBackgroundColor: getInputBackgroundColor(theme),
+        borderColor: getBorderColor(theme),
         errorColor: getErrorColor(),
         successColor: getSuccessColor(),
         warningColor: getWarningColor(),

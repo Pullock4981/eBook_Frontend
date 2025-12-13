@@ -3,7 +3,7 @@
 ## ✅ **Production Backend URL Updated**
 
 Frontend code এখন production backend URL ব্যবহার করবে:
-- **Production Backend:** `https://e-book-backend-tau.vercel.app/api`
+- **Production Backend:** `http://localhost:5000/api`
 
 ## 📝 **Manual .env File Setup (Optional)**
 
@@ -15,7 +15,7 @@ Frontend code এখন production backend URL ব্যবহার করব�
 
 ```env
 # Production Backend API URL
-VITE_API_BASE_URL=https://e-book-backend-tau.vercel.app/api
+VITE_API_BASE_URL=http://localhost:5000/api
 
 # Local Development (uncomment to use localhost)
 # VITE_API_BASE_URL=http://localhost:5000/api
@@ -42,7 +42,7 @@ npm run dev
    - Development mode-এ localhost ব্যবহার হবে
 
 2. **Current Configuration:**
-   - ✅ Production: `https://e-book-backend-tau.vercel.app/api` (default)
+   - ✅ Production: `http://localhost:5000/api` (default)
    - ✅ Development: `.env` file-এ `VITE_API_BASE_URL=http://localhost:5000/api` set করুন (optional)
 
 ## 🚀 **For Netlify Deployment:**
@@ -50,7 +50,7 @@ npm run dev
 Netlify-এ frontend deploy করার সময়, environment variable হিসেবে set করুন (optional):
 
 ```
-VITE_API_BASE_URL=https://e-book-backend-tau.vercel.app/api
+VITE_API_BASE_URL=http://localhost:5000/api
 ```
 
 **Note:** Default-এ production URL already set আছে, তাই optional।
@@ -64,6 +64,6 @@ VITE_API_BASE_URL=https://e-book-backend-tau.vercel.app/api
 ## 📌 **Note:**
 
 - `.env` file `.gitignore`-এ আছে, তাই git-এ commit হবে না
-- Production build-এ automatically production URL (`https://e-book-backend-tau.vercel.app/api`) ব্যবহার হবে
+- Production build-এ automatically production URL (`http://localhost:5000/api`) ব্যবহার হবে
 - Local development-এ production URL ব্যবহার হবে (`.env` file-এ localhost set করতে পারেন)
 

@@ -4,13 +4,13 @@
  * Detailed product information page
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProductById, fetchProductBySlug, selectCurrentProduct, selectIsLoading, selectError, clearCurrentProduct } from '../store/slices/productSlice';
 import { selectUser, selectIsAuthenticated } from '../store/slices/authSlice';
-import { addItemToCart } from '../store/slices/cartSlice';
+import { addItemToCart, selectCartItems, fetchCart } from '../store/slices/cartSlice';
 import { deleteProduct } from '../services/adminService';
 import { checkeBookAccess } from '../services/ebookService';
 import ProductGallery from '../components/products/ProductGallery';
@@ -30,15 +30,61 @@ function ProductDetail() {
     const error = useSelector(selectError);
     const user = useSelector(selectUser);
     const isAuthenticated = useSelector(selectIsAuthenticated);
+    const cartItems = useSelector(selectCartItems);
 
     const [isDeleting, setIsDeleting] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [isAddingToCart, setIsAddingToCart] = useState(false);
     const [addToCartError, setAddToCartError] = useState(null);
     const [addToCartSuccess, setAddToCartSuccess] = useState(false);
+    // Initialize hasEBookAccess as false - only set to true if explicitly confirmed
     const [hasEBookAccess, setHasEBookAccess] = useState(false);
     const [checkingAccess, setCheckingAccess] = useState(false);
     const { buttonColor, primaryTextColor, secondaryTextColor, backgroundColor, errorColor, successColor, infoColor } = useThemeColors();
+
+    // Track the current product ID for which views have been incremented
+    // This prevents double incrementing in React StrictMode (development)
+    // Use sessionStorage with timestamp to persist across component remounts
+    const VIEW_INCREMENT_KEY = 'productViewsIncremented';
+    const VIEW_INCREMENT_TIMEOUT = 2000; // 2 seconds - prevent rapid double clicks
+    
+    const getViewsIncremented = () => {
+        try {
+            const data = sessionStorage.getItem(VIEW_INCREMENT_KEY);
+            if (!data) return null;
+            const { productId, timestamp } = JSON.parse(data);
+            // Check if timestamp is still valid (within timeout)
+            const now = Date.now();
+            if (now - timestamp < VIEW_INCREMENT_TIMEOUT) {
+                return productId;
+            }
+            // Timestamp expired, clear it
+            clearViewsIncremented();
+            return null;
+        } catch {
+            return null;
+        }
+    };
+    
+    const setViewsIncremented = (productId) => {
+        try {
+            const data = {
+                productId,
+                timestamp: Date.now()
+            };
+            sessionStorage.setItem(VIEW_INCREMENT_KEY, JSON.stringify(data));
+        } catch {
+            // Ignore if sessionStorage is not available
+        }
+    };
+    
+    const clearViewsIncremented = () => {
+        try {
+            sessionStorage.removeItem(VIEW_INCREMENT_KEY);
+        } catch {
+            // Ignore if sessionStorage is not available
+        }
+    };
 
     // Check if user is admin
     const isAdmin = user?.role === 'admin';
@@ -60,30 +106,86 @@ function ProductDetail() {
                 console.log('🔍 ProductDetail - Is ObjectId:', /^[0-9a-fA-F]{24}$/.test(cleanId));
             }
 
+            // Check if views have already been incremented for this product ID in this session
+            // This prevents double incrementing in React StrictMode (development)
+            const incrementedProductId = getViewsIncremented();
+            const hasIncremented = incrementedProductId === cleanId;
+            
             // Check if it's a MongoDB ObjectId (24 hex characters) or a slug
             const isObjectId = /^[0-9a-fA-F]{24}$/.test(cleanId);
 
-            if (isObjectId) {
-                // It's an ObjectId, fetch by ID
-                dispatch(fetchProductById({ id: cleanId, incrementViews: true }));
+            if (!hasIncremented) {
+                // Mark as incremented BEFORE dispatching to prevent race conditions
+                setViewsIncremented(cleanId);
+
+                if (isObjectId) {
+                    // It's an ObjectId, fetch by ID with view increment
+                    dispatch(fetchProductById({ id: cleanId, incrementViews: true }));
+                } else {
+                    // It's a slug, fetch by slug with view increment
+                    dispatch(fetchProductBySlug({ slug: cleanId, incrementViews: true }));
+                }
             } else {
-                // It's a slug, fetch by slug
-                dispatch(fetchProductBySlug({ slug: cleanId, incrementViews: true }));
+                // Views already incremented for this ID in this session, fetch without incrementing
+                if (isObjectId) {
+                    dispatch(fetchProductById({ id: cleanId, incrementViews: false }));
+                } else {
+                    dispatch(fetchProductBySlug({ slug: cleanId, incrementViews: false }));
+                }
             }
         } else {
             console.error('❌ No product ID in URL');
         }
 
         return () => {
+            // Clean up when ID changes or component unmounts
+            // Clear the sessionStorage entry for this product so views can increment again
+            // if user navigates away and comes back to the same product
+            if (id) {
+                const cleanId = String(id).trim();
+                const incrementedProductId = getViewsIncremented();
+                if (incrementedProductId === cleanId) {
+                    // Only clear if it's the same product - this allows incrementing again on revisit
+                    clearViewsIncremented();
+                }
+            }
             dispatch(clearCurrentProduct());
         };
     }, [dispatch, id]);
 
+    // Fetch cart when authenticated
+    useEffect(() => {
+        if (isAuthenticated) {
+            dispatch(fetchCart());
+        }
+    }, [dispatch, isAuthenticated]);
+
+    // Check if product is in cart
+    const isProductInCart = () => {
+        if (!product || !cartItems || cartItems.length === 0) {
+            return false;
+        }
+        const productId = String(product.id || product._id);
+        return cartItems.some(item => {
+            const itemProductId = item.product?._id 
+                ? String(item.product._id) 
+                : String(item.product);
+            return itemProductId === productId;
+        });
+    };
+
+    // Check if actually purchased (not just in cart)
+    const [isActuallyPurchased, setIsActuallyPurchased] = useState(false);
+
     // Check if user has eBook access (for digital products)
+    // Access granted if: 1) Actually purchased, OR 2) Product is in cart (since payment system not implemented yet)
     useEffect(() => {
         const checkAccess = async () => {
+            // Reset to false first
+            setHasEBookAccess(false);
+            
+            // Only check if user is authenticated, product exists, and is digital
             if (!isAuthenticated || !product || !isDigital) {
-                setHasEBookAccess(false);
                 return;
             }
 
@@ -91,18 +193,31 @@ function ProductDetail() {
             try {
                 const productId = product.id || product._id;
                 if (productId) {
-                    const hasAccess = await checkeBookAccess(productId);
-                    setHasEBookAccess(hasAccess);
+                    // Check if actually purchased
+                    const hasPurchased = await checkeBookAccess(productId);
+                    setIsActuallyPurchased(hasPurchased === true);
+                    
+                    // Check if product is in cart (temporary access until payment is implemented)
+                    const inCart = isProductInCart();
+                    
+                    // Grant access if purchased OR in cart
+                    setHasEBookAccess(hasPurchased === true || inCart === true);
+                } else {
+                    setHasEBookAccess(false);
+                    setIsActuallyPurchased(false);
                 }
             } catch (error) {
-                setHasEBookAccess(false);
+                // On any error, check if in cart as fallback
+                const inCart = isProductInCart();
+                setHasEBookAccess(inCart === true);
+                setIsActuallyPurchased(false);
             } finally {
                 setCheckingAccess(false);
             }
         };
 
         checkAccess();
-    }, [isAuthenticated, product, isDigital]);
+    }, [isAuthenticated, product, isDigital, cartItems]);
 
     if (isLoading) {
         return (
@@ -364,107 +479,85 @@ function ProductDetail() {
                                 {/* Digital Product - Read Now or Add to Cart */}
                                 {isDigital ? (
                                     <div className="flex flex-col gap-3 sm:gap-4 pt-4">
-                                        {isAuthenticated && hasEBookAccess ? (
-                                            <>
-                                                <button
-                                                    onClick={() => navigate(`/ebooks/viewer/${product.id || product._id}`)}
-                                                    className="btn btn-success btn-md sm:btn-lg flex-grow text-white shadow-lg hover:shadow-xl transition-all font-semibold"
-                                                    style={{
-                                                        backgroundColor: successColor,
-                                                        fontWeight: '600'
-                                                    }}
-                                                >
-                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                                                    </svg>
-                                                    <span className="ml-2">{t('ebooks.readNow') || 'Read Now'}</span>
-                                                </button>
-                                                <div className="badge badge-success badge-lg flex items-center gap-2 px-4 py-3">
-                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                                    </svg>
-                                                    {t('ebooks.alreadyPurchased') || 'Already Purchased'}
-                                                </div>
-                                            </>
-                                        ) : (
-                                            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                                                {/* Read Button for Logged-in Users */}
-                                                {isAuthenticated && product?.digitalFile ? (
-                                                    <button
-                                                        onClick={() => {
-                                                            // Navigate to PDF viewer in same tab
-                                                            const productId = product.id || product._id;
-                                                            if (productId) {
-                                                                navigate(`/pdf/view/${productId}`);
-                                                            }
-                                                        }}
-                                                        className="btn btn-info btn-md sm:btn-lg flex-grow text-white shadow-lg hover:shadow-xl transition-all font-semibold"
-                                                        style={{
-                                                            backgroundColor: infoColor,
-                                                            fontWeight: '600'
-                                                        }}
-                                                    >
+                                        {/* Read Now Button - NO CONDITIONS - Just show PDF */}
+                                        <button
+                                            onClick={() => navigate(`/ebooks/viewer/${product.id || product._id}`)}
+                                            className="btn btn-success btn-md sm:btn-lg flex-grow text-white shadow-lg hover:shadow-xl transition-all font-semibold"
+                                            style={{
+                                                backgroundColor: successColor,
+                                                fontWeight: '600'
+                                            }}
+                                        >
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                            </svg>
+                                            <span className="ml-2">{t('ebooks.readNow') || 'Read Now'}</span>
+                                        </button>
+                                        
+                                        {/* Add to Cart Button - Always show */}
+                                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                                            <button
+                                                className="btn btn-primary btn-md sm:btn-lg flex-grow text-white shadow-lg hover:shadow-xl transition-all font-semibold"
+                                                style={{ backgroundColor: buttonColor }}
+                                                disabled={isAddingToCart || checkingAccess}
+                                                onClick={async () => {
+                                                    if (!isAuthenticated) {
+                                                        navigate('/login');
+                                                        return;
+                                                    }
+
+                                                    if (!product?._id) {
+                                                        setAddToCartError(t('cart.productNotFound') || 'Product not found');
+                                                        return;
+                                                    }
+
+                                                    setIsAddingToCart(true);
+                                                    setAddToCartError(null);
+                                                    setAddToCartSuccess(false);
+                                                    try {
+                                                        await dispatch(addItemToCart({ productId: product._id, quantity: 1 })).unwrap();
+                                                        // Refresh cart to update access status (product in cart = can read PDF)
+                                                        await dispatch(fetchCart());
+                                                        setAddToCartSuccess(true);
+                                                        setTimeout(() => setAddToCartSuccess(false), 3000);
+                                                    } catch (error) {
+                                                        const errorMessage = error?.message || error || t('cart.addToCartError') || 'Failed to add to cart';
+                                                        setAddToCartError(errorMessage);
+                                                    } finally {
+                                                        setIsAddingToCart(false);
+                                                    }
+                                                }}
+                                            >
+                                                {isAddingToCart ? (
+                                                    <>
+                                                        <span className="loading loading-spinner loading-sm"></span>
+                                                        <span className="ml-2">{t('cart.adding') || 'Adding...'}</span>
+                                                    </>
+                                                ) : addToCartSuccess ? (
+                                                    <>
                                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                                         </svg>
-                                                        <span className="ml-2">{t('ebooks.read') || 'Read'}</span>
-                                                    </button>
-                                                ) : null}
-
-                                                {/* Add to Cart Button */}
-                                                <button
-                                                    className="btn btn-primary btn-md sm:btn-lg flex-grow text-white shadow-lg hover:shadow-xl transition-all"
-                                                    style={{ backgroundColor: buttonColor }}
-                                                    disabled={isAddingToCart || !isAuthenticated}
-                                                    onClick={async () => {
-                                                        if (!isAuthenticated) {
-                                                            navigate('/login');
-                                                            return;
-                                                        }
-
-                                                        if (!product?._id) {
-                                                            setAddToCartError(t('cart.productNotFound') || 'Product not found');
-                                                            return;
-                                                        }
-
-                                                        setIsAddingToCart(true);
-                                                        setAddToCartError(null);
-                                                        setAddToCartSuccess(false);
-                                                        try {
-                                                            await dispatch(addItemToCart({ productId: product._id, quantity: 1 })).unwrap();
-                                                            setAddToCartSuccess(true);
-                                                            setTimeout(() => setAddToCartSuccess(false), 3000);
-                                                        } catch (error) {
-                                                            const errorMessage = error?.message || error || t('cart.addToCartError') || 'Failed to add to cart';
-                                                            setAddToCartError(errorMessage);
-                                                        } finally {
-                                                            setIsAddingToCart(false);
-                                                        }
-                                                    }}
-                                                >
-                                                    {isAddingToCart ? (
-                                                        <>
-                                                            <span className="loading loading-spinner loading-sm"></span>
-                                                            <span className="ml-2">{t('cart.adding') || 'Adding...'}</span>
-                                                        </>
-                                                    ) : addToCartSuccess ? (
-                                                        <>
-                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                                            </svg>
-                                                            <span className="ml-2">{t('cart.addedToCart') || 'Added to Cart!'}</span>
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                                                            </svg>
-                                                            <span className="ml-2">{t('products.addToCart') || 'Add to Cart'}</span>
-                                                        </>
-                                                    )}
-                                                </button>
-                                            </div>
-                                        )}
+                                                        <span className="ml-2">{t('cart.addedToCart') || 'Added to Cart!'}</span>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                                        </svg>
+                                                        <span className="ml-2">{t('products.addToCart') || 'Add to Cart'}</span>
+                                                    </>
+                                                )}
+                                            </button>
+                                            
+                                            {/* Show loading state while checking access */}
+                                            {checkingAccess && (
+                                                <div className="flex items-center justify-center">
+                                                    <span className="loading loading-spinner loading-sm"></span>
+                                                    <span className="ml-2 text-sm opacity-70">{t('common.checking') || 'Checking...'}</span>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 ) : (
                                     /* Physical Product - Add to Cart */
@@ -495,6 +588,8 @@ function ProductDetail() {
                                                 setAddToCartSuccess(false);
                                                 try {
                                                     await dispatch(addItemToCart({ productId: product._id, quantity: 1 })).unwrap();
+                                                    // Refresh cart to update access status (product in cart = can read PDF)
+                                                    await dispatch(fetchCart());
                                                     setAddToCartSuccess(true);
                                                     setTimeout(() => setAddToCartSuccess(false), 3000);
                                                 } catch (error) {

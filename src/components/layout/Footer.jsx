@@ -23,8 +23,8 @@ function Footer() {
             style={{
                 backgroundColor: backgroundColor,
                 borderTopWidth: '2px',
+                borderTopStyle: 'solid',
                 borderTopColor: primaryTextColor,
-                borderColor: '#e2e8f0',
                 boxShadow: '0 -4px 12px rgba(30, 41, 59, 0.15), 0 -2px 4px rgba(30, 41, 59, 0.1)'
             }}
         >

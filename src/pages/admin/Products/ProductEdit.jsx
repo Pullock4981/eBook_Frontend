@@ -39,13 +39,17 @@ function ProductEdit() {
     const handleSubmit = async (formData) => {
         setIsSubmitting(true);
         try {
-            await updateProduct(id, formData);
+            console.log('ProductEdit - Submitting update:', { id, formData });
+            const response = await updateProduct(id, formData);
+            console.log('ProductEdit - Update successful:', response);
             // Refresh products list
             dispatch(fetchProducts({ filters: {}, page: 1, limit: 12 }));
             // Navigate to products list
             navigate('/admin/products');
         } catch (error) {
-            alert(error.message || t('admin.updateError') || 'Failed to update product');
+            console.error('ProductEdit - Update error:', error);
+            const errorMessage = error.data?.message || error.message || error.errors?.join(', ') || t('admin.updateError') || 'Failed to update product';
+            alert(errorMessage);
         } finally {
             setIsSubmitting(false);
         }

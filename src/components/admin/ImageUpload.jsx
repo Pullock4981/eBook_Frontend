@@ -59,29 +59,130 @@ function ImageUpload({
         setUploadProgress(0);
 
         try {
-            let uploadedImages;
+            let uploadedImages = [];
 
             if (multiple) {
                 const response = await uploadMultipleImages(validFiles, (progress) => {
                     setUploadProgress(progress);
                 });
-                uploadedImages = response.data || [];
+                console.log('Multiple Images Upload Response (Full):', JSON.stringify(response, null, 2));
+                console.log('Multiple Images Upload Response Type:', typeof response);
+                console.log('Multiple Images Upload Response Keys:', response ? Object.keys(response) : 'null');
+                
+                // API interceptor returns response.data directly, so response is already the data object
+                // Structure: { success: true, data: [...] } or { success: true, data: {...} }
+                if (response) {
+                    if (response.success && response.data) {
+                        // Standard structure: { success: true, data: [...] }
+                        uploadedImages = Array.isArray(response.data) ? response.data : [response.data];
+                        console.log('Found images in response.data:', uploadedImages);
+                    } else if (Array.isArray(response)) {
+                        // Direct array response
+                        uploadedImages = response;
+                        console.log('Found images as direct array:', uploadedImages);
+                    } else if (response.data && Array.isArray(response.data)) {
+                        // Nested data array
+                        uploadedImages = response.data;
+                        console.log('Found images in nested response.data:', uploadedImages);
+                    } else if (response.data) {
+                        // Single object in data
+                        uploadedImages = [response.data];
+                        console.log('Found single image in response.data:', uploadedImages);
+                    } else if (response.secure_url || response.url) {
+                        // Direct image object
+                        uploadedImages = [response];
+                        console.log('Found image as direct object:', uploadedImages);
+                    }
+                }
             } else {
                 const response = await uploadSingleImage(validFiles[0], (progress) => {
                     setUploadProgress(progress);
                 });
-                uploadedImages = [response.data];
+                console.log('Single Image Upload Response (Full):', JSON.stringify(response, null, 2));
+                console.log('Single Image Upload Response Type:', typeof response);
+                console.log('Single Image Upload Response Keys:', response ? Object.keys(response) : 'null');
+                
+                // API interceptor returns response.data directly
+                // Structure: { success: true, data: {...} }
+                if (response) {
+                    if (response.success && response.data) {
+                        // Standard structure: { success: true, data: {...} }
+                        uploadedImages = [response.data];
+                        console.log('Found image in response.data:', uploadedImages);
+                    } else if (response.secure_url || response.url) {
+                        // Direct image object
+                        uploadedImages = [response];
+                        console.log('Found image as direct object:', uploadedImages);
+                    } else if (response.data) {
+                        // Nested data
+                        uploadedImages = [response.data];
+                        console.log('Found image in nested response.data:', uploadedImages);
+                    } else {
+                        // Try as is
+                        uploadedImages = [response];
+                        console.log('Using response as-is:', uploadedImages);
+                    }
+                }
+            }
+
+            console.log('Extracted Uploaded Images:', uploadedImages);
+
+            // Extract URLs from uploaded images
+            const imageUrls = uploadedImages
+                .map((img, idx) => {
+                    if (!img) {
+                        console.warn(`Image at index ${idx} is null/undefined`);
+                        return null;
+                    }
+                    
+                    if (typeof img === 'string') {
+                        console.log(`Image ${idx} is string:`, img);
+                        return img;
+                    }
+                    
+                    // Try to get URL from various possible fields
+                    let url = img.secure_url || img.url || img.path;
+                    
+                    // If URL not found but public_id exists, construct Cloudinary URL
+                    if (!url && img.public_id) {
+                        // Extract cloud name from public_id or use default
+                        const publicId = img.public_id;
+                        // Try to construct URL: https://res.cloudinary.com/{cloud_name}/image/upload/{public_id}
+                        // For now, we'll need the cloud name, but let's try a generic approach
+                        url = `https://res.cloudinary.com/${publicId.split('/')[0] || 'dbnmcsoch'}/image/upload/${publicId}`;
+                        console.log(`Constructed URL from public_id for image ${idx}:`, url);
+                    }
+                    
+                    console.log(`Image ${idx} extracted URL:`, url, 'from object:', img);
+                    return url;
+                })
+                .filter(url => url !== null && url !== undefined && url !== '');
+
+            console.log('Extracted Image URLs:', imageUrls);
+            console.log('Image URLs count:', imageUrls.length);
+
+            if (imageUrls.length === 0) {
+                console.error('No image URLs found. Full response structure:', JSON.stringify(uploadedImages, null, 2));
+                throw new Error('No image URLs found in response. Please check backend configuration and Cloudinary setup.');
             }
 
             // Add new images to existing ones
             const newImages = multiple
-                ? [...images, ...uploadedImages.map(img => img.secure_url || img.url)]
-                : [uploadedImages[0].secure_url || uploadedImages[0].url];
+                ? [...images, ...imageUrls]
+                : imageUrls;
 
+            console.log('Final Images Array:', newImages);
             onImagesChange(newImages);
             setUploadProgress(0);
         } catch (error) {
-            setError(error.message || 'Failed to upload images');
+            console.error('Image Upload Error:', error);
+            console.error('Error Details:', {
+                message: error.message,
+                response: error.response,
+                data: error.data,
+                status: error.status
+            });
+            setError(error.message || error.data?.message || 'Failed to upload images');
         } finally {
             setUploading(false);
             // Reset file input
@@ -213,15 +314,32 @@ function ImageUpload({
                         {t('admin.uploadedImages') || 'Uploaded Images'} ({images.length})
                     </h3>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
-                        {images.map((imageUrl, index) => (
-                            <div key={index} className="relative group">
-                                <div className="aspect-square rounded-lg overflow-hidden border-2 hover:border-primary transition-colors" style={{ borderColor: '#cbd5e1' }}>
-                                    <img
-                                        src={imageUrl}
-                                        alt={`Upload ${index + 1}`}
-                                        className="w-full h-full object-cover"
-                                    />
-                                </div>
+                        {images.map((imageUrl, index) => {
+                            // Ensure imageUrl is a valid string
+                            const validUrl = typeof imageUrl === 'string' ? imageUrl : (imageUrl?.secure_url || imageUrl?.url || '');
+                            
+                            return (
+                                <div key={index} className="relative group">
+                                    <div className="aspect-square rounded-lg overflow-hidden border-2 hover:border-primary transition-colors bg-base-200" style={{ borderColor: '#cbd5e1' }}>
+                                        {validUrl ? (
+                                            <img
+                                                src={validUrl}
+                                                alt={`Upload ${index + 1}`}
+                                                className="w-full h-full object-cover"
+                                                onError={(e) => {
+                                                    console.error('Image load error:', validUrl);
+                                                    e.target.src = 'https://via.placeholder.com/300x300?text=Image+Error';
+                                                }}
+                                                onLoad={() => {
+                                                    console.log('Image loaded successfully:', validUrl);
+                                                }}
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center bg-base-200">
+                                                <span className="text-xs opacity-50">No Image</span>
+                                            </div>
+                                        )}
+                                    </div>
                                 <button
                                     type="button"
                                     onClick={() => handleRemoveImage(index)}
@@ -241,15 +359,16 @@ function ImageUpload({
                                         />
                                     </svg>
                                 </button>
-                                {index === 0 && (
-                                    <div className="absolute bottom-2 left-2">
-                                        <span className="badge badge-primary badge-sm text-white">
-                                            {t('admin.mainImage') || 'Main'}
-                                        </span>
-                                    </div>
-                                )}
-                            </div>
-                        ))}
+                                    {index === 0 && (
+                                        <div className="absolute bottom-2 left-2">
+                                            <span className="badge badge-primary badge-sm text-white">
+                                                {t('admin.mainImage') || 'Main'}
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             )}

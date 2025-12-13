@@ -11,12 +11,21 @@ import { useDispatch } from 'react-redux';
 import { updateItemQuantity, removeItemFromCart } from '../../store/slices/cartSlice';
 import { formatCurrency } from '../../utils/helpers';
 import { PRODUCT_TYPES } from '../../utils/constants';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 function CartItem({ item }) {
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const [isUpdating, setIsUpdating] = useState(false);
     const [isRemoving, setIsRemoving] = useState(false);
+    const {
+        cardBackgroundColor,
+        primaryTextColor,
+        secondaryTextColor,
+        borderColor,
+        buttonColor,
+        buttonTextColor,
+    } = useThemeColors();
 
     const product = item.product || {};
     // Ensure productId is a string
@@ -77,12 +86,12 @@ function CartItem({ item }) {
     const productUrl = product.slug ? `/products/${product.slug}` : `/products/${productId}`;
 
     return (
-        <div className="card bg-base-100 shadow-sm border border-base-200">
+        <div className="card shadow-sm border" style={{ borderColor, backgroundColor: cardBackgroundColor }}>
             <div className="card-body p-3 sm:p-4 md:p-6">
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                     {/* Product Image */}
                     <Link to={productUrl} className="flex-shrink-0 mx-auto sm:mx-0">
-                        <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-lg overflow-hidden bg-base-200">
+                        <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-lg overflow-hidden" style={{ backgroundColor: borderColor }}>
                             <img
                                 src={productImage}
                                 alt={productName}
@@ -100,7 +109,7 @@ function CartItem({ item }) {
                         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
                             <div className="flex-grow min-w-0">
                                 <Link to={productUrl} className="hover:text-primary transition-colors">
-                                    <h3 className="text-base sm:text-lg md:text-xl font-semibold mb-1 sm:mb-2 line-clamp-2" style={{ color: '#1E293B' }}>
+                                    <h3 className="text-base sm:text-lg md:text-xl font-semibold mb-1 sm:mb-2 line-clamp-2" style={{ color: primaryTextColor }}>
                                         {productName}
                                     </h3>
                                 </Link>
@@ -109,7 +118,7 @@ function CartItem({ item }) {
                                         {isPhysical ? t('products.physical') : t('products.digital')}
                                     </span>
                                 </div>
-                                <div className="text-base sm:text-lg font-bold mb-2 sm:mb-0" style={{ color: '#1E293B' }}>
+                                <div className="text-base sm:text-lg font-bold mb-2 sm:mb-0" style={{ color: primaryTextColor }}>
                                     {formatCurrency(item.price)}
                                 </div>
                             </div>
@@ -122,7 +131,7 @@ function CartItem({ item }) {
                                         className="btn btn-sm btn-outline px-3 sm:px-4"
                                         onClick={handleDecrease}
                                         disabled={isUpdating || isRemoving}
-                                        style={{ borderColor: '#1E293B', color: '#1E293B' }}
+                                        style={{ borderColor: buttonColor, color: buttonColor }}
                                         aria-label={t('cart.decreaseQuantity') || 'Decrease quantity'}
                                     >
                                         {isUpdating ? (
@@ -133,14 +142,14 @@ function CartItem({ item }) {
                                             </svg>
                                         )}
                                     </button>
-                                    <span className="text-base font-semibold min-w-[40px] text-center px-2" style={{ color: '#1E293B' }}>
+                                    <span className="text-base font-semibold min-w-[40px] text-center px-2" style={{ color: primaryTextColor }}>
                                         {item.quantity}
                                     </span>
                                     <button
                                         className="btn btn-sm btn-outline px-3 sm:px-4"
                                         onClick={handleIncrease}
                                         disabled={isUpdating || isRemoving}
-                                        style={{ borderColor: '#1E293B', color: '#1E293B' }}
+                                        style={{ borderColor: buttonColor, color: buttonColor }}
                                         aria-label={t('cart.increaseQuantity') || 'Increase quantity'}
                                     >
                                         {isUpdating ? (
@@ -155,7 +164,7 @@ function CartItem({ item }) {
 
                                 {/* Item Total */}
                                 <div className="text-right sm:text-left">
-                                    <div className="text-base sm:text-lg md:text-xl font-bold" style={{ color: '#1E293B' }}>
+                                    <div className="text-base sm:text-lg md:text-xl font-bold" style={{ color: primaryTextColor }}>
                                         {formatCurrency(itemTotal)}
                                     </div>
                                 </div>

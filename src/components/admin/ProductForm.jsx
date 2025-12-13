@@ -51,22 +51,22 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
     useEffect(() => {
         if (product) {
             setFormData({
-                name: product.name || '',
+                name: String(product.name || ''),
                 type: product.type || PRODUCT_TYPES.PHYSICAL,
                 category: product.category?._id || product.category || '',
                 subcategory: product.subcategory?._id || product.subcategory || '',
-                description: product.description || '',
-                shortDescription: product.shortDescription || '',
-                price: product.price || '',
-                discountPrice: product.discountPrice || '',
-                stock: product.stock || '',
-                sku: product.sku || '',
+                description: String(product.description || ''),
+                shortDescription: String(product.shortDescription || ''),
+                price: product.price !== undefined && product.price !== null ? String(product.price) : '',
+                discountPrice: product.discountPrice !== undefined && product.discountPrice !== null ? String(product.discountPrice) : '',
+                stock: product.stock !== undefined && product.stock !== null ? String(product.stock) : '',
+                sku: String(product.sku || ''),
                 tags: product.tags?.join(', ') || '',
                 images: product.images || [],
                 isFeatured: product.isFeatured || false,
                 isActive: product.isActive !== undefined ? product.isActive : true,
-                digitalFile: product.digitalFile || '',
-                fileSize: product.fileSize || '',
+                digitalFile: String(product.digitalFile || ''),
+                fileSize: product.fileSize !== undefined && product.fileSize !== null ? String(product.fileSize) : '',
             });
         }
     }, [product]);
@@ -75,7 +75,8 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
         const { name, value, type, checked } = e.target;
         setFormData((prev) => ({
             ...prev,
-            [name]: type === 'checkbox' ? checked : value,
+            // Ensure all values are strings (or boolean for checkboxes) - never undefined or null
+            [name]: type === 'checkbox' ? checked : (value || ''),
         }));
         // Clear error for this field
         if (errors[name]) {
@@ -114,11 +115,12 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
             newErrors.discountPrice = t('admin.errors.discountInvalid') || 'Discount price must be less than regular price';
         }
 
-        if (formData.type === PRODUCT_TYPES.PHYSICAL && !formData.stock && formData.stock !== 0) {
+        if (formData.type === PRODUCT_TYPES.PHYSICAL && (formData.stock === '' || formData.stock === null || formData.stock === undefined)) {
             newErrors.stock = t('admin.errors.stockRequired') || 'Stock is required for physical products';
         }
 
-        if (formData.type === PRODUCT_TYPES.DIGITAL && !formData.digitalFile) {
+        // For digital products, check if digitalFile is provided (either uploaded or manual URL)
+        if (formData.type === PRODUCT_TYPES.DIGITAL && !formData.digitalFile?.trim()) {
             newErrors.digitalFile = t('admin.errors.digitalFileRequired') || 'PDF file upload or URL is required for digital products';
         }
 
@@ -130,19 +132,142 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
         return Object.keys(newErrors).length === 0;
     };
 
+    const scrollToFirstError = () => {
+        const firstErrorField = Object.keys(errors)[0];
+        if (firstErrorField) {
+            // Try to find the input/select/textarea element
+            const element = document.querySelector(`[name="${firstErrorField}"]`);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                element.focus();
+            } else {
+                // If not found, try to find by error message
+                const errorElement = document.querySelector(`[data-error-field="${firstErrorField}"]`);
+                if (errorElement) {
+                    errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        }
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (!validate()) return;
+        console.log('Form Submit - Form Data:', formData);
+        
+        // Validate form
+        const isValid = validate();
+        console.log('Form Validation - Valid:', isValid, 'Errors:', errors);
+        
+        if (!isValid) {
+            // Scroll to first error after a short delay to ensure errors are rendered
+            setTimeout(() => {
+                scrollToFirstError();
+            }, 100);
+            
+            // Show alert for better visibility
+            const firstError = Object.values(errors)[0];
+            if (firstError) {
+                alert(firstError);
+            } else {
+                alert('Please fill in all required fields correctly.');
+            }
+            return;
+        }
 
+        // Prepare submit data with proper type conversions
+        // CRITICAL: Always include price field when updating (needed for discount validation)
+        let priceValue = formData.price && formData.price.toString().trim() 
+            ? (isNaN(parseFloat(formData.price)) ? undefined : parseFloat(formData.price))
+            : (product && product.price !== undefined ? (typeof product.price === 'number' ? product.price : parseFloat(product.price)) : undefined);
+        
+        let discountPriceValue = formData.discountPrice && formData.discountPrice.trim() 
+            ? (isNaN(parseFloat(formData.discountPrice)) ? undefined : parseFloat(formData.discountPrice))
+            : undefined;
+        
+        // If discountPrice is set, ensure price is also set (use existing if not provided)
+        if (discountPriceValue !== undefined && discountPriceValue !== null) {
+            if (priceValue === undefined || priceValue === null || isNaN(priceValue)) {
+                if (product && product.price !== undefined && product.price !== null) {
+                    priceValue = typeof product.price === 'number' ? product.price : parseFloat(product.price);
+                    console.log('ProductForm - Using existing price for discount validation:', priceValue);
+                }
+            }
+        }
+        
         const submitData = {
-            ...formData,
-            price: parseFloat(formData.price),
-            discountPrice: formData.discountPrice ? parseFloat(formData.discountPrice) : null,
-            stock: formData.type === PRODUCT_TYPES.PHYSICAL ? parseInt(formData.stock) : undefined,
-            tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [],
-            fileSize: formData.fileSize ? parseInt(formData.fileSize) : null,
+            name: formData.name.trim(),
+            type: formData.type,
+            description: formData.description.trim(),
+            shortDescription: formData.shortDescription.trim(),
+            images: formData.images || [],
+            isFeatured: formData.isFeatured,
+            isActive: formData.isActive,
+            // Convert empty strings to undefined for ObjectId fields (MongoDB doesn't accept empty strings)
+            category: formData.category && formData.category.trim() ? formData.category.trim() : undefined,
+            subcategory: formData.subcategory && formData.subcategory.trim() ? formData.subcategory.trim() : undefined,
+            // Always include price (needed for discount validation)
+            price: priceValue,
+            discountPrice: discountPriceValue,
+            // Convert stock (only for physical products) - ensure it's a valid number
+            stock: formData.type === PRODUCT_TYPES.PHYSICAL && formData.stock
+                ? (isNaN(parseInt(formData.stock)) ? undefined : parseInt(formData.stock))
+                : undefined,
+            // Convert tags
+            tags: formData.tags && formData.tags.trim() 
+                ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag) 
+                : [],
+            // Convert fileSize - ensure it's a valid number
+            fileSize: formData.fileSize && formData.fileSize.trim()
+                ? (isNaN(parseInt(formData.fileSize)) ? undefined : parseInt(formData.fileSize))
+                : undefined,
+            // Ensure digitalFile is not empty string
+            digitalFile: formData.digitalFile && formData.digitalFile.trim() ? formData.digitalFile.trim() : undefined,
+            // SKU if provided
+            sku: formData.sku && formData.sku.trim() ? formData.sku.trim() : undefined,
         };
+        
+        // Remove undefined, null, empty string, and NaN values
+        // BUT: Always keep price and discountPrice if they're valid numbers
+        Object.keys(submitData).forEach(key => {
+            const value = submitData[key];
+            // Always keep price and discountPrice if they're valid numbers
+            if ((key === 'price' || key === 'discountPrice') && typeof value === 'number' && !isNaN(value)) {
+                return; // Keep this field
+            }
+            if (value === undefined || value === null || value === '' || 
+                (typeof value === 'number' && isNaN(value)) ||
+                (Array.isArray(value) && value.length === 0)) {
+                delete submitData[key];
+            }
+        });
+        
+        // Final check: If discountPrice is set, ensure price is also set
+        if (submitData.discountPrice !== undefined && submitData.discountPrice !== null) {
+            if (submitData.price === undefined || submitData.price === null || isNaN(submitData.price)) {
+                // Last resort: use existing product price
+                if (product && product.price !== undefined && product.price !== null) {
+                    submitData.price = typeof product.price === 'number' ? product.price : parseFloat(product.price);
+                    console.log('ProductForm - Final fallback: Using existing price:', submitData.price);
+                }
+            }
+        }
+        
+        // For digital products, ensure digitalFile is present (validation will catch if missing)
+        if (submitData.type === PRODUCT_TYPES.DIGITAL && !submitData.digitalFile) {
+            // Keep it undefined so validation can catch it
+            // Don't set to null as that might cause issues
+        }
 
+        console.log('Form Submit - Submitting Data:', submitData);
+        console.log('Form Submit - Price Details:', {
+            price: submitData.price,
+            priceType: typeof submitData.price,
+            discountPrice: submitData.discountPrice,
+            discountPriceType: typeof submitData.discountPrice,
+            comparison: submitData.discountPrice && submitData.price 
+                ? `${submitData.discountPrice} < ${submitData.price} = ${submitData.discountPrice < submitData.price}`
+                : 'N/A'
+        });
         onSubmit(submitData);
     };
 
@@ -170,7 +295,7 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                             <input
                                 type="text"
                                 name="name"
-                                value={formData.name}
+                                value={formData.name || ''}
                                 onChange={handleChange}
                                 className={`input input-bordered w-full h-12 text-base sm:text-base px-4 ${errors.name ? 'input-error border-error border-2' : 'border-2'}`}
                                 style={{
@@ -201,7 +326,7 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                                 </label>
                                 <select
                                     name="type"
-                                    value={formData.type}
+                                    value={formData.type || PRODUCT_TYPES.PHYSICAL}
                                     onChange={handleChange}
                                     className="select select-bordered w-full h-12 text-base sm:text-base border-2 px-4"
                                     style={{
@@ -231,7 +356,7 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                                 </label>
                                 <select
                                     name="category"
-                                    value={formData.category}
+                                    value={formData.category || ''}
                                     onChange={handleChange}
                                     className={`select select-bordered w-full h-12 text-base sm:text-base px-4 ${errors.category ? 'select-error border-error border-2' : 'border-2'}`}
                                     style={{
@@ -269,7 +394,7 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                             </label>
                             <textarea
                                 name="shortDescription"
-                                value={formData.shortDescription}
+                                value={formData.shortDescription || ''}
                                 onChange={handleChange}
                                 className="textarea textarea-bordered w-full min-h-24 text-base sm:text-base border-2 resize-y px-4 py-3"
                                 style={{
@@ -297,7 +422,7 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                             </label>
                             <textarea
                                 name="description"
-                                value={formData.description}
+                                value={formData.description || ''}
                                 onChange={handleChange}
                                 className={`textarea textarea-bordered w-full min-h-32 text-base sm:text-base resize-y px-4 py-3 ${errors.description ? 'textarea-error border-error border-2' : 'border-2'}`}
                                 style={{
@@ -348,7 +473,7 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                                 <input
                                     type="number"
                                     name="price"
-                                    value={formData.price}
+                                    value={formData.price || ''}
                                     onChange={handleChange}
                                     className={`input input-bordered w-full h-12 text-base sm:text-base pl-10 pr-4 ${errors.price ? 'input-error border-error border-2' : 'border-2'}`}
                                     style={{
@@ -387,7 +512,7 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                                 <input
                                     type="number"
                                     name="discountPrice"
-                                    value={formData.discountPrice}
+                                    value={formData.discountPrice || ''}
                                     onChange={handleChange}
                                     className={`input input-bordered w-full h-12 text-base sm:text-base pl-10 pr-4 ${errors.discountPrice ? 'input-error border-error border-2' : 'border-2'}`}
                                     style={{
@@ -442,7 +567,7 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                                 <input
                                     type="number"
                                     name="stock"
-                                    value={formData.stock}
+                                    value={formData.stock || ''}
                                     onChange={handleChange}
                                     className={`input input-bordered w-full h-12 text-base sm:text-base px-4 ${errors.stock ? 'input-error border-error border-2' : 'border-2'}`}
                                     style={{
@@ -475,7 +600,7 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                                 <input
                                     type="text"
                                     name="sku"
-                                    value={formData.sku}
+                                    value={formData.sku || ''}
                                     onChange={handleChange}
                                     className="input input-bordered w-full h-12 text-base sm:text-base border-2 px-4"
                                     style={{
@@ -518,24 +643,30 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                                 </label>
                                 <PDFUpload
                                     onUploadSuccess={(url, fileData) => {
+                                        const pdfUrl = url ? String(url) : '';
                                         setFormData(prev => ({
                                             ...prev,
-                                            digitalFile: url,
-                                            fileSize: fileData?.bytes || prev.fileSize
+                                            digitalFile: pdfUrl,
+                                            fileSize: fileData?.bytes ? String(fileData.bytes) : (prev.fileSize || '')
                                         }));
                                         // Clear error if upload successful
                                         if (errors.digitalFile) {
-                                            setErrors(prev => ({ ...prev, digitalFile: '' }));
+                                            setErrors(prev => {
+                                                const newErrors = { ...prev };
+                                                delete newErrors.digitalFile;
+                                                return newErrors;
+                                            });
                                         }
                                     }}
                                     onUploadError={(error) => {
+                                        const errorMsg = error.response?.data?.message || t('admin.errors.uploadFailed') || 'Failed to upload PDF';
                                         setErrors(prev => ({
                                             ...prev,
-                                            digitalFile: error.response?.data?.message || t('admin.errors.uploadFailed') || 'Failed to upload PDF'
+                                            digitalFile: `${errorMsg}. You can enter the PDF URL manually below.`
                                         }));
                                     }}
                                     maxSizeMB={50}
-                                    existingUrl={formData.digitalFile}
+                                    existingUrl={formData.digitalFile || ''}
                                 />
                                 {errors.digitalFile && (
                                     <label className="label pt-1">
@@ -560,7 +691,7 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                                 <input
                                     type="url"
                                     name="digitalFile"
-                                    value={formData.digitalFile}
+                                    value={formData.digitalFile || ''}
                                     onChange={handleChange}
                                     className="input input-bordered w-full h-12 text-base sm:text-base px-4 border-2"
                                     style={{
@@ -588,7 +719,7 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                                     <input
                                         type="number"
                                         name="fileSize"
-                                        value={formData.fileSize}
+                                        value={formData.fileSize || ''}
                                         onChange={handleChange}
                                         className="input input-bordered flex-grow h-12 text-base sm:text-base border-2 px-4"
                                         style={{
@@ -661,7 +792,7 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                             <input
                                 type="text"
                                 name="tags"
-                                value={formData.tags}
+                                value={formData.tags || ''}
                                 onChange={handleChange}
                                 className="input input-bordered w-full h-12 text-base sm:text-base border-2 px-4"
                                 style={{
@@ -741,51 +872,28 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
             </div>
 
             {/* Form Actions - Fixed Bottom Bar */}
-            <div className="fixed bottom-0 left-0 right-0 bg-base-100 border-t-2 shadow-2xl p-3 sm:p-4 md:p-4 lg:p-4 z-50" style={{ backgroundColor, borderColor: secondaryTextColor }}>
-                <div className="container mx-auto max-w-5xl px-3 sm:px-4 md:px-4 lg:px-5">
-                    <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-3 md:gap-3 lg:gap-3">
+            <div className="fixed bottom-0 left-0 right-0 bg-base-100 border-t-2 shadow-2xl p-2 sm:p-3 md:p-4 z-50" style={{ backgroundColor, borderColor: secondaryTextColor }}>
+                <div className="container mx-auto max-w-5xl px-2 sm:px-3 md:px-4 lg:px-5">
+                    <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3">
                         <button
                             type="button"
                             onClick={onCancel}
-                            className="btn btn-outline w-full sm:w-auto sm:min-w-[130px] md:min-w-[150px] h-11 sm:h-12 md:h-14 text-sm sm:text-base font-semibold flex items-center justify-center"
+                            className="btn btn-outline w-full sm:w-auto sm:min-w-[90px] md:min-w-[110px] lg:min-w-[130px] h-9 sm:h-10 md:h-11 lg:h-12 text-xs sm:text-sm md:text-base font-semibold flex items-center justify-center order-2 sm:order-1"
                             style={{ borderColor: buttonColor, borderWidth: '2px', color: buttonColor }}
                             disabled={isLoading}
-                            onMouseEnter={(e) => {
-                                if (!isLoading) {
-                                    e.currentTarget.style.backgroundColor = buttonColor;
-                                    e.currentTarget.style.color = '#ffffff';
-                                }
-                            }}
-                            onMouseLeave={(e) => {
-                                if (!isLoading) {
-                                    e.currentTarget.style.backgroundColor = 'transparent';
-                                    e.currentTarget.style.color = buttonColor;
-                                }
-                            }}
                         >
-                            <span>{t('common.cancel') || 'Cancel'}</span>
+                            <span className="whitespace-nowrap">{t('common.cancel') || 'Cancel'}</span>
                         </button>
                         <button
                             type="submit"
-                            className="btn btn-primary w-full sm:w-auto sm:min-w-[150px] md:min-w-[180px] h-11 sm:h-12 md:h-14 text-sm sm:text-base font-semibold text-white shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
+                            className="btn btn-primary w-full sm:w-auto sm:min-w-[100px] md:min-w-[130px] lg:min-w-[150px] h-9 sm:h-10 md:h-11 lg:h-12 text-xs sm:text-sm md:text-base font-semibold text-white shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-1 sm:gap-2 order-1 sm:order-2"
                             style={{ backgroundColor: buttonColor }}
                             disabled={isLoading}
-                            onMouseEnter={(e) => {
-                                if (!isLoading) {
-                                    e.currentTarget.style.backgroundColor = buttonColor.startsWith('#') ? `color-mix(in srgb, ${buttonColor} 80%, black)` : `darken(${buttonColor}, 10%)`;
-                                }
-                            }}
-                            onMouseLeave={(e) => {
-                                if (!isLoading) {
-                                    e.currentTarget.style.backgroundColor = buttonColor;
-                                }
-                            }}
                         >
                             {isLoading ? (
                                 <>
                                     <span className="loading loading-spinner loading-sm"></span>
-                                    <span className="hidden sm:inline">{t('common.saving') || 'Saving...'}</span>
-                                    <span className="sm:hidden">{t('common.saving') || 'Saving...'}</span>
+                                    <span className="whitespace-nowrap">{t('common.saving') || 'Saving...'}</span>
                                 </>
                             ) : (
                                 <>
@@ -794,15 +902,16 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                                             <svg className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                             </svg>
-                                            <span className="hidden sm:inline">{t('admin.updateProduct') || 'Update Product'}</span>
-                                            <span className="sm:hidden">{t('common.update') || 'Update'}</span>
+                                            <span className="hidden md:inline whitespace-nowrap">{t('admin.updateProduct') || 'Update Product'}</span>
+                                            <span className="md:hidden whitespace-nowrap">{t('common.update') || 'Update'}</span>
                                         </>
                                     ) : (
                                         <>
                                             <svg className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                                             </svg>
-                                            <span>{t('admin.addProduct') || 'Add Product'}</span>
+                                            <span className="hidden md:inline whitespace-nowrap">{t('admin.addProduct') || 'Add Product'}</span>
+                                            <span className="md:hidden whitespace-nowrap">{t('common.add') || 'Add'}</span>
                                         </>
                                     )}
                                 </>
@@ -812,8 +921,8 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                 </div>
             </div>
 
-            {/* Spacer for fixed footer */}
-            <div className="h-16 sm:h-20 md:h-24"></div>
+            {/* Spacer for fixed footer - responsive height */}
+            <div className="h-14 sm:h-16 md:h-20 lg:h-24"></div>
         </form>
     );
 }

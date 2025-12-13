@@ -29,14 +29,12 @@ function Sidebar({ isAdmin = false, onLinkClick }) {
     const isAffiliate = useSelector(selectIsAffiliate);
     const affiliateStatus = useSelector(selectAffiliateStatus);
 
-    // Check affiliate status on mount
-    useEffect(() => {
-        if (!isAdmin) {
-            dispatch(fetchAffiliateProfile()).catch(() => {
-                // User is not affiliate, ignore
-            });
-        }
-    }, [dispatch, isAdmin]);
+    // Affiliate check DISABLED - No need to check affiliate status
+    // Most users are not affiliates, so we skip this check to avoid 404 errors
+    // useEffect(() => {
+    //     if (!isAdmin) {
+    //         dispatch(fetchAffiliateProfile()).catch(() => {});
+    // }, [dispatch, isAdmin]);
 
     // Check if route is active
     const isActive = (path) => {

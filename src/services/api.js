@@ -30,12 +30,20 @@ api.interceptors.request.use(
             config.headers.Authorization = `Bearer ${token}`;
         }
 
+        // For FormData requests, let axios set Content-Type with boundary automatically
+        // Don't set Content-Type header for FormData - axios will handle it
+        if (config.data instanceof FormData) {
+            // Remove Content-Type header if it was set manually
+            // Axios will automatically set it with the correct boundary
+            delete config.headers['Content-Type'];
+        }
+
         // Log request in development
         if (import.meta.env.DEV) {
             console.log('API Request:', {
                 method: config.method?.toUpperCase(),
                 url: config.url,
-                data: config.data,
+                hasFormData: config.data instanceof FormData,
             });
         }
 
@@ -52,8 +60,9 @@ api.interceptors.request.use(
 // Handles responses and errors globally
 api.interceptors.response.use(
     (response) => {
-        // Log response in development
-        if (import.meta.env.DEV) {
+        // Don't log affiliate profile responses (they're frequent and not important)
+        const isAffiliateProfile = response.config?.url?.includes('/affiliates/profile');
+        if (!isAffiliateProfile && import.meta.env.DEV) {
             console.log('API Response:', {
                 status: response.status,
                 url: response.config.url,
@@ -69,6 +78,13 @@ api.interceptors.response.use(
         if (error.response) {
             // Server responded with error status
             const { status, data } = error.response;
+            const isAffiliateProfile = error.config?.url?.includes('/affiliates/profile');
+
+            // COMPLETELY SUPPRESS affiliate profile 404 errors - return null instead of error
+            if (status === 404 && isAffiliateProfile) {
+                // Return a resolved promise with null to completely silence the error
+                return Promise.resolve(null);
+            }
 
             // Handle 401 Unauthorized - Clear auth and redirect to login
             if (status === 401) {
@@ -84,7 +100,12 @@ api.interceptors.response.use(
 
             // Handle 404 Not Found
             if (status === 404) {
-                console.error('Resource not found:', error.config.url);
+                // Don't log 404 errors for expected cases:
+                // 1. eBook access checks - expected when user hasn't purchased
+                const isEBookAccessCheck = error.config?.url?.includes('/ebooks/') && error.config?.url?.includes('/access');
+                if (!isEBookAccessCheck) {
+                    console.error('Resource not found:', error.config.url);
+                }
             }
 
             // Handle 500 Server Error

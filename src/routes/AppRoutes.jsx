@@ -32,7 +32,7 @@ import UserDashboard from '../pages/user/Dashboard';
 import UserProfile from '../pages/user/Profile';
 import UserAddresses from '../pages/user/Addresses';
 import UserEBooks from '../pages/user/eBooks';
-import eBookViewer from '../pages/user/eBookViewer';
+import EBookViewer from '../pages/user/eBookViewer';
 import AffiliateDashboard from '../pages/user/Affiliate';
 import AffiliateWithdraw from '../pages/user/AffiliateWithdraw';
 import AdminProductList from '../pages/admin/Products/ProductList';
@@ -218,7 +218,7 @@ function AppRoutes() {
                     <Route path="/dashboard/addresses" element={<UserAddresses />} />
                     <Route path="/orders" element={<Orders />} />
                     <Route path="/orders/:id" element={<OrderDetail />} />
-                    <Route path="/ebooks/viewer/:productId" element={<eBookViewer />} />
+                    <Route path="/ebooks/viewer/:productId" element={<EBookViewer />} />
                     <Route path="/dashboard/affiliate" element={<AffiliateDashboard />} />
                     <Route path="/dashboard/affiliate/withdraw" element={<AffiliateWithdraw />} />
                 </Route>

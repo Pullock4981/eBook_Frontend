@@ -6,10 +6,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import * as pdfjsLib from 'pdfjs-dist';
-
-// Configure PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+import pdfjsLib from '../../utils/pdfjsConfig'; // Import configured PDF.js
 
 function SecurePDFViewer({ pdfURL, accessToken }) {
     const { t } = useTranslation();
@@ -107,19 +104,58 @@ function SecurePDFViewer({ pdfURL, accessToken }) {
                 setIsLoading(true);
                 setError(null);
 
-                // Fetch PDF with access token (token is in URL query)
+                // Fetch PDF with credentials (for authentication)
+                console.log('📄 SecurePDFViewer - Loading PDF from URL:', pdfURL);
+                const token = localStorage.getItem('token');
+                const headers = {};
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                    console.log('📄 SecurePDFViewer - Using auth token');
+                } else {
+                    console.warn('📄 SecurePDFViewer - No auth token found');
+                }
+
                 const response = await fetch(pdfURL, {
                     credentials: 'include',
                     mode: 'cors',
+                    headers: headers
                 });
 
                 if (!response.ok) {
-                    throw new Error('Failed to load PDF');
+                    // Try to get error message from response
+                    let errorMessage = `Failed to load PDF: ${response.status} ${response.statusText}`;
+                    try {
+                        const errorData = await response.json();
+                        errorMessage = errorData.message || errorMessage;
+                    } catch {
+                        // If response is not JSON, use default message
+                    }
+                    console.error('PDF fetch failed:', {
+                        status: response.status,
+                        statusText: response.statusText,
+                        url: pdfURL,
+                        errorMessage
+                    });
+                    throw new Error(errorMessage);
+                }
+
+                // Check if response is actually a PDF
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/pdf')) {
+                    console.warn('PDF response content-type:', contentType, 'Expected: application/pdf');
+                    // Still try to load it - might be a proxy that doesn't set content-type correctly
                 }
 
                 const arrayBuffer = await response.arrayBuffer();
-                const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+                console.log('PDF loaded, arrayBuffer size:', arrayBuffer.byteLength);
+                
+                // Load PDF document (worker is already configured in pdfjsConfig.js)
+                const loadingTask = pdfjsLib.getDocument({ 
+                    data: arrayBuffer,
+                    verbosity: 0 // Reduce console noise
+                });
                 const pdf = await loadingTask.promise;
+                console.log('PDF document loaded, pages:', pdf.numPages);
 
                 setPdfDoc(pdf);
                 setNumPages(pdf.numPages);

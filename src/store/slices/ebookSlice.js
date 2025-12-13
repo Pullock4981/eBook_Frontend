@@ -116,8 +116,9 @@ const ebookSlice = createSlice({
             })
             .addCase(fetcheBookAccess.fulfilled, (state, action) => {
                 state.isLoading = false;
+                // Store full response data for cart-based and testing access
+                state.currenteBook = action.payload || null;
                 state.accessToken = action.payload?.accessToken || null;
-                state.currenteBook = action.payload?.product || null;
                 state.error = null;
             })
             .addCase(fetcheBookAccess.rejected, (state, action) => {
