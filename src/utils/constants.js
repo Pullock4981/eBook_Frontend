@@ -181,7 +181,7 @@ export const SUCCESS_MESSAGES = {
 
 // App Configuration
 export const APP_CONFIG = {
-    NAME: 'eBook Store',
+    NAME: 'RootX Softwares',
     VERSION: '1.0.0',
     SUPPORT_EMAIL: 'support@ebookstore.com',
     SUPPORT_PHONE: '+880-1234-567890',

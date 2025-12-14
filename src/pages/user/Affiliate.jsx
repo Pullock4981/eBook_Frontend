@@ -4,7 +4,7 @@
  * Main dashboard for affiliate users showing statistics and referral link
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -27,21 +27,11 @@ function AffiliateDashboard() {
     const statistics = useSelector(selectAffiliateStatistics);
     const commissions = useSelector(selectCommissions);
     const loading = useSelector(selectAffiliateLoading);
-    const [copied, setCopied] = useState(false);
 
     useEffect(() => {
         dispatch(fetchAffiliateStatistics());
         dispatch(fetchCommissions({ status: 'pending' }, 1, 5));
     }, [dispatch]);
-
-    const handleCopyLink = () => {
-        const link = statistics?.affiliate?.referralLink || '';
-        if (link) {
-            navigator.clipboard.writeText(link);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
-        }
-    };
 
     if (loading && !statistics) {
         return (
@@ -66,40 +56,8 @@ function AffiliateDashboard() {
                     </p>
                 </div>
 
-                {/* Referral Link Card */}
-                <div className="rounded-lg shadow-sm p-4 sm:p-6 mb-6 border" style={{ borderColor: secondaryTextColor, backgroundColor }}>
-                    <h2 className="text-lg sm:text-xl font-bold mb-4" style={{ color: primaryTextColor }}>
-                        {t('affiliate.referralLink')}
-                    </h2>
-                    <div className="flex flex-col sm:flex-row gap-3">
-                        <input
-                            type="text"
-                            value={affiliate?.referralLink || ''}
-                            readOnly
-                            className="flex-1 input input-bordered px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base"
-                            style={{ backgroundColor, borderColor: secondaryTextColor, color: primaryTextColor }}
-                        />
-                        <button
-                            onClick={handleCopyLink}
-                            className="btn px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-medium text-white transition-all duration-200 hover:shadow-md"
-                            style={{ backgroundColor: buttonColor, minHeight: '44px' }}
-                            onMouseEnter={(e) => {
-                                e.target.style.backgroundColor = buttonColor.startsWith('#') ? `color-mix(in srgb, ${buttonColor} 80%, black)` : `darken(${buttonColor}, 10%)`;
-                            }}
-                            onMouseLeave={(e) => {
-                                e.target.style.backgroundColor = buttonColor;
-                            }}
-                        >
-                            {copied ? t('affiliate.copied') : t('affiliate.copyLink')}
-                        </button>
-                    </div>
-                    <p className="text-xs sm:text-sm mt-3" style={{ color: secondaryTextColor }}>
-                        {t('affiliate.shareLinkFeature')}
-                    </p>
-                </div>
-
                 {/* Add New Coupon Section */}
-                {affiliate && affiliate.status === 'active' && (
+                {affiliate && (
                     <div className="rounded-lg shadow-sm p-4 sm:p-6 mb-6 border" style={{ borderColor: secondaryTextColor, backgroundColor }}>
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                             <div className="flex-1">

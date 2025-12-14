@@ -7,6 +7,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
+import Swal from 'react-sweetalert2';
 import {
     fetchAffiliateStatistics,
     selectAffiliateStatistics,
@@ -27,6 +28,7 @@ function AffiliateCouponSection() {
     const [couponsLoading, setCouponsLoading] = useState(false);
     const [showForm, setShowForm] = useState(false);
     const [formData, setFormData] = useState({
+        code: '', // Optional coupon code
         type: 'percentage',
         value: 10,
         usageLimit: 100,
@@ -43,43 +45,98 @@ function AffiliateCouponSection() {
     // Calculate affiliate status early
     const affiliate = statistics?.affiliate;
     const isActiveAffiliate = affiliate && affiliate.status === 'active';
+    const isAffiliate = affiliate !== null && affiliate !== undefined; // Any affiliate status
 
     useEffect(() => {
-        // Load coupons only if affiliate is active
-        if (isActiveAffiliate) {
-            loadCoupons();
-        }
+        // Always load coupons - no conditions
+        loadCoupons();
     }, [statistics?.affiliate?.status]);
+
+    // Auto-refresh coupons every 30 seconds to show updated status
+    useEffect(() => {
+        const interval = setInterval(() => {
+            loadCoupons();
+        }, 30000); // Refresh every 30 seconds
+
+        return () => clearInterval(interval);
+    }, []);
 
     // Listen for custom event to open form
     useEffect(() => {
         const handleOpenForm = () => {
-            if (isActiveAffiliate) {
-                setShowForm(true);
-                // Scroll form into view
-                setTimeout(() => {
-                    const formElement = document.getElementById('coupon-form');
-                    if (formElement) {
-                        formElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-                }, 100);
-            }
+            // Always open form - no conditions
+            setShowForm(true);
+            // Scroll form into view after state update
+            setTimeout(() => {
+                const formElement = document.getElementById('coupon-form');
+                if (formElement) {
+                    formElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 200);
         };
         window.addEventListener('openCouponForm', handleOpenForm);
         return () => {
             window.removeEventListener('openCouponForm', handleOpenForm);
         };
-    }, [isActiveAffiliate]);
+    }, []);
+
+    // Scroll to form when showForm changes to true
+    useEffect(() => {
+        if (showForm) {
+            setTimeout(() => {
+                const formElement = document.getElementById('coupon-form');
+                if (formElement) {
+                    formElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 200);
+        }
+    }, [showForm]);
 
     const loadCoupons = async () => {
         setCouponsLoading(true);
         try {
             const response = await getAffiliateCoupons();
-            if (response?.success && response?.data?.coupons) {
-                setCoupons(response.data.coupons);
+            console.log('loadCoupons - Full response:', response);
+            
+            // Handle different response structures
+            let couponsList = [];
+            if (response?.success && response?.data) {
+                // Check if coupons is an array directly or nested
+                if (Array.isArray(response.data.coupons)) {
+                    couponsList = response.data.coupons;
+                } else if (Array.isArray(response.data)) {
+                    couponsList = response.data;
+                } else if (response.data?.data && Array.isArray(response.data.data)) {
+                    couponsList = response.data.data;
+                }
+            } else if (Array.isArray(response?.coupons)) {
+                couponsList = response.coupons;
+            } else if (Array.isArray(response)) {
+                couponsList = response;
             }
+            
+            console.log('loadCoupons - Extracted coupons:', couponsList);
+            
+            // Filter: Show only approved and active coupons
+            const activeCoupons = couponsList.filter(c => 
+                c.approvalStatus === 'approved' && c.isActive === true
+            );
+            
+            console.log('✅ Active coupons - Filtered list:', activeCoupons);
+            console.log('✅ Active coupons - Count:', activeCoupons.length);
+            
+            // Sort coupons: newest first
+            const sortedCoupons = [...activeCoupons].sort((a, b) => {
+                const dateA = new Date(a.createdAt || a.created_at || 0);
+                const dateB = new Date(b.createdAt || b.created_at || 0);
+                return dateB - dateA; // Newest first
+            });
+            
+            setCoupons(sortedCoupons);
+            console.log('loadCoupons - Final sorted active coupons:', sortedCoupons);
         } catch (err) {
             console.error('Error loading coupons:', err);
+            setCoupons([]);
         } finally {
             setCouponsLoading(false);
         }
@@ -87,10 +144,19 @@ function AffiliateCouponSection() {
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: type === 'checkbox' ? checked : (type === 'number' ? parseFloat(value) || 0 : value)
-        }));
+        setFormData(prev => {
+            if (type === 'checkbox') {
+                return { ...prev, [name]: checked };
+            } else if (type === 'number') {
+                // For minimum purchase, use integer (no decimals)
+                if (name === 'minPurchase' || name === 'usageLimit') {
+                    return { ...prev, [name]: parseInt(value) || 0 };
+                }
+                // For other number fields, allow decimals
+                return { ...prev, [name]: parseFloat(value) || 0 };
+            }
+            return { ...prev, [name]: value };
+        });
     };
 
     const handleSubmit = async (e) => {
@@ -100,17 +166,46 @@ function AffiliateCouponSection() {
         setSubmitLoading(true);
 
         try {
+            // Check if user already has a pending coupon request
+            const hasPendingCoupon = coupons.some(c => c.approvalStatus === 'pending');
+            if (hasPendingCoupon) {
+                setError('You already have a pending coupon request. Please wait for admin approval before creating a new one.');
+                setSubmitLoading(false);
+                return;
+            }
+
+            // Validate expiry date before submission
+            if (formData.expiryDate) {
+                const selectedDate = new Date(formData.expiryDate);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                if (selectedDate < today) {
+                    setError(t('affiliate.expiryDatePast') || 'Expiry date cannot be in the past');
+                    setSubmitLoading(false);
+                    return;
+                }
+            }
+
             const couponData = {
                 ...formData,
+                code: formData.code && formData.code.trim() ? formData.code.trim().toUpperCase() : null, // Optional code
                 expiryDate: formData.expiryDate || null,
                 maxDiscount: formData.maxDiscount || null
             };
+            
+            // Remove empty code field if not provided
+            if (!couponData.code) {
+                delete couponData.code;
+            }
 
             const response = await generateAffiliateCoupon(couponData);
             if (response?.success) {
-                setSuccess(true);
+                const coupon = response?.data?.coupon;
+                
+                // Close form first
                 setShowForm(false);
                 setFormData({
+                    code: '',
                     type: 'percentage',
                     value: 10,
                     usageLimit: 100,
@@ -120,11 +215,54 @@ function AffiliateCouponSection() {
                     description: '',
                     oneTimeUse: false
                 });
-                loadCoupons();
+                
+                // Show success alert with react-sweetalert2 FIRST
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Coupon Generated Successfully!',
+                    html: coupon?.code 
+                        ? `<div style="text-align: center; color: #333;">
+                            <p style="margin-bottom: 20px; font-size: 18px; font-weight: bold; color: #10b981;">Your coupon has been generated!</p>
+                            <p style="margin-bottom: 15px; font-size: 16px;"><strong>Coupon Code:</strong></p>
+                            <p style="background: #f0f0f0; padding: 15px; border-radius: 8px; font-size: 24px; font-weight: bold; font-family: monospace; text-align: center; margin-bottom: 15px; color: ${successColor}; letter-spacing: 2px;">${coupon.code}</p>
+                            <p style="color: #666; margin-top: 15px; font-size: 14px;">${t('affiliate.waitingForApproval') || 'Your coupon request has been submitted. Waiting for admin approval.'}</p>
+                           </div>`
+                        : `<div style="text-align: center; color: #333;">
+                            <p style="margin-bottom: 20px; font-size: 18px; font-weight: bold; color: #10b981;">Your coupon has been generated!</p>
+                            <p style="color: #666; margin-top: 15px; font-size: 14px;">${t('affiliate.waitingForApproval') || 'Your coupon request has been submitted. Waiting for admin approval.'}</p>
+                           </div>`,
+                    confirmButtonText: t('common.ok') || 'OK',
+                    confirmButtonColor: buttonColor,
+                    width: '550px',
+                    padding: '2rem'
+                });
+                
+                // Reload coupons to show the new one in dashboard AFTER alert
+                await loadCoupons();
+                
+                // Notify parent component to reload active coupon
+                window.dispatchEvent(new CustomEvent('couponStatusChanged'));
+                window.dispatchEvent(new CustomEvent('couponGenerated'));
+                
+                // Notify parent component to reload active coupon
+                window.dispatchEvent(new CustomEvent('couponStatusChanged'));
+                
+                // Set success state after alert
+                setSuccess(true);
                 setTimeout(() => setSuccess(false), 5000);
             }
         } catch (err) {
-            setError(err?.message || t('affiliate.failedToGenerateCoupon'));
+            const errorMessage = err?.response?.data?.message || err?.message || err?.data?.message || t('affiliate.failedToGenerateCoupon');
+            setError(errorMessage);
+            
+            // Show error alert with react-sweetalert2
+            Swal.fire({
+                icon: 'error',
+                title: t('affiliate.couponGenerationFailed') || 'Failed to Generate Coupon',
+                text: errorMessage,
+                confirmButtonText: t('common.ok') || 'OK',
+                confirmButtonColor: errorColor || '#EF4444'
+            });
         } finally {
             setSubmitLoading(false);
         }
@@ -173,27 +311,24 @@ function AffiliateCouponSection() {
                         onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            if (isActiveAffiliate) {
-                                setShowForm(!showForm);
-                                // Scroll to form when opening
-                                if (!showForm) {
-                                    setTimeout(() => {
-                                        const formElement = document.getElementById('coupon-form');
-                                        if (formElement) {
-                                            formElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                                        }
-                                    }, 200);
-                                }
-                            } else {
-                                // Show message if not active
-                                alert(t('affiliate.onlyActiveAffiliates'));
+                            // Always allow coupon generation - no conditions
+                            const newShowForm = !showForm;
+                            setShowForm(newShowForm);
+                            // Scroll to form when opening
+                            if (newShowForm) {
+                                setTimeout(() => {
+                                    const formElement = document.getElementById('coupon-form');
+                                    if (formElement) {
+                                        formElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                    }
+                                }, 300);
                             }
                         }}
                         className="btn px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-medium text-white transition-all duration-200 hover:shadow-md"
                         style={{
-                            backgroundColor: isActiveAffiliate ? buttonColor : secondaryTextColor,
+                            backgroundColor: buttonColor,
                             minHeight: '44px',
-                            opacity: isActiveAffiliate ? 1 : 0.7,
+                            opacity: 1,
                             cursor: 'pointer',
                             pointerEvents: 'auto',
                             zIndex: 10,
@@ -203,20 +338,12 @@ function AffiliateCouponSection() {
                         }}
                         type="button"
                         onMouseEnter={(e) => {
-                            if (isActiveAffiliate) {
-                                e.currentTarget.style.backgroundColor = buttonColor.startsWith('#') ? `color-mix(in srgb, ${buttonColor} 80%, black)` : `darken(${buttonColor}, 10%)`;
-                                e.currentTarget.style.transform = 'scale(1.02)';
-                            } else {
-                                e.currentTarget.style.opacity = '0.8';
-                            }
+                            e.currentTarget.style.backgroundColor = buttonColor.startsWith('#') ? `color-mix(in srgb, ${buttonColor} 80%, black)` : `darken(${buttonColor}, 10%)`;
+                            e.currentTarget.style.transform = 'scale(1.02)';
                         }}
                         onMouseLeave={(e) => {
-                            if (isActiveAffiliate) {
-                                e.currentTarget.style.backgroundColor = buttonColor;
-                                e.currentTarget.style.transform = 'scale(1)';
-                            } else {
-                                e.currentTarget.style.opacity = '0.7';
-                            }
+                            e.currentTarget.style.backgroundColor = buttonColor;
+                            e.currentTarget.style.transform = 'scale(1)';
                         }}
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -227,8 +354,8 @@ function AffiliateCouponSection() {
                 </div>
             </div>
 
-            {/* Show message if not active affiliate */}
-            {!isActiveAffiliate && statistics && (
+            {/* Show message if not affiliate */}
+            {!isAffiliate && statistics && (
                 <div className="rounded-lg shadow-sm p-4 sm:p-6 border mb-6" style={{ borderColor: secondaryTextColor, backgroundColor }}>
                     <div className="text-center py-4">
                         <svg className="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: secondaryTextColor }}>
@@ -277,17 +404,51 @@ function AffiliateCouponSection() {
             )}
 
             {/* Generate Coupon Form */}
-            {showForm && isActiveAffiliate && (
-                <div id="coupon-form" className="mb-6 rounded-lg shadow-sm p-4 sm:p-6 border" style={{ borderColor: secondaryTextColor, backgroundColor }}>
+            {showForm && (
+                <div 
+                    id="coupon-form" 
+                    className="mb-6 rounded-lg shadow-sm p-4 sm:p-6 border" 
+                    style={{ 
+                        borderColor: secondaryTextColor, 
+                        backgroundColor,
+                        display: 'block',
+                        visibility: 'visible',
+                        opacity: 1,
+                        position: 'relative',
+                        zIndex: 1
+                    }}
+                >
                     <h3 className="text-base sm:text-lg font-bold mb-4" style={{ color: primaryTextColor }}>
                         {t('affiliate.generateNewCoupon')}
                     </h3>
                     <form onSubmit={handleSubmit} className="space-y-4">
+                        {/* Coupon Code Field */}
+                        <div>
+                            <label className="label">
+                                <span className="label-text text-sm sm:text-base font-medium" style={{ color: primaryTextColor }}>
+                                    Coupon Code
+                                </span>
+                            </label>
+                            <input
+                                type="text"
+                                name="code"
+                                value={formData.code}
+                                onChange={handleInputChange}
+                                className="input input-bordered w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base uppercase"
+                                style={{ borderColor: secondaryTextColor, color: primaryTextColor, backgroundColor, minHeight: '44px' }}
+                                placeholder="Leave empty for auto-generation"
+                                maxLength={50}
+                            />
+                            <p className="text-xs mt-1" style={{ color: secondaryTextColor }}>
+                                Leave empty to auto-generate a unique code
+                            </p>
+                        </div>
+
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label className="label">
                                     <span className="label-text text-sm sm:text-base font-medium" style={{ color: primaryTextColor }}>
-                                        {t('affiliate.couponType')} <span style={{ color: errorColor }}>*</span>
+                                        {t('affiliate.couponType') || 'Type'} <span style={{ color: errorColor }}>*</span>
                                     </span>
                                 </label>
                                 <select
@@ -298,8 +459,8 @@ function AffiliateCouponSection() {
                                     style={{ borderColor: secondaryTextColor, color: primaryTextColor, backgroundColor, minHeight: '44px' }}
                                     required
                                 >
-                                    <option value="percentage">{t('coupon.percentage')}</option>
-                                    <option value="fixed">{t('coupon.fixed')}</option>
+                                    <option value="percentage">Percentage</option>
+                                    <option value="fixed">Fixed Amount</option>
                                 </select>
                             </div>
 
@@ -355,7 +516,7 @@ function AffiliateCouponSection() {
                                     value={formData.minPurchase}
                                     onChange={handleInputChange}
                                     min="0"
-                                    step="0.01"
+                                    step="1"
                                     className="input input-bordered w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base"
                                     style={{ borderColor: secondaryTextColor, color: primaryTextColor, backgroundColor, minHeight: '44px' }}
                                 />
@@ -397,6 +558,19 @@ function AffiliateCouponSection() {
                                 min={new Date().toISOString().split('T')[0]}
                                 className="input input-bordered w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base"
                                 style={{ borderColor: secondaryTextColor, color: primaryTextColor, backgroundColor, minHeight: '44px' }}
+                                onBlur={(e) => {
+                                    // Validate date on blur
+                                    if (e.target.value) {
+                                        const selectedDate = new Date(e.target.value);
+                                        const today = new Date();
+                                        today.setHours(0, 0, 0, 0);
+                                        if (selectedDate < today) {
+                                            setError(t('affiliate.expiryDatePast') || 'Expiry date cannot be in the past');
+                                            e.target.value = '';
+                                            setFormData(prev => ({ ...prev, expiryDate: '' }));
+                                        }
+                                    }
+                                }}
                             />
                         </div>
 
@@ -497,20 +671,65 @@ function AffiliateCouponSection() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                         {coupons.map((coupon) => (
                             <div
-                                key={coupon.id}
+                                key={coupon.id || coupon._id}
                                 className="rounded-lg border p-4 sm:p-5 transition-all duration-200 hover:shadow-md"
                                 style={{ borderColor: secondaryTextColor, backgroundColor }}
                             >
                                 <div className="flex items-start justify-between mb-3">
                                     <div className="flex-1">
-                                        <div className="flex items-center gap-2 mb-2">
+                                        <div className="flex items-center gap-2 mb-2 flex-wrap">
                                             <span className="text-lg sm:text-xl font-bold font-mono" style={{ color: successColor }}>
                                                 {coupon.code}
                                             </span>
-                                            {coupon.isActive ? (
-                                                <span className="badge badge-sm badge-success">{t('affiliate.active')}</span>
-                                            ) : (
-                                                <span className="badge badge-sm badge-error">{t('affiliate.inactive')}</span>
+                                            {/* Approval Status Badge - Clear and Prominent */}
+                                            {coupon.approvalStatus === 'pending' && (
+                                                <span 
+                                                    className="badge badge-sm px-2 py-1 font-semibold"
+                                                    style={{ backgroundColor: '#f59e0b', color: '#ffffff', border: 'none' }}
+                                                >
+                                                    ⏳ {t('affiliate.pending') || 'Pending Approval'}
+                                                </span>
+                                            )}
+                                            {coupon.approvalStatus === 'approved' && coupon.isActive && (
+                                                <span 
+                                                    className="badge badge-sm px-2 py-1 font-semibold"
+                                                    style={{ backgroundColor: '#10b981', color: '#ffffff', border: 'none' }}
+                                                >
+                                                    ✅ Approved
+                                                </span>
+                                            )}
+                                            {coupon.approvalStatus === 'approved' && !coupon.isActive && (
+                                                <span 
+                                                    className="badge badge-sm px-2 py-1 font-semibold"
+                                                    style={{ backgroundColor: '#6b7280', color: '#ffffff', border: 'none' }}
+                                                >
+                                                    ⚠️ Approved (Inactive)
+                                                </span>
+                                            )}
+                                            {coupon.approvalStatus === 'rejected' && (
+                                                <span 
+                                                    className="badge badge-sm px-2 py-1 font-semibold"
+                                                    style={{ backgroundColor: '#ef4444', color: '#ffffff', border: 'none' }}
+                                                >
+                                                    ❌ {t('affiliate.rejected') || 'Rejected'}
+                                                </span>
+                                            )}
+                                            {/* Fallback for coupons without approvalStatus (old coupons) */}
+                                            {!coupon.approvalStatus && coupon.isActive && (
+                                                <span 
+                                                    className="badge badge-sm px-2 py-1 font-semibold"
+                                                    style={{ backgroundColor: '#10b981', color: '#ffffff', border: 'none' }}
+                                                >
+                                                    ✅ {t('affiliate.active') || 'Active'}
+                                                </span>
+                                            )}
+                                            {!coupon.approvalStatus && !coupon.isActive && (
+                                                <span 
+                                                    className="badge badge-sm px-2 py-1 font-semibold"
+                                                    style={{ backgroundColor: '#6b7280', color: '#ffffff', border: 'none' }}
+                                                >
+                                                    ⚠️ {t('affiliate.inactive') || 'Inactive'}
+                                                </span>
                                             )}
                                         </div>
                                         <p className="text-sm font-semibold mb-1" style={{ color: primaryTextColor }}>
@@ -549,6 +768,15 @@ function AffiliateCouponSection() {
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                             </svg>
                                             <span style={{ color: infoColor }}>{t('affiliate.oneTimeUse')}</span>
+                                        </div>
+                                    )}
+                                    {/* Earnings Display */}
+                                    {coupon.totalEarnings !== undefined && coupon.totalEarnings > 0 && (
+                                        <div className="flex items-center justify-between text-xs sm:text-sm mt-2 pt-2 border-t" style={{ borderColor: secondaryTextColor }}>
+                                            <span style={{ color: secondaryTextColor }}>{t('affiliate.totalEarnings') || 'Total Earnings'}:</span>
+                                            <span className="font-semibold" style={{ color: successColor }}>
+                                                {formatCurrency(coupon.totalEarnings)}
+                                            </span>
                                         </div>
                                     )}
                                 </div>

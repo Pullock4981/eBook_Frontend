@@ -8,6 +8,7 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useThemeColors } from '../../hooks/useThemeColors';
+import { APP_CONFIG } from '../../utils/constants';
 
 function Logo({ className = '', showText = true, size = 'md' }) {
     const { t } = useTranslation();
@@ -25,7 +26,7 @@ function Logo({ className = '', showText = true, size = 'md' }) {
             className={`btn btn-ghost font-bold ${sizeClasses[size]} ${className}`}
             style={{ color: primaryTextColor }}
         >
-            {showText && (t('app.name') || 'eBook Store')}
+            {showText && (t('app.name') || APP_CONFIG.NAME)}
         </Link>
     );
 }

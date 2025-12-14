@@ -124,7 +124,8 @@ export const getAffiliateCoupons = async (page = 1, limit = 10) => {
             params: { page, limit }
         });
         console.log('Get coupons response:', response);
-        return response.data;
+        // API interceptor already returns response.data, so we return response directly
+        return response;
     } catch (error) {
         console.error('API Error in getAffiliateCoupons:', error);
         throw error;

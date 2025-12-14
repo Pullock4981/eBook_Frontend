@@ -27,6 +27,7 @@ import AffiliateRegistrationModal from '../../components/affiliate/AffiliateRegi
 import { formatCurrency, formatDate } from '../../utils/helpers';
 import { getPDFURL } from '../../services/ebookService';
 import { useThemeColors } from '../../hooks/useThemeColors';
+import { getAffiliateCoupons } from '../../services/affiliateService';
 
 function Dashboard() {
     const { t } = useTranslation();
@@ -55,6 +56,8 @@ function Dashboard() {
     const affiliateStatus = useSelector(selectAffiliateStatus);
     const affiliateStats = useSelector(selectAffiliateStatistics);
     const affiliate = useSelector(selectAffiliate);
+    const [activeCouponCode, setActiveCouponCode] = useState(null);
+    const [loadingCoupon, setLoadingCoupon] = useState(false);
 
     // Reset banner state when user changes
     useEffect(() => {
@@ -76,17 +79,72 @@ function Dashboard() {
         dispatch(fetchUserOrders({ page: 1, limit: 5 })); // Get recent 5 orders
         dispatch(fetchUserEBooks());
 
-        // Affiliate check DISABLED - No need to check affiliate status
-        // Most users are not affiliates, so we skip this check to avoid 404 errors
-        // dispatch(fetchAffiliateProfile()).then((result) => {
-        //     if (result.type === 'affiliate/fetchProfile/fulfilled') {
-        //         const affiliate = result.payload?.affiliate || result.payload?.data?.affiliate;
-        //         if (affiliate?.status === 'active') {
-        //             dispatch(fetchAffiliateStatistics());
-        //         }
-        //     }
-        // }).catch((error) => {});
+        // Check affiliate status - if user is already affiliated, fetch statistics
+        dispatch(fetchAffiliateProfile()).then((result) => {
+            if (result.type === 'affiliate/fetchProfile/fulfilled') {
+                const affiliate = result.payload?.affiliate || result.payload?.data?.affiliate;
+                if (affiliate?.status === 'active') {
+                    // Fetch statistics for active affiliates (but don't redirect)
+                    dispatch(fetchAffiliateStatistics());
+                }
+            }
+        }).catch((error) => {
+            // Silently handle - user is not affiliate (expected for most users)
+        });
     }, [dispatch, isAuthenticated, navigate]);
+
+    // Load active coupon code function
+    const loadActiveCoupon = async () => {
+        if (!isAffiliate || affiliateStatus !== 'active') {
+            return;
+        }
+        
+        setLoadingCoupon(true);
+        try {
+            const response = await getAffiliateCoupons(1, 100);
+            console.log('Dashboard - loadActiveCoupon - Full response:', response);
+            
+            // Handle different response structures
+            let couponsList = [];
+            if (response?.success && response?.data) {
+                if (Array.isArray(response.data.coupons)) {
+                    couponsList = response.data.coupons;
+                } else if (Array.isArray(response.data)) {
+                    couponsList = response.data;
+                } else if (response.data?.data && Array.isArray(response.data.data)) {
+                    couponsList = response.data.data;
+                }
+            } else if (Array.isArray(response?.coupons)) {
+                couponsList = response.coupons;
+            } else if (Array.isArray(response)) {
+                couponsList = response;
+            }
+            
+            // Find the first approved and active coupon
+            const activeCoupon = couponsList.find(c => 
+                c.approvalStatus === 'approved' && c.isActive === true
+            );
+            
+            if (activeCoupon && activeCoupon.code) {
+                console.log('Dashboard - Setting active coupon code:', activeCoupon.code);
+                setActiveCouponCode(activeCoupon.code);
+            } else {
+                setActiveCouponCode(null);
+            }
+        } catch (error) {
+            console.error('Dashboard - Error loading active coupon:', error);
+            setActiveCouponCode(null);
+        } finally {
+            setLoadingCoupon(false);
+        }
+    };
+
+    // Reload active coupon when affiliate status changes
+    useEffect(() => {
+        if (isAffiliate && affiliateStatus === 'active') {
+            loadActiveCoupon();
+        }
+    }, [isAffiliate, affiliateStatus]);
 
     // Affiliate auto-refresh DISABLED - No need to check affiliate status
     // Most users are not affiliates, so we skip this check to avoid 404 errors
@@ -294,26 +352,32 @@ function Dashboard() {
                                 <p className="text-sm sm:text-base mb-3" style={{ color: secondaryTextColor }}>
                                     {t('affiliate.accountApprovedMessage')}
                                 </p>
-                                {affiliate?.referralLink && (
+                                {activeCouponCode && (
                                     <div className="mt-3 p-3 rounded-lg" style={{ backgroundColor }}>
                                         <p className="text-xs sm:text-sm font-medium mb-2" style={{ color: secondaryTextColor }}>
-                                            {t('affiliate.referralLink')}:
+                                            Active Coupon Code:
                                         </p>
                                         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                                            <code className="text-xs sm:text-sm font-mono p-2 rounded flex-1 break-all" style={{ backgroundColor: secondaryTextColor + '20', color: buttonColor }}>
-                                                {affiliate.referralLink}
+                                            <code className="text-xs sm:text-sm font-mono p-2 rounded flex-1 break-all text-center font-bold" style={{ backgroundColor: secondaryTextColor + '20', color: successColor, fontSize: '1.1rem', letterSpacing: '2px' }}>
+                                                {activeCouponCode}
                                             </code>
                                             <button
                                                 onClick={() => {
-                                                    navigator.clipboard.writeText(affiliate.referralLink);
-                                                    alert(t('affiliate.linkCopiedSuccess'));
+                                                    navigator.clipboard.writeText(activeCouponCode);
+                                                    alert('Coupon code copied to clipboard!');
                                                 }}
                                                 className="btn btn-sm px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white whitespace-nowrap"
-                                                style={{ backgroundColor: buttonColor, minHeight: '36px' }}
+                                                style={{ backgroundColor: successColor, minHeight: '36px' }}
                                             >
-                                                {t('affiliate.copyLink')}
+                                                Copy Code
                                             </button>
                                         </div>
+                                    </div>
+                                )}
+                                {loadingCoupon && (
+                                    <div className="mt-3 p-3 rounded-lg flex items-center justify-center" style={{ backgroundColor }}>
+                                        <span className="loading loading-spinner loading-sm"></span>
+                                        <span className="ml-2 text-xs sm:text-sm" style={{ color: secondaryTextColor }}>Loading coupon code...</span>
                                     </div>
                                 )}
                                 <div className="mt-4 pt-4 border-t" style={{ borderColor: secondaryTextColor }}>

@@ -8,10 +8,12 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 function Breadcrumbs() {
     const { t } = useTranslation();
     const location = useLocation();
+    const { primaryTextColor, secondaryTextColor } = useThemeColors();
 
     // Generate breadcrumb items from pathname
     const generateBreadcrumbs = () => {
@@ -96,7 +98,7 @@ function Breadcrumbs() {
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
-                                    style={{ color: '#64748b' }}
+                                    style={{ color: secondaryTextColor }}
                                 >
                                     <path
                                         strokeLinecap="round"
@@ -107,14 +109,14 @@ function Breadcrumbs() {
                                 </svg>
                             )}
                             {isLast ? (
-                                <span className="font-medium" style={{ color: '#1E293B' }}>
+                                <span className="font-medium" style={{ color: primaryTextColor }}>
                                     {crumb.label}
                                 </span>
                             ) : (
                                 <Link
                                     to={crumb.path}
                                     className="hover:underline transition-colors"
-                                    style={{ color: '#64748b' }}
+                                    style={{ color: secondaryTextColor }}
                                 >
                                     {crumb.label}
                                 </Link>

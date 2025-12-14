@@ -131,3 +131,54 @@ export const deleteCoupon = async (id) => {
     }
 };
 
+/**
+ * Get pending affiliate coupons (Admin)
+ * @param {number} page - Page number
+ * @param {number} limit - Items per page
+ * @returns {Promise} API response
+ */
+export const getPendingAffiliateCoupons = async (page = 1, limit = 10) => {
+    try {
+        console.log('getPendingAffiliateCoupons - Calling API with params:', { page, limit });
+        const response = await api.get(`/coupons/pending-affiliate`, {
+            params: { page, limit }
+        });
+        console.log('getPendingAffiliateCoupons - API response received:', response);
+        console.log('getPendingAffiliateCoupons - Response type:', typeof response);
+        console.log('getPendingAffiliateCoupons - Response keys:', Object.keys(response || {}));
+        return response;
+    } catch (error) {
+        console.error('getPendingAffiliateCoupons - API error:', error);
+        console.error('getPendingAffiliateCoupons - Error response:', error?.response);
+        throw error;
+    }
+};
+
+/**
+ * Approve affiliate coupon (Admin)
+ * @param {string} id - Coupon ID
+ * @returns {Promise} API response
+ */
+export const approveAffiliateCoupon = async (id) => {
+    try {
+        const response = await api.post(`/coupons/${id}/approve`);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};
+
+/**
+ * Reject affiliate coupon (Admin)
+ * @param {string} id - Coupon ID
+ * @returns {Promise} API response
+ */
+export const rejectAffiliateCoupon = async (id) => {
+    try {
+        const response = await api.post(`/coupons/${id}/reject`);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};
+

@@ -13,6 +13,8 @@ import { formatCurrency } from '../../../utils/helpers';
 import Loading from '../../../components/common/Loading';
 import Pagination from '../../../components/common/Pagination';
 import { useThemeColors } from '../../../hooks/useThemeColors';
+import { getPendingAffiliateCoupons, approveAffiliateCoupon, rejectAffiliateCoupon } from '../../../services/couponService';
+import toast from 'react-hot-toast';
 
 function CouponList() {
     const { t } = useTranslation();
@@ -27,10 +29,137 @@ function CouponList() {
 
     const [searchQuery, setSearchQuery] = useState('');
     const [deleteLoading, setDeleteLoading] = useState(null);
+    const [pendingCoupons, setPendingCoupons] = useState([]);
+    const [pendingLoading, setPendingLoading] = useState(false);
+    const [actionLoading, setActionLoading] = useState(null);
 
     useEffect(() => {
+        console.log('📄 CouponList component mounted');
         dispatch(fetchAllCoupons({ page: 1, limit: 10 }));
+        loadPendingCoupons();
     }, [dispatch]);
+
+    const loadPendingCoupons = async () => {
+        setPendingLoading(true);
+        try {
+            console.log('🔄 Loading pending affiliate coupons...');
+            const response = await getPendingAffiliateCoupons(1, 10);
+            console.log('✅ Pending coupons - Raw response:', response);
+            console.log('✅ Pending coupons - Response type:', typeof response);
+            console.log('✅ Pending coupons - Response keys:', response ? Object.keys(response) : 'null');
+            console.log('✅ Pending coupons - Full JSON:', JSON.stringify(response, null, 2));
+            
+            // API interceptor returns response.data directly
+            // Backend returns: { success: true, data: { coupons: [...], pagination: {...} } }
+            // After interceptor: response = { success: true, data: { coupons: [...], pagination: {...} } }
+            
+            let couponsList = [];
+            
+            // Direct check: response.data.coupons (most likely structure)
+            if (response?.data?.coupons) {
+                couponsList = Array.isArray(response.data.coupons) ? response.data.coupons : [];
+                console.log('✅ Found in response.data.coupons:', couponsList.length);
+            }
+            // Fallback: response.success && response.data.coupons
+            else if (response?.success && response?.data?.coupons) {
+                couponsList = Array.isArray(response.data.coupons) ? response.data.coupons : [];
+                console.log('✅ Found in response.data.coupons (with success):', couponsList.length);
+            }
+            // Fallback: nested data.data.coupons
+            else if (response?.data?.data?.coupons) {
+                couponsList = Array.isArray(response.data.data.coupons) ? response.data.data.coupons : [];
+                console.log('✅ Found in response.data.data.coupons:', couponsList.length);
+            }
+            // Fallback: response.coupons
+            else if (response?.coupons) {
+                couponsList = Array.isArray(response.coupons) ? response.coupons : [];
+                console.log('✅ Found in response.coupons:', couponsList.length);
+            }
+            // Fallback: response.data is array
+            else if (Array.isArray(response?.data)) {
+                couponsList = response.data;
+                console.log('✅ Found as array in response.data:', couponsList.length);
+            }
+            // Last fallback: response is array
+            else if (Array.isArray(response)) {
+                couponsList = response;
+                console.log('✅ Found as direct array:', couponsList.length);
+            }
+            else {
+                console.warn('⚠️ No coupons found. Full response:', JSON.stringify(response, null, 2));
+            }
+            
+            console.log('📋 Pending coupons - Final list:', couponsList);
+            console.log('📊 Pending coupons - Count:', couponsList.length);
+            
+            setPendingCoupons(couponsList || []);
+        } catch (error) {
+            console.error('❌ Error loading pending coupons:', error);
+            console.error('❌ Error response:', error?.response);
+            console.error('❌ Error data:', error?.response?.data);
+            console.error('❌ Error message:', error?.message);
+            console.error('❌ Error stack:', error?.stack);
+            setPendingCoupons([]);
+        } finally {
+            setPendingLoading(false);
+        }
+    };
+
+    const handleApprove = async (couponId) => {
+        setActionLoading(couponId);
+        try {
+            console.log('Approving coupon:', couponId);
+            const response = await approveAffiliateCoupon(couponId);
+            console.log('Approve response:', response);
+            
+            // Handle different response structures
+            const success = response?.success || response?.data?.success;
+            if (success) {
+                toast.success('Coupon Approved! The affiliate coupon has been approved and is now active.');
+                // Reload pending coupons and all coupons
+                await loadPendingCoupons();
+                dispatch(fetchAllCoupons({ page: 1, limit: 10 }));
+            } else {
+                throw new Error('Unexpected response format');
+            }
+        } catch (error) {
+            console.error('Approve error:', error);
+            const errorMessage = error?.response?.data?.message || error?.message || 'Failed to approve coupon';
+            toast.error(errorMessage);
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
+    const handleReject = async (couponId) => {
+        if (!window.confirm('Are you sure you want to reject this coupon request? This action cannot be undone.')) {
+            return;
+        }
+
+        setActionLoading(couponId);
+        try {
+            console.log('Rejecting coupon:', couponId);
+            const response = await rejectAffiliateCoupon(couponId);
+            console.log('Reject response:', response);
+            
+            // Handle different response structures
+            const success = response?.success || response?.data?.success;
+            if (success) {
+                toast.success('Coupon Rejected! The affiliate coupon request has been rejected.');
+                // Reload pending coupons and all coupons
+                await loadPendingCoupons();
+                dispatch(fetchAllCoupons({ page: 1, limit: 10 }));
+            } else {
+                throw new Error('Unexpected response format');
+            }
+        } catch (error) {
+            console.error('Reject error:', error);
+            const errorMessage = error?.response?.data?.message || error?.message || 'Failed to reject coupon';
+            toast.error(errorMessage);
+        } finally {
+            setActionLoading(null);
+        }
+    };
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -131,6 +260,115 @@ function CouponList() {
                                 <span className="ml-1.5">{t('admin.addCoupon') || '+ Add Coupon'}</span>
                             </Link>
                         </div>
+                    </div>
+
+                    {/* Pending Affiliate Coupon Requests */}
+                    <div className="bg-base-100 rounded-lg shadow-sm border p-4 sm:p-5" style={{ borderColor: secondaryTextColor, backgroundColor }}>
+                        <div className="flex items-center justify-between mb-4">
+                            <div>
+                                <h2 className="text-lg sm:text-xl font-bold mb-1" style={{ color: primaryTextColor }}>
+                                    Pending Affiliate Coupon Requests
+                                </h2>
+                                <p className="text-sm opacity-70" style={{ color: secondaryTextColor }}>
+                                    {pendingLoading ? 'Loading...' : `${pendingCoupons.length} coupon request${pendingCoupons.length !== 1 ? 's' : ''} waiting for approval`}
+                                </p>
+                            </div>
+                        </div>
+                        {pendingLoading ? (
+                            <div className="flex justify-center py-8">
+                                <Loading />
+                            </div>
+                        ) : pendingCoupons.length === 0 ? (
+                            <div className="text-center py-8">
+                                <p className="text-sm opacity-70" style={{ color: secondaryTextColor }}>
+                                    No pending coupon requests at the moment.
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                {pendingCoupons.map((coupon) => (
+                                        <div
+                                            key={coupon.id || coupon._id}
+                                            className="border rounded-lg p-4"
+                                            style={{ borderColor: secondaryTextColor, backgroundColor }}
+                                        >
+                                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-3 mb-2">
+                                                        <span className="font-bold text-lg font-mono" style={{ color: successColor }}>
+                                                            {coupon.code}
+                                                        </span>
+                                                        <span className="badge badge-warning">Pending</span>
+                                                    </div>
+                                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm">
+                                                        <div>
+                                                            <span style={{ color: secondaryTextColor }}>Type: </span>
+                                                            <span style={{ color: primaryTextColor }}>{coupon.type === 'percentage' ? 'Percentage' : 'Fixed'}</span>
+                                                        </div>
+                                                        <div>
+                                                            <span style={{ color: secondaryTextColor }}>Discount: </span>
+                                                            <span style={{ color: primaryTextColor }}>
+                                                                {coupon.type === 'percentage' ? `${coupon.value}%` : formatCurrency(coupon.value)}
+                                                            </span>
+                                                        </div>
+                                                        <div>
+                                                            <span style={{ color: secondaryTextColor }}>Usage Limit: </span>
+                                                            <span style={{ color: primaryTextColor }}>{coupon.usageLimit}</span>
+                                                        </div>
+                                                        {coupon.minPurchase > 0 && (
+                                                            <div>
+                                                                <span style={{ color: secondaryTextColor }}>Min Purchase: </span>
+                                                                <span style={{ color: primaryTextColor }}>{formatCurrency(coupon.minPurchase)}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    {coupon.description && (
+                                                        <p className="text-sm mt-2" style={{ color: secondaryTextColor }}>
+                                                            {coupon.description}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                                <div className="flex flex-row sm:flex-col gap-2">
+                                                    <button
+                                                        onClick={() => handleApprove(coupon.id || coupon._id)}
+                                                        className="btn btn-sm text-white px-4 py-2 font-medium"
+                                                        style={{ backgroundColor: successColor }}
+                                                        disabled={actionLoading === (coupon.id || coupon._id)}
+                                                    >
+                                                        {actionLoading === (coupon.id || coupon._id) ? (
+                                                            <span className="loading loading-spinner loading-xs"></span>
+                                                        ) : (
+                                                            <>
+                                                                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                                </svg>
+                                                                Approve
+                                                            </>
+                                                        )}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleReject(coupon.id || coupon._id)}
+                                                        className="btn btn-sm text-white px-4 py-2 font-medium"
+                                                        style={{ backgroundColor: errorColor }}
+                                                        disabled={actionLoading === (coupon.id || coupon._id)}
+                                                    >
+                                                        {actionLoading === (coupon.id || coupon._id) ? (
+                                                            <span className="loading loading-spinner loading-xs"></span>
+                                                        ) : (
+                                                            <>
+                                                                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                                </svg>
+                                                                Reject
+                                                            </>
+                                                        )}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* Search */}
