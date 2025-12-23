@@ -8,13 +8,7 @@
 // API Configuration
 // Production backend URL: https://e-book-backend-tau.vercel.app/api
 const getDefaultAPIURL = () => {
-    // If VITE_API_BASE_URL is set, use it
-    if (import.meta.env.VITE_API_BASE_URL) {
-        const url = import.meta.env.VITE_API_BASE_URL;
-        // Ensure URL ends with /api
-        return url.endsWith('/api') ? url : `${url}/api`;
-    }
-    // Default to production backend URL
+    // Force production backend URL as requested
     return 'https://e-book-backend-tau.vercel.app/api';
 };
 
