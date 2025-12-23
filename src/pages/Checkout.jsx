@@ -19,6 +19,7 @@ import CartItem from '../components/cart/CartItem';
 import Loading from '../components/common/Loading';
 import { PRODUCT_TYPES } from '../utils/constants';
 import { useThemeColors } from '../hooks/useThemeColors';
+import { showError } from '../utils/toast';
 
 function Checkout() {
     const { t } = useTranslation();
@@ -42,7 +43,7 @@ function Checkout() {
     const orderError = useSelector((state) => state.orders.error);
 
     const [shippingAddress, setShippingAddress] = useState(null);
-    const [paymentMethod, setPaymentMethod] = useState('sslcommerz');
+    const [paymentMethod, setPaymentMethod] = useState('bkash');
     const [notes, setNotes] = useState('');
     const [hasPhysicalProducts, setHasPhysicalProducts] = useState(false);
     const [shipping, setShipping] = useState(0);
@@ -90,12 +91,12 @@ function Checkout() {
     const handlePlaceOrder = async () => {
         // Validation
         if (hasPhysicalProducts && !shippingAddress) {
-            alert(t('checkout.addressRequired') || 'Please select a shipping address');
+            showError(t('checkout.addressRequired') || 'Please select a shipping address');
             return;
         }
 
         if (!paymentMethod) {
-            alert(t('checkout.paymentMethodRequired') || 'Please select a payment method');
+            showError(t('checkout.paymentMethodRequired') || 'Please select a payment method');
             return;
         }
 
@@ -150,7 +151,7 @@ function Checkout() {
             // Error is already in orderError state, but we can show a more detailed message
             if (err?.errors && Array.isArray(err.errors)) {
                 const firstError = err.errors[0];
-                alert(`${firstError.field || 'Validation'}: ${firstError.message || errorMessage}`);
+                showError(`${firstError.field || 'Validation'}: ${firstError.message || errorMessage}`);
             }
         }
     };

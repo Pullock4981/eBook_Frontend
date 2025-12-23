@@ -14,6 +14,7 @@ import { fetchProducts } from '../../../store/slices/productSlice';
 import ProductForm from '../../../components/admin/ProductForm';
 import Loading from '../../../components/common/Loading';
 import { useThemeColors } from '../../../hooks/useThemeColors';
+import { showError, showSuccess } from '../../../utils/toast';
 
 function ProductEdit() {
     const { t } = useTranslation();
@@ -42,6 +43,7 @@ function ProductEdit() {
             console.log('ProductEdit - Submitting update:', { id, formData });
             const response = await updateProduct(id, formData);
             console.log('ProductEdit - Update successful:', response);
+            showSuccess(t('admin.productUpdated') || 'Product updated successfully!');
             // Refresh products list
             dispatch(fetchProducts({ filters: {}, page: 1, limit: 12 }));
             // Navigate to products list
@@ -49,7 +51,7 @@ function ProductEdit() {
         } catch (error) {
             console.error('ProductEdit - Update error:', error);
             const errorMessage = error.data?.message || error.message || error.errors?.join(', ') || t('admin.updateError') || 'Failed to update product';
-            alert(errorMessage);
+            showError(errorMessage);
         } finally {
             setIsSubmitting(false);
         }

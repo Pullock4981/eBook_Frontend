@@ -693,50 +693,70 @@ function ProductDetail() {
                                     <p className="py-4" style={{ color: secondaryTextColor }}>
                                         {t('admin.confirmDeleteMessage') || 'Are you sure you want to delete this product? This action cannot be undone.'}
                                     </p>
-                                    <div className="modal-action">
+                                    <div className="modal-action gap-2">
                                         <button
-                                            className="btn btn-outline"
+                                            className="btn"
                                             onClick={() => setShowDeleteConfirm(false)}
                                             disabled={isDeleting}
-                                            style={{ borderColor: buttonColor, color: buttonColor }}
+                                            style={{ 
+                                                borderColor: secondaryTextColor, 
+                                                color: primaryTextColor,
+                                                backgroundColor: 'transparent',
+                                                borderWidth: '1px'
+                                            }}
                                             onMouseEnter={(e) => {
                                                 if (!isDeleting) {
-                                                    e.currentTarget.style.backgroundColor = buttonColor;
-                                                    e.currentTarget.style.color = '#ffffff';
+                                                    e.currentTarget.style.backgroundColor = secondaryTextColor + '20';
                                                 }
                                             }}
                                             onMouseLeave={(e) => {
                                                 if (!isDeleting) {
                                                     e.currentTarget.style.backgroundColor = 'transparent';
-                                                    e.currentTarget.style.color = buttonColor;
                                                 }
                                             }}
                                         >
                                             {t('common.cancel') || 'Cancel'}
                                         </button>
                                         <button
-                                            className="btn btn-error text-white"
+                                            className="btn text-white"
                                             onClick={async () => {
                                                 if (!product?._id) {
-                                                    alert(t('admin.productNotFound') || 'Product not found');
+                                                    showError(t('admin.productNotFound') || 'Product not found');
                                                     return;
                                                 }
                                                 try {
                                                     setIsDeleting(true);
                                                     await deleteProduct(product._id);
                                                     // Show success message
-                                                    alert(t('admin.deleteSuccess') || 'Product deleted successfully');
+                                                    showSuccess(t('admin.deleteSuccess') || 'Product deleted successfully');
                                                     // Navigate to products list
                                                     navigate('/admin/products');
                                                 } catch (error) {
                                                     console.error('Delete error:', error);
                                                     const errorMessage = error?.response?.data?.message || error?.message || t('admin.deleteError') || 'Failed to delete product';
-                                                    alert(errorMessage);
+                                                    showError(errorMessage);
                                                     setIsDeleting(false);
                                                     setShowDeleteConfirm(false);
                                                 }
                                             }}
                                             disabled={isDeleting}
+                                            style={{ 
+                                                backgroundColor: '#EF4444',
+                                                borderColor: '#EF4444',
+                                                color: '#ffffff'
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                if (!isDeleting) {
+                                                    e.currentTarget.style.backgroundColor = '#DC2626';
+                                                    e.currentTarget.style.borderColor = '#DC2626';
+                                                }
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                if (!isDeleting) {
+                                                    e.currentTarget.style.backgroundColor = '#EF4444';
+                                                    e.currentTarget.style.borderColor = '#EF4444';
+                                                }
+                                            }}
                                         >
                                             {isDeleting ? (
                                                 <>

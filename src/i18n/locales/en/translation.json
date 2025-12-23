@@ -103,9 +103,12 @@
             "comingSoon": "Coming Soon",
             "favourited": "Favourited",
             "frequentlyDownloaded": "Frequently Downloaded",
+            "newAdded": "New Added Books",
             "popularReader": "Popular at Online Reader",
             "categories": "Browse Categories",
-            "coupons": "Special Offers"
+            "coupons": "Special Offers",
+            "emptyMessage": "Books Coming Soon!",
+            "emptyDescription": "We are adding amazing books very soon. Stay tuned!"
         }
     },
     "pages": {

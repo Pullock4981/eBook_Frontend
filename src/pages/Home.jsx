@@ -32,32 +32,36 @@ function Home() {
     const products = useSelector(selectDashboardProducts);
     const isLoadingAdmin = useSelector(selectDashboardLoading);
 
-    // State for regular user product sections (only Favourited and Frequently Downloaded)
+    // State for regular user product sections
     const [favourited, setFavourited] = useState([]);
     const [frequentlyDownloaded, setFrequentlyDownloaded] = useState([]);
+    const [newAdded, setNewAdded] = useState([]);
 
     // Loading states
     const [loadingFavourited, setLoadingFavourited] = useState(true);
     const [loadingFrequentlyDownloaded, setLoadingFrequentlyDownloaded] = useState(true);
+    const [loadingNewAdded, setLoadingNewAdded] = useState(true);
 
     useEffect(() => {
         if (isAdmin) {
             // Fetch admin dashboard stats
             dispatch(fetchDashboardStats());
         } else {
-            // Fetch regular user product sections (only Favourited and Frequently Downloaded)
+            // Fetch regular user product sections
             const fetchSections = async () => {
                 try {
-                    // Fetch only Favourited and Frequently Downloaded sections
+                    // Fetch Favourited (most viewed), Frequently Downloaded, and New Added sections
                     const [
                         favouritedData,
-                        frequentlyDownloadedData
+                        frequentlyDownloadedData,
+                        newAddedData
                     ] = await Promise.allSettled([
-                        isAuthenticated ? homeService.getFavourited(3) : Promise.resolve({ success: true, data: [] }),
-                        homeService.getFrequentlyDownloaded(3)
+                        homeService.getFavourited(3),
+                        homeService.getFrequentlyDownloaded(3),
+                        homeService.getNewAdded(3)
                     ]);
 
-                    // Favourited
+                    // Favourited (Most Viewed/Clicked)
                     if (favouritedData.status === 'fulfilled' && favouritedData.value.success) {
                         setFavourited(favouritedData.value.data || []);
                     }
@@ -68,10 +72,17 @@ function Home() {
                         setFrequentlyDownloaded(frequentlyDownloadedData.value.data || []);
                     }
                     setLoadingFrequentlyDownloaded(false);
+
+                    // New Added
+                    if (newAddedData.status === 'fulfilled' && newAddedData.value.success) {
+                        setNewAdded(newAddedData.value.data || []);
+                    }
+                    setLoadingNewAdded(false);
                 } catch (error) {
                     console.error('Error fetching home sections:', error);
                     setLoadingFavourited(false);
                     setLoadingFrequentlyDownloaded(false);
+                    setLoadingNewAdded(false);
                 }
             };
 
@@ -160,17 +171,23 @@ function Home() {
                     </div>
                 </section>
             ) : (
-                /* Regular User Product Sections - Only Favourited and Frequently Downloaded */
+                /* Regular User Product Sections */
                 <>
-                    {/* Favourited Section */}
-                    {isAuthenticated && (
-                        <HomeSection
-                            titleKey="home.sections.favourited"
-                            products={favourited}
-                            seeMoreLink="/products?section=favourited"
-                            loading={loadingFavourited}
-                        />
-                    )}
+                    {/* New Added Books Section - At the top */}
+                    <HomeSection
+                        titleKey="home.sections.newAdded"
+                        products={newAdded}
+                        seeMoreLink="/products?section=new-added"
+                        loading={loadingNewAdded}
+                    />
+
+                    {/* Favourited Section (Most Viewed/Clicked) */}
+                    <HomeSection
+                        titleKey="home.sections.favourited"
+                        products={favourited}
+                        seeMoreLink="/products?section=favourited"
+                        loading={loadingFavourited}
+                    />
 
                     {/* Frequently Downloaded Section */}
                     <HomeSection

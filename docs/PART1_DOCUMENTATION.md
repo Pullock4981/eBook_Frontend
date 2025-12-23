@@ -253,7 +253,7 @@ npm run format
 - `.env.example` file creation was blocked by system
 - Create manually with the following structure:
   ```
-  VITE_API_BASE_URL=http://localhost:5000/api
+  VITE_API_BASE_URL=https://e-book-backend-tau.vercel.app/api
   VITE_APP_NAME=eBook Store
   VITE_APP_VERSION=1.0.0
   ```

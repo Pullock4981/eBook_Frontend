@@ -13,6 +13,8 @@ import Loading from '../../../components/common/Loading';
 import Pagination from '../../../components/common/Pagination';
 import { formatDate } from '../../../utils/helpers';
 import { useThemeColors } from '../../../hooks/useThemeColors';
+import { showError, showSuccess } from '../../../utils/toast';
+import Swal from 'sweetalert2';
 
 function UserList() {
     const { t } = useTranslation();
@@ -73,16 +75,28 @@ function UserList() {
     };
 
     const handleBanUser = async (userId, isActive) => {
-        if (!window.confirm(isActive ? 'Are you sure you want to unban this user?' : 'Are you sure you want to ban this user?')) {
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: isActive ? 'You want to unban this user?' : 'You want to ban this user?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: isActive ? 'Unban' : 'Ban',
+            cancelButtonText: 'Cancel',
+        });
+
+        if (!result.isConfirmed) {
             return;
         }
 
         setActionLoading(userId);
         try {
             await updateUserStatus(userId, isActive);
+            showSuccess(isActive ? 'User unbanned successfully!' : 'User banned successfully!');
             await fetchUsers();
         } catch (error) {
-            alert(error.response?.data?.message || error.message || 'Failed to update user status');
+            showError(error.response?.data?.message || error.message || 'Failed to update user status');
         } finally {
             setActionLoading(null);
         }
@@ -90,16 +104,28 @@ function UserList() {
 
     const handleUpdateRole = async (userId, newRole) => {
         const action = newRole === 'admin' ? 'make admin' : 'remove admin';
-        if (!window.confirm(`Are you sure you want to ${action} this user?`)) {
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: `You want to ${action} this user?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3b82f6',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Confirm',
+            cancelButtonText: 'Cancel',
+        });
+
+        if (!result.isConfirmed) {
             return;
         }
 
         setActionLoading(userId);
         try {
             await updateUserRole(userId, newRole);
+            showSuccess(`User role updated to ${newRole} successfully!`);
             await fetchUsers();
         } catch (error) {
-            alert(error.response?.data?.message || error.message || 'Failed to update user role');
+            showError(error.response?.data?.message || error.message || 'Failed to update user role');
         } finally {
             setActionLoading(null);
         }
@@ -139,17 +165,28 @@ function UserList() {
     };
 
     const handleApproveAffiliate = async (affiliateId) => {
-        if (!window.confirm('Are you sure you want to approve this affiliate request?')) {
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: 'You want to approve this affiliate request?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Approve',
+            cancelButtonText: 'Cancel',
+        });
+
+        if (!result.isConfirmed) {
             return;
         }
 
         setActionLoading(`affiliate-${affiliateId}`);
         try {
             await approveAffiliate(affiliateId);
-            alert('Affiliate approved successfully!');
+            showSuccess('Affiliate approved successfully!');
             await fetchPendingAffiliates();
         } catch (error) {
-            alert(error.response?.data?.message || error.message || 'Failed to approve affiliate');
+            showError(error.response?.data?.message || error.message || 'Failed to approve affiliate');
         } finally {
             setActionLoading(null);
         }
@@ -157,18 +194,18 @@ function UserList() {
 
     const handleRejectAffiliate = async () => {
         if (!rejectModal.reason.trim()) {
-            alert('Please provide a rejection reason');
+            showError('Please provide a rejection reason');
             return;
         }
 
         setActionLoading(`affiliate-${rejectModal.affiliateId}`);
         try {
             await rejectAffiliate(rejectModal.affiliateId, rejectModal.reason);
-            alert('Affiliate rejected successfully!');
+            showSuccess('Affiliate rejected successfully!');
             setRejectModal({ open: false, affiliateId: null, reason: '' });
             await fetchPendingAffiliates();
         } catch (error) {
-            alert(error.response?.data?.message || error.message || 'Failed to reject affiliate');
+            showError(error.response?.data?.message || error.message || 'Failed to reject affiliate');
         } finally {
             setActionLoading(null);
         }

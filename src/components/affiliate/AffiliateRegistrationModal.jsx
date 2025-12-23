@@ -12,6 +12,7 @@ import { registerAsAffiliate } from '../../services/affiliateService';
 import { registerAffiliate, fetchAffiliateProfile } from '../../store/slices/affiliateSlice';
 import Loading from '../common/Loading';
 import { useThemeColors } from '../../hooks/useThemeColors';
+import { showError, showSuccess } from '../../utils/toast';
 
 function AffiliateRegistrationModal({ onClose, onSuccess }) {
     const { t } = useTranslation();
@@ -65,11 +66,11 @@ function AffiliateRegistrationModal({ onClose, onSuccess }) {
                 setSuccessData({ affiliate });
                 setError(null);
 
-                // Show success alert immediately
+                // Show success toast immediately
                 const referralCode = affiliate.referralCode || 'N/A';
                 const status = affiliate.status || 'pending';
 
-                alert(`✅ Registration Successful!\n\nYour Referral Code: ${referralCode}\nStatus: ${status.toUpperCase()}\n\nYour registration is pending admin approval. You'll receive your referral link once approved.`);
+                showSuccess(`Registration Successful! Your Referral Code: ${referralCode}. Status: ${status.toUpperCase()}. Your registration is pending admin approval.`);
 
                 // Fetch updated affiliate profile to get full details and update Redux state
                 setTimeout(() => {
@@ -94,8 +95,8 @@ function AffiliateRegistrationModal({ onClose, onSuccess }) {
             console.error('Registration error:', err);
             const errorMessage = err.response?.data?.message || err.message || 'Failed to register as affiliate';
             setError(errorMessage);
-            // Show error alert
-            alert(`❌ Registration Failed!\n\n${errorMessage}\n\nPlease try again or contact support.`);
+            // Show error toast
+            showError(`Registration Failed! ${errorMessage}. Please try again or contact support.`);
         } finally {
             setLoading(false);
         }

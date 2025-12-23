@@ -15,6 +15,8 @@ import { PRODUCT_TYPES } from '../../../utils/constants';
 import Loading from '../../../components/common/Loading';
 import Pagination from '../../../components/common/Pagination';
 import { useThemeColors } from '../../../hooks/useThemeColors';
+import { showError, showSuccess } from '../../../utils/toast';
+import Swal from 'sweetalert2';
 
 function ProductList() {
     const { t } = useTranslation();
@@ -43,17 +45,29 @@ function ProductList() {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm(t('admin.confirmDelete') || 'Are you sure you want to delete this product?')) {
+        const result = await Swal.fire({
+            title: t('admin.confirmDelete') || 'Are you sure?',
+            text: t('admin.confirmDeleteMessage') || 'You want to delete this product?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: t('common.delete') || 'Delete',
+            cancelButtonText: t('common.cancel') || 'Cancel',
+        });
+
+        if (!result.isConfirmed) {
             return;
         }
 
         setDeleteLoading(id);
         try {
             await deleteProduct(id);
+            showSuccess(t('admin.deleteSuccess') || 'Product deleted successfully!');
             // Refresh list - include inactive products for admin
             dispatch(fetchProducts({ filters: { includeInactive: true }, page: pagination.currentPage, limit: 100 }));
         } catch (error) {
-            alert(error.message || t('admin.deleteError') || 'Failed to delete product');
+            showError(error.message || t('admin.deleteError') || 'Failed to delete product');
         } finally {
             setDeleteLoading(null);
         }
@@ -255,7 +269,7 @@ function ProductList() {
                                                     />
                                                 </div>
                                             </div>
-                                            
+
                                             {/* Product Info */}
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-start justify-between gap-2 mb-2">
@@ -281,7 +295,7 @@ function ProductList() {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                
+
                                                 {/* Price */}
                                                 <div className="mb-2">
                                                     <div className="font-semibold text-sm" style={{ color: primaryTextColor }}>
@@ -293,7 +307,7 @@ function ProductList() {
                                                         </div>
                                                     )}
                                                 </div>
-                                                
+
                                                 {/* Additional Info */}
                                                 <div className="flex items-center gap-3 text-xs mb-3" style={{ color: secondaryTextColor }}>
                                                     {product.category?.name && (
@@ -305,7 +319,7 @@ function ProductList() {
                                                         </span>
                                                     )}
                                                 </div>
-                                                
+
                                                 {/* Actions */}
                                                 <div className="flex gap-2">
                                                     <Link
@@ -421,7 +435,23 @@ function ProductList() {
                                                                 {product.stock || 0}
                                                             </span>
                                                         ) : (
-                                                            <span className="text-xs opacity-50">-</span>
+                                                            product.digitalFile ? (
+                                                                <a
+                                                                    href={product.digitalFile}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:underline"
+                                                                    onClick={(e) => e.stopPropagation()} // Prevent row click
+                                                                >
+                                                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                                    </svg>
+                                                                    PDF
+                                                                </a>
+                                                            ) : (
+                                                                <span className="text-xs text-error font-medium">No PDF</span>
+                                                            )
                                                         )}
                                                     </td>
                                                     <td className="hidden lg:table-cell py-3 px-4">

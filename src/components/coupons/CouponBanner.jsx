@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { fetchActiveCoupons } from '../../store/slices/couponSlice';
 import { formatCurrency, formatDate } from '../../utils/helpers';
 import { useThemeColors } from '../../hooks/useThemeColors';
+import { showSuccess } from '../../utils/toast';
 
 function CouponBanner() {
     const { t } = useTranslation();
@@ -40,8 +41,7 @@ function CouponBanner() {
 
     const handleCopyCode = (code) => {
         navigator.clipboard.writeText(code);
-        // Show toast notification (you can add a toast library later)
-        alert(t('coupon.codeCopied') || `Coupon code "${code}" copied to clipboard!`);
+        showSuccess(t('coupon.codeCopied') || `Coupon code "${code}" copied to clipboard!`);
     };
 
     const getDiscountDisplay = (coupon) => {

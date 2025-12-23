@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { formatCurrency } from '../../utils/helpers';
 import Loading from '../common/Loading';
 import { useThemeColors } from '../../hooks/useThemeColors';
+import { showSuccess } from '../../utils/toast';
 
 function CouponSection({ coupons, seeMoreLink, loading }) {
     const { t } = useTranslation();
@@ -15,7 +16,7 @@ function CouponSection({ coupons, seeMoreLink, loading }) {
 
     const handleCopyCode = (code) => {
         navigator.clipboard.writeText(code);
-        alert(t('coupon.codeCopied') || `Coupon code "${code}" copied to clipboard!`);
+        showSuccess(t('coupon.codeCopied') || `Coupon code "${code}" copied to clipboard!`);
     };
 
     const getDiscountDisplay = (coupon) => {

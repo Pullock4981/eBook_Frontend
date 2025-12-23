@@ -13,6 +13,7 @@ import ImageUpload from './ImageUpload';
 import PDFUpload from '../common/PDFUpload';
 import { PRODUCT_TYPES } from '../../utils/constants';
 import { useThemeColors } from '../../hooks/useThemeColors';
+import { showError } from '../../utils/toast';
 
 function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) {
     const { t } = useTranslation();
@@ -153,37 +154,37 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
     const handleSubmit = (e) => {
         e.preventDefault();
         console.log('Form Submit - Form Data:', formData);
-        
+
         // Validate form
         const isValid = validate();
         console.log('Form Validation - Valid:', isValid, 'Errors:', errors);
-        
+
         if (!isValid) {
             // Scroll to first error after a short delay to ensure errors are rendered
             setTimeout(() => {
                 scrollToFirstError();
             }, 100);
-            
-            // Show alert for better visibility
+
+            // Show toast for better visibility
             const firstError = Object.values(errors)[0];
             if (firstError) {
-                alert(firstError);
+                showError(firstError);
             } else {
-                alert('Please fill in all required fields correctly.');
+                showError('Please fill in all required fields correctly.');
             }
             return;
         }
 
         // Prepare submit data with proper type conversions
         // CRITICAL: Always include price field when updating (needed for discount validation)
-        let priceValue = formData.price && formData.price.toString().trim() 
+        let priceValue = formData.price && formData.price.toString().trim()
             ? (isNaN(parseFloat(formData.price)) ? undefined : parseFloat(formData.price))
             : (product && product.price !== undefined ? (typeof product.price === 'number' ? product.price : parseFloat(product.price)) : undefined);
-        
-        let discountPriceValue = formData.discountPrice && formData.discountPrice.trim() 
+
+        let discountPriceValue = formData.discountPrice && formData.discountPrice.trim()
             ? (isNaN(parseFloat(formData.discountPrice)) ? undefined : parseFloat(formData.discountPrice))
             : undefined;
-        
+
         // If discountPrice is set, ensure price is also set (use existing if not provided)
         if (discountPriceValue !== undefined && discountPriceValue !== null) {
             if (priceValue === undefined || priceValue === null || isNaN(priceValue)) {
@@ -193,7 +194,7 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                 }
             }
         }
-        
+
         const submitData = {
             name: formData.name.trim(),
             type: formData.type,
@@ -213,8 +214,8 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                 ? (isNaN(parseInt(formData.stock)) ? undefined : parseInt(formData.stock))
                 : undefined,
             // Convert tags
-            tags: formData.tags && formData.tags.trim() 
-                ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag) 
+            tags: formData.tags && formData.tags.trim()
+                ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
                 : [],
             // Convert fileSize - ensure it's a valid number
             fileSize: formData.fileSize && formData.fileSize.trim()
@@ -225,7 +226,7 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
             // SKU if provided
             sku: formData.sku && formData.sku.trim() ? formData.sku.trim() : undefined,
         };
-        
+
         // Remove undefined, null, empty string, and NaN values
         // BUT: Always keep price and discountPrice if they're valid numbers
         Object.keys(submitData).forEach(key => {
@@ -234,13 +235,13 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
             if ((key === 'price' || key === 'discountPrice') && typeof value === 'number' && !isNaN(value)) {
                 return; // Keep this field
             }
-            if (value === undefined || value === null || value === '' || 
+            if (value === undefined || value === null || value === '' ||
                 (typeof value === 'number' && isNaN(value)) ||
                 (Array.isArray(value) && value.length === 0)) {
                 delete submitData[key];
             }
         });
-        
+
         // Final check: If discountPrice is set, ensure price is also set
         if (submitData.discountPrice !== undefined && submitData.discountPrice !== null) {
             if (submitData.price === undefined || submitData.price === null || isNaN(submitData.price)) {
@@ -251,7 +252,7 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                 }
             }
         }
-        
+
         // For digital products, ensure digitalFile is present (validation will catch if missing)
         if (submitData.type === PRODUCT_TYPES.DIGITAL && !submitData.digitalFile) {
             // Keep it undefined so validation can catch it
@@ -264,7 +265,7 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
             priceType: typeof submitData.price,
             discountPrice: submitData.discountPrice,
             discountPriceType: typeof submitData.discountPrice,
-            comparison: submitData.discountPrice && submitData.price 
+            comparison: submitData.discountPrice && submitData.price
                 ? `${submitData.discountPrice} < ${submitData.price} = ${submitData.discountPrice < submitData.price}`
                 : 'N/A'
         });
@@ -679,13 +680,13 @@ function ProductForm({ product = null, onSubmit, onCancel, isLoading = false }) 
                             <div className="form-control w-full">
                                 <label className="label pb-2">
                                     <span className="label-text text-sm sm:text-base font-semibold" style={{ color: primaryTextColor }}>
-                                        {t('admin.digitalFileUrl') || 'Digital File URL'}
+                                        {t('admin.digitalFileUrl') || 'Manual PDF Link (If Upload Fails)'}
                                         <span className="label-text-alt text-xs sm:text-sm opacity-70 ml-2" style={{ color: secondaryTextColor }}>
                                             {t('common.optional') || 'Optional'}
                                         </span>
                                     </span>
                                     <span className="label-text-alt text-xs sm:text-sm opacity-70" style={{ color: secondaryTextColor }}>
-                                        {t('admin.manualURLHint') || 'Or enter URL manually'}
+                                        {t('admin.manualURLHint') || 'Paste direct link to PDF here (Google Drive, Dropbox, etc.)'}
                                     </span>
                                 </label>
                                 <input

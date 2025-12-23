@@ -19,6 +19,7 @@ import { formatCurrency, formatDate } from '../../utils/helpers';
 import Loading from '../../components/common/Loading';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import AffiliateCouponSection from '../../components/affiliate/AffiliateCouponSection';
+import { showSuccess } from '../../utils/toast';
 
 function AffiliateDashboard() {
     const { t } = useTranslation();
@@ -42,6 +43,12 @@ function AffiliateDashboard() {
     }
 
     const affiliate = statistics?.affiliate;
+
+    // Debug: Log affiliate data
+    console.log('Affiliate Dashboard - Statistics:', statistics);
+    console.log('Affiliate Dashboard - Affiliate:', affiliate);
+    console.log('Affiliate Dashboard - ReferralCode:', affiliate?.referralCode);
+    console.log('Affiliate Dashboard - ReferralLink:', affiliate?.referralLink);
 
     return (
         <div className="w-full pb-4" style={{ backgroundColor }}>
@@ -178,6 +185,81 @@ function AffiliateDashboard() {
                         </div>
                     </div>
                 </div>
+
+                {/* Referral Information Card */}
+                {affiliate && (
+                    <div className="rounded-lg shadow-sm p-4 sm:p-6 mb-6 border" style={{ borderColor: secondaryTextColor, backgroundColor }}>
+                        <h2 className="text-lg sm:text-xl font-bold mb-4" style={{ color: primaryTextColor }}>
+                            Referral Information
+                        </h2>
+                        
+                        {/* Referral Code */}
+                        <div className="mb-4">
+                            <label className="text-xs sm:text-sm font-medium mb-2 block" style={{ color: secondaryTextColor }}>
+                                Your Referral Code
+                            </label>
+                            {affiliate.referralCode ? (
+                                <div className="flex flex-col sm:flex-row gap-2">
+                                    <code className="text-sm sm:text-base font-mono p-3 rounded flex-1 break-all text-center font-bold" 
+                                          style={{ backgroundColor: secondaryTextColor + '20', color: buttonColor, fontSize: '1.1rem', letterSpacing: '2px' }}>
+                                        {affiliate.referralCode}
+                                    </code>
+                                    <button
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(affiliate.referralCode);
+                                            showSuccess('Referral code copied to clipboard!');
+                                        }}
+                                        className="btn btn-sm px-4 py-2 text-xs sm:text-sm font-medium text-white whitespace-nowrap"
+                                        style={{ backgroundColor: buttonColor, minHeight: '36px' }}
+                                    >
+                                        Copy Code
+                                    </button>
+                                </div>
+                            ) : (
+                                <p className="text-xs sm:text-sm opacity-70" style={{ color: secondaryTextColor }}>
+                                    Referral code not available
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Referral Link */}
+                        <div>
+                            <label className="text-xs sm:text-sm font-medium mb-2 block" style={{ color: secondaryTextColor }}>
+                                Your Referral Link
+                            </label>
+                            {affiliate.referralLink ? (
+                                <>
+                                    <div className="flex flex-col sm:flex-row gap-2">
+                                        <input
+                                            type="text"
+                                            readOnly
+                                            value={affiliate.referralLink}
+                                            className="input input-bordered flex-1 text-xs sm:text-sm p-3 break-all"
+                                            style={{ borderColor: secondaryTextColor, color: primaryTextColor, backgroundColor }}
+                                        />
+                                        <button
+                                            onClick={() => {
+                                                navigator.clipboard.writeText(affiliate.referralLink);
+                                                showSuccess('Referral link copied to clipboard!');
+                                            }}
+                                            className="btn btn-sm px-4 py-2 text-xs sm:text-sm font-medium text-white whitespace-nowrap"
+                                            style={{ backgroundColor: buttonColor, minHeight: '36px' }}
+                                        >
+                                            Copy Link
+                                        </button>
+                                    </div>
+                                    <p className="text-xs mt-2 opacity-70" style={{ color: secondaryTextColor }}>
+                                        Share this link with others to earn commissions when they make purchases using your referral code
+                                    </p>
+                                </>
+                            ) : (
+                                <p className="text-xs sm:text-sm opacity-70" style={{ color: secondaryTextColor }}>
+                                    Referral link not available
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                )}
 
                 {/* Recent Commissions */}
                 <div className="rounded-lg shadow-sm p-4 sm:p-6 mb-6 border" style={{ borderColor: secondaryTextColor, backgroundColor }}>

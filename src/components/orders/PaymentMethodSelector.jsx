@@ -13,13 +13,6 @@ function PaymentMethodSelector({ selectedMethod, onMethodChange }) {
 
     const PAYMENT_METHODS = [
         {
-            value: 'sslcommerz',
-            label: t('checkout.sslcommerzLabel') || 'SSLCommerz',
-            icon: '💳',
-            description: t('checkout.sslcommerzDesc') || 'Credit/Debit Card',
-            accent: '#0b8bd9',
-        },
-        {
             value: 'bkash',
             label: t('checkout.bkashLabel') || 'bKash',
             icon: '📲',

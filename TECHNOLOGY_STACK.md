@@ -383,7 +383,7 @@ xl:  1280px - Extra large devices
 
 ### Environment Variables
 ```
-VITE_API_URL=http://localhost:5000/api
+VITE_API_URL=https://e-book-backend-tau.vercel.app/api
 VITE_APP_NAME=eBook Store
 VITE_ENABLE_ANALYTICS=false
 ```

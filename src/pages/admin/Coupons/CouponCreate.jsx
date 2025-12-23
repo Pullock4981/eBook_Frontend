@@ -11,6 +11,7 @@ import { useDispatch } from 'react-redux';
 import { createCoupon, fetchAllCoupons } from '../../../store/slices/couponSlice';
 import CouponForm from '../../../components/admin/CouponForm';
 import { useThemeColors } from '../../../hooks/useThemeColors';
+import { showError, showSuccess } from '../../../utils/toast';
 
 function CouponCreate() {
     const { t } = useTranslation();
@@ -23,12 +24,13 @@ function CouponCreate() {
         setIsLoading(true);
         try {
             await dispatch(createCoupon(formData)).unwrap();
+            showSuccess(t('admin.couponCreated') || 'Coupon created successfully!');
             // Refresh coupons list
             dispatch(fetchAllCoupons({ page: 1, limit: 10 }));
             // Navigate to coupons list
             navigate('/admin/coupons');
         } catch (error) {
-            alert(error || t('admin.createError') || 'Failed to create coupon');
+            showError(error || t('admin.createError') || 'Failed to create coupon');
         } finally {
             setIsLoading(false);
         }

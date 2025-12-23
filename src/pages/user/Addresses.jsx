@@ -13,11 +13,8 @@ import { selectIsAuthenticated } from '../../store/slices/authSlice';
 import AddressForm from '../../components/user/AddressForm';
 import Loading from '../../components/common/Loading';
 import { useThemeColors } from '../../hooks/useThemeColors';
-// Toast notifications - using browser alert for now, can be replaced with toast library
-const toast = {
-    success: (message) => alert(message),
-    error: (message) => alert(message)
-};
+import { showSuccess, showError } from '../../utils/toast';
+import Swal from 'sweetalert2';
 import * as userService from '../../services/userService';
 
 function Addresses() {
@@ -45,7 +42,7 @@ function Addresses() {
 
     useEffect(() => {
         if (error) {
-            toast.error(error);
+            showError(error);
             dispatch(clearError());
         }
     }, [error, dispatch]);
@@ -69,40 +66,51 @@ function Addresses() {
         try {
             if (editingAddress) {
                 await dispatch(updateAddress({ addressId: editingAddress._id, addressData })).unwrap();
-                toast.success(t('user.addressUpdated') || 'Address updated successfully!');
+                showSuccess(t('user.addressUpdated') || 'Address updated successfully!');
             } else {
                 await dispatch(createAddress(addressData)).unwrap();
-                toast.success(t('user.addressCreated') || 'Address created successfully!');
+                showSuccess(t('user.addressCreated') || 'Address created successfully!');
             }
             // Refresh addresses list
             await dispatch(fetchAddresses());
             setShowForm(false);
             setEditingAddress(null);
         } catch (err) {
-            toast.error(err || t('user.addressOperationFailed') || 'Failed to save address');
+            showError(err || t('user.addressOperationFailed') || 'Failed to save address');
         }
     };
 
     const handleDelete = async (addressId) => {
-        if (!window.confirm(t('user.confirmDeleteAddress') || 'Are you sure you want to delete this address?')) {
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: t('user.confirmDeleteAddress') || 'You want to delete this address?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: t('common.delete') || 'Delete',
+            cancelButtonText: t('common.cancel') || 'Cancel',
+        });
+
+        if (!result.isConfirmed) {
             return;
         }
 
         try {
             await dispatch(deleteAddress(addressId)).unwrap();
-            toast.success(t('user.addressDeleted') || 'Address deleted successfully!');
+            showSuccess(t('user.addressDeleted') || 'Address deleted successfully!');
         } catch (err) {
-            toast.error(err || t('user.addressDeleteFailed') || 'Failed to delete address');
+            showError(err || t('user.addressDeleteFailed') || 'Failed to delete address');
         }
     };
 
     const handleSetDefault = async (addressId) => {
         try {
             await userService.setDefaultAddress(addressId);
-            toast.success(t('user.defaultAddressSet') || 'Default address updated!');
+            showSuccess(t('user.defaultAddressSet') || 'Default address updated!');
             dispatch(fetchAddresses()); // Refresh addresses
         } catch (err) {
-            toast.error(err.message || t('user.defaultAddressFailed') || 'Failed to set default address');
+            showError(err.message || t('user.defaultAddressFailed') || 'Failed to set default address');
         }
     };
 

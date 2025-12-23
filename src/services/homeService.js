@@ -68,7 +68,7 @@ export const getFrequentlyDownloaded = async (limit = 3) => {
 };
 
 /**
- * Get user's favorited products (requires auth)
+ * Get most viewed/clicked products (Favourited section)
  */
 export const getFavourited = async (limit = 3) => {
     try {
@@ -77,11 +77,22 @@ export const getFavourited = async (limit = 3) => {
         });
         return response;
     } catch (error) {
-        // If not authenticated (401), return empty array
-        if (error.status === 401 || error.response?.status === 401) {
-            return { success: true, data: [] };
-        }
         console.error('Error fetching favourited:', error);
+        return { success: false, data: [] };
+    }
+};
+
+/**
+ * Get newly added products
+ */
+export const getNewAdded = async (limit = 3) => {
+    try {
+        const response = await api.get('/products/sections/new-added', {
+            params: { limit }
+        });
+        return response;
+    } catch (error) {
+        console.error('Error fetching new added:', error);
         return { success: false, data: [] };
     }
 };

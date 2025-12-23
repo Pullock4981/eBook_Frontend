@@ -15,6 +15,8 @@ import { selectIsAuthenticated, selectUser } from '../../store/slices/authSlice'
 import pdfjsLib from '../../utils/pdfjsConfig'; // Import configured PDF.js
 import Loading from '../common/Loading';
 import { useThemeColors } from '../../hooks/useThemeColors';
+import { API_BASE_URL } from '../../utils/constants';
+import { getToken } from '../../utils/helpers';
 
 function SecurePDFViewerPage({ productId, pdfURL: initialPdfURL }) {
     const { t } = useTranslation();
@@ -116,18 +118,35 @@ function SecurePDFViewerPage({ productId, pdfURL: initialPdfURL }) {
             setIsLoading(true);
             setError(null);
 
-            // Fetch PDF - if it's our API endpoint, include auth token
+            // Fetch PDF logic
             const headers = {};
-            const token = localStorage.getItem('token');
-            if (token && pdfURL.includes('/api/')) {
-                headers['Authorization'] = `Bearer ${token}`;
+            const token = getToken();
+            // Check if URL is external (e.g., Cloudinary)
+            // If it starts with API_BASE_URL, it's INTERNAL (even if it's absolute)
+            const isInternalAPI = pdfURL.startsWith(API_BASE_URL) || (!pdfURL.startsWith('http://') && !pdfURL.startsWith('https://'));
+            const isExternal = !isInternalAPI;
+
+            let fetchOptions = {
+                mode: 'cors'
+            };
+
+            if (isExternal) {
+                // External (Cloudinary/S3) - bypass auth headers to prevent CORS preflight issues
+                console.log('SecurePDFViewerPage: External URL detected, omitting credentials');
+                fetchOptions.credentials = 'omit';
+                fetchOptions.headers = {}; // clear headers
+            } else {
+                // Internal API - include credentials and auth
+                fetchOptions.credentials = 'include';
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+                fetchOptions.headers = headers;
             }
 
-            const pdfResponse = await fetch(pdfURL, {
-                credentials: 'include',
-                mode: 'cors',
-                headers: headers
-            });
+            console.log('Fetching PDF from:', pdfURL);
+
+            const pdfResponse = await fetch(pdfURL, fetchOptions);
 
             if (!pdfResponse.ok) {
                 throw new Error(`Failed to load PDF: ${pdfResponse.status} ${pdfResponse.statusText}`);

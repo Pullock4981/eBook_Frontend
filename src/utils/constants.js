@@ -6,15 +6,16 @@
  */
 
 // API Configuration
-// Production backend URL: http://localhost:5000/api
+// Production backend URL: https://e-book-backend-tau.vercel.app/api
 const getDefaultAPIURL = () => {
-    // If VITE_API_BASE_URL is set, use it (highest priority)
+    // If VITE_API_BASE_URL is set, use it
     if (import.meta.env.VITE_API_BASE_URL) {
-        return import.meta.env.VITE_API_BASE_URL;
+        const url = import.meta.env.VITE_API_BASE_URL;
+        // Ensure URL ends with /api
+        return url.endsWith('/api') ? url : `${url}/api`;
     }
-    // Default to production backend URL for all environments
-    // For local development, create .env file with: VITE_API_BASE_URL=http://localhost:5000/api
-    return 'http://localhost:5000/api';
+    // Default to production backend URL
+    return 'https://e-book-backend-tau.vercel.app/api';
 };
 
 export const API_BASE_URL = getDefaultAPIURL();
@@ -156,10 +157,9 @@ export const PAYMENT_STATUS = {
 
 // Payment Methods
 export const PAYMENT_METHODS = {
-    SSLCOMMERZ: 'sslcommerz',
     BKASH: 'bkash',
     NAGAD: 'nagad',
-    COD: 'cod',
+    COD: 'cash_on_delivery',
 };
 
 // Error Messages

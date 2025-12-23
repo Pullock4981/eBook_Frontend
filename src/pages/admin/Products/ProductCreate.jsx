@@ -12,6 +12,7 @@ import { createProduct } from '../../../services/adminService';
 import { fetchProducts } from '../../../store/slices/productSlice';
 import ProductForm from '../../../components/admin/ProductForm';
 import { useThemeColors } from '../../../hooks/useThemeColors';
+import { showSuccess, showError } from '../../../utils/toast';
 
 function ProductCreate() {
     const { t } = useTranslation();
@@ -28,7 +29,7 @@ function ProductCreate() {
             console.log('Product Create - Success:', response);
             
             // Show success message
-            alert(t('admin.productCreated') || 'Product created successfully!');
+            showSuccess(t('admin.productCreated') || 'Product created successfully!');
             
             // Refresh products list
             dispatch(fetchProducts({ filters: {}, page: 1, limit: 12 }));
@@ -59,7 +60,7 @@ function ProductCreate() {
                 errorMessage = 'Server error. Please try again later.';
             }
             
-            alert(errorMessage);
+            showError(errorMessage);
         } finally {
             setIsLoading(false);
         }

@@ -17,6 +17,8 @@ import Loading from '../../../components/common/Loading';
 import Pagination from '../../../components/common/Pagination';
 import { formatDate } from '../../../utils/helpers';
 import { useThemeColors } from '../../../hooks/useThemeColors';
+import { showError, showSuccess } from '../../../utils/toast';
+import Swal from 'sweetalert2';
 
 function AffiliateList() {
     const { t } = useTranslation();
@@ -60,29 +62,44 @@ function AffiliateList() {
 
             console.log('=== API Response ===');
             console.log('Full response:', response);
+            console.log('Response type:', typeof response);
+            console.log('Response keys:', Object.keys(response || {}));
             console.log('Response success:', response?.success);
             console.log('Response data:', response?.data);
             console.log('Affiliates array:', response?.data?.affiliates);
             console.log('Affiliates count:', response?.data?.affiliates?.length || 0);
             console.log('Pagination:', response?.data?.pagination);
 
-            if (response?.success && response?.data) {
-                const affiliatesList = response.data.affiliates || [];
-                console.log('=== Setting Affiliates ===');
-                console.log('Count:', affiliatesList.length);
-                console.log('First affiliate:', affiliatesList[0]);
+            // Handle different response structures
+            let affiliatesList = [];
+            let paginationData = { totalPages: 1, totalItems: 0 };
 
-                setAffiliates(affiliatesList);
-                setPagination(prev => ({
-                    ...prev,
-                    totalPages: response.data.pagination?.totalPages || 1,
-                    totalItems: response.data.pagination?.totalItems || 0
-                }));
-            } else {
-                console.warn('=== Response Format Issue ===');
-                console.warn('Response:', response);
-                setAffiliates([]);
+            if (response?.success && response?.data) {
+                // Standard structure: { success: true, data: { affiliates: [...], pagination: {...} } }
+                affiliatesList = response.data.affiliates || [];
+                paginationData = response.data.pagination || paginationData;
+            } else if (response?.affiliates) {
+                // Direct affiliates array: { affiliates: [...], pagination: {...} }
+                affiliatesList = Array.isArray(response.affiliates) ? response.affiliates : [];
+                paginationData = response.pagination || paginationData;
+            } else if (Array.isArray(response)) {
+                // Response is directly an array
+                affiliatesList = response;
             }
+
+            console.log('=== Setting Affiliates ===');
+            console.log('Count:', affiliatesList.length);
+            console.log('First affiliate:', affiliatesList[0]);
+            console.log('Pagination data:', paginationData);
+
+            setAffiliates(affiliatesList);
+            setPagination(prev => ({
+                ...prev,
+                currentPage: paginationData.currentPage || paginationData.page || prev.currentPage,
+                totalPages: paginationData.totalPages || paginationData.pages || 1,
+                totalItems: paginationData.totalItems || paginationData.total || 0,
+                itemsPerPage: paginationData.itemsPerPage || paginationData.limit || prev.itemsPerPage
+            }));
         } catch (error) {
             console.error('=== Error Fetching Affiliates ===');
             console.error('Error:', error);
@@ -128,18 +145,29 @@ function AffiliateList() {
     };
 
     const handleApprove = async (affiliateId) => {
-        if (!window.confirm('Are you sure you want to approve this affiliate?')) {
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: 'You want to approve this affiliate?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Approve',
+            cancelButtonText: 'Cancel',
+        });
+
+        if (!result.isConfirmed) {
             return;
         }
 
         setActionLoading(affiliateId);
         try {
             await approveAffiliate(affiliateId);
-            alert('Affiliate approved successfully!');
+            showSuccess('Affiliate approved successfully!');
             await fetchAffiliates();
             await fetchAnalytics();
         } catch (error) {
-            alert(error.response?.data?.message || error.message || 'Failed to approve affiliate');
+            showError(error.response?.data?.message || error.message || 'Failed to approve affiliate');
         } finally {
             setActionLoading(null);
         }
@@ -147,37 +175,48 @@ function AffiliateList() {
 
     const handleReject = async () => {
         if (!rejectModal.reason.trim()) {
-            alert('Please provide a rejection reason');
+            showError('Please provide a rejection reason');
             return;
         }
 
         setActionLoading(rejectModal.affiliateId);
         try {
             await rejectAffiliate(rejectModal.affiliateId, rejectModal.reason);
-            alert('Affiliate rejected successfully!');
+            showSuccess('Affiliate rejected successfully!');
             setRejectModal({ open: false, affiliateId: null, reason: '' });
             await fetchAffiliates();
             await fetchAnalytics();
         } catch (error) {
-            alert(error.response?.data?.message || error.message || 'Failed to reject affiliate');
+            showError(error.response?.data?.message || error.message || 'Failed to reject affiliate');
         } finally {
             setActionLoading(null);
         }
     };
 
     const handleSuspend = async (affiliateId) => {
-        if (!window.confirm('Are you sure you want to suspend this affiliate?')) {
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: 'You want to suspend this affiliate?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#f59e0b',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Suspend',
+            cancelButtonText: 'Cancel',
+        });
+
+        if (!result.isConfirmed) {
             return;
         }
 
         setActionLoading(affiliateId);
         try {
             await suspendAffiliate(affiliateId);
-            alert('Affiliate suspended successfully!');
+            showSuccess('Affiliate suspended successfully!');
             await fetchAffiliates();
             await fetchAnalytics();
         } catch (error) {
-            alert(error.response?.data?.message || error.message || 'Failed to suspend affiliate');
+            showError(error.response?.data?.message || error.message || 'Failed to suspend affiliate');
         } finally {
             setActionLoading(null);
         }

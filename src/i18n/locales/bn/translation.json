@@ -103,9 +103,12 @@
             "comingSoon": "শীঘ্রই আসছে",
             "favourited": "পছন্দের",
             "frequentlyDownloaded": "প্রায়ই ডাউনলোড করা",
+            "newAdded": "নতুন যোগ করা বই",
             "popularReader": "অনলাইন রিডারে জনপ্রিয়",
             "categories": "ক্যাটাগরি ব্রাউজ করুন",
-            "coupons": "বিশেষ অফার"
+            "coupons": "বিশেষ অফার",
+            "emptyMessage": "বই খুব শীঘ্রই যোগ করা হবে!",
+            "emptyDescription": "আমরা খুব শীঘ্রই চমৎকার বই যোগ করছি। সাথে থাকুন!"
         }
     },
     "pages": {

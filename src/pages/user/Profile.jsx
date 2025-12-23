@@ -14,11 +14,7 @@ import ProfileForm from '../../components/user/ProfileForm';
 import PasswordForm from '../../components/user/PasswordForm';
 import Loading from '../../components/common/Loading';
 import { useThemeColors } from '../../hooks/useThemeColors';
-// Toast notifications - using browser alert for now, can be replaced with toast library
-const toast = {
-    success: (message) => alert(message),
-    error: (message) => alert(message)
-};
+import { showSuccess, showError } from '../../utils/toast';
 
 function Profile() {
     const { t } = useTranslation();
@@ -44,7 +40,7 @@ function Profile() {
 
     useEffect(() => {
         if (error) {
-            toast.error(error);
+            showError(error);
             dispatch(clearError());
         }
     }, [error, dispatch]);
@@ -62,10 +58,10 @@ function Profile() {
             }));
             // Refresh profile data from database to ensure UI shows latest data
             await dispatch(fetchUserProfile());
-            toast.success(t('user.profileUpdated') || 'Profile updated successfully!');
+            showSuccess(t('user.profileUpdated') || 'Profile updated successfully!');
             return updatedProfile;
         } catch (err) {
-            toast.error(err || t('user.profileUpdateFailed') || 'Failed to update profile');
+            showError(err || t('user.profileUpdateFailed') || 'Failed to update profile');
             throw err; // Re-throw to let form handle it
         }
     };
@@ -73,9 +69,9 @@ function Profile() {
     const handlePasswordChange = async (passwordData) => {
         try {
             await dispatch(changeUserPassword(passwordData)).unwrap();
-            toast.success(t('user.passwordChanged') || 'Password changed successfully!');
+            showSuccess(t('user.passwordChanged') || 'Password changed successfully!');
         } catch (err) {
-            toast.error(err || t('user.passwordChangeFailed') || 'Failed to change password');
+            showError(err || t('user.passwordChangeFailed') || 'Failed to change password');
         }
     };
 

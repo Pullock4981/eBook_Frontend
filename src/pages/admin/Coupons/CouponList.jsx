@@ -15,6 +15,8 @@ import Pagination from '../../../components/common/Pagination';
 import { useThemeColors } from '../../../hooks/useThemeColors';
 import { getPendingAffiliateCoupons, approveAffiliateCoupon, rejectAffiliateCoupon } from '../../../services/couponService';
 import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
+import { showError } from '../../../utils/toast';
 
 function CouponList() {
     const { t } = useTranslation();
@@ -132,7 +134,17 @@ function CouponList() {
     };
 
     const handleReject = async (couponId) => {
-        if (!window.confirm('Are you sure you want to reject this coupon request? This action cannot be undone.')) {
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: 'You want to reject this coupon request? This action cannot be undone.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Reject',
+            cancelButtonText: 'Cancel',
+        });
+        if (!result.isConfirmed) {
             return;
         }
 
@@ -167,7 +179,17 @@ function CouponList() {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm(t('admin.confirmDeleteCoupon') || 'Are you sure you want to delete this coupon?')) {
+        const result = await Swal.fire({
+            title: t('admin.confirmDeleteCoupon') || 'Are you sure?',
+            text: 'You want to delete this coupon?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: t('common.delete') || 'Delete',
+            cancelButtonText: t('common.cancel') || 'Cancel',
+        });
+        if (!result.isConfirmed) {
             return;
         }
 
@@ -177,7 +199,7 @@ function CouponList() {
             // Refresh list
             dispatch(fetchAllCoupons({ page: pagination.currentPage, limit: 10 }));
         } catch (error) {
-            alert(error || t('admin.deleteError') || 'Failed to delete coupon');
+            showError(error || t('admin.deleteError') || 'Failed to delete coupon');
         } finally {
             setDeleteLoading(null);
         }

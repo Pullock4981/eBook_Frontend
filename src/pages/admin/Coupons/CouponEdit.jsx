@@ -12,6 +12,7 @@ import { fetchCouponById, updateCoupon, fetchAllCoupons, selectCurrentCoupon, se
 import CouponForm from '../../../components/admin/CouponForm';
 import Loading from '../../../components/common/Loading';
 import { useThemeColors } from '../../../hooks/useThemeColors';
+import { showError, showSuccess } from '../../../utils/toast';
 
 function CouponEdit() {
     const { t } = useTranslation();
@@ -34,12 +35,13 @@ function CouponEdit() {
         setIsSubmitting(true);
         try {
             await dispatch(updateCoupon({ id, couponData: formData })).unwrap();
+            showSuccess(t('admin.couponUpdated') || 'Coupon updated successfully!');
             // Refresh coupons list
             dispatch(fetchAllCoupons({ page: 1, limit: 10 }));
             // Navigate to coupons list
             navigate('/admin/coupons');
         } catch (error) {
-            alert(error || t('admin.updateError') || 'Failed to update coupon');
+            showError(error || t('admin.updateError') || 'Failed to update coupon');
         } finally {
             setIsSubmitting(false);
         }

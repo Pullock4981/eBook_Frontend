@@ -30,7 +30,7 @@ export const uploadSingleImage = async (file, onProgress) => {
                     onProgress(percentCompleted);
                 }
             },
-            timeout: 60000, // 1 minute for image uploads
+            timeout: 45000, // 45 seconds for image uploads (optimized)
         });
 
         return response;
@@ -65,7 +65,7 @@ export const uploadMultipleImages = async (files, onProgress) => {
                     onProgress(percentCompleted);
                 }
             },
-            timeout: 120000, // 2 minutes for multiple image uploads
+            timeout: 90000, // 90 seconds for multiple image uploads (optimized)
         });
 
         return response;

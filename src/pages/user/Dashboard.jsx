@@ -28,6 +28,8 @@ import { formatCurrency, formatDate } from '../../utils/helpers';
 import { getPDFURL } from '../../services/ebookService';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { getAffiliateCoupons } from '../../services/affiliateService';
+import { showError, showSuccess } from '../../utils/toast';
+import Swal from 'sweetalert2';
 
 function Dashboard() {
     const { t } = useTranslation();
@@ -280,21 +282,33 @@ function Dashboard() {
                                     </h3>
                                     <button
                                         onClick={async () => {
-                                            if (!window.confirm('Are you sure you want to cancel your affiliate registration request? This action cannot be undone.')) {
+                                            const result = await Swal.fire({
+                                                title: 'Are you sure?',
+                                                text: 'You want to cancel your affiliate registration request? This action cannot be undone.',
+                                                icon: 'warning',
+                                                showCancelButton: true,
+                                                confirmButtonColor: '#ef4444',
+                                                cancelButtonColor: '#6b7280',
+                                                confirmButtonText: 'Cancel Registration',
+                                                cancelButtonText: 'Keep It',
+                                            });
+
+                                            if (!result.isConfirmed) {
                                                 return;
                                             }
+
                                             setCancelLoading(true);
                                             try {
                                                 const result = await dispatch(cancelAffiliateRegistration());
                                                 if (cancelAffiliateRegistration.fulfilled.match(result)) {
-                                                    alert('✅ Affiliate registration cancelled successfully!');
+                                                    showSuccess('Affiliate registration cancelled successfully!');
                                                     // Affiliate check disabled - no need to refresh
                                                     // dispatch(fetchAffiliateProfile());
                                                 } else {
-                                                    alert(`❌ Failed to cancel: ${result.payload || 'Unknown error'}`);
+                                                    showError(`Failed to cancel: ${result.payload || 'Unknown error'}`);
                                                 }
                                             } catch (error) {
-                                                alert(`❌ Error: ${error.message || 'Failed to cancel registration'}`);
+                                                showError(`Error: ${error.message || 'Failed to cancel registration'}`);
                                             } finally {
                                                 setCancelLoading(false);
                                             }
@@ -364,7 +378,7 @@ function Dashboard() {
                                             <button
                                                 onClick={() => {
                                                     navigator.clipboard.writeText(activeCouponCode);
-                                                    alert('Coupon code copied to clipboard!');
+                                                    showSuccess('Coupon code copied to clipboard!');
                                                 }}
                                                 className="btn btn-sm px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white whitespace-nowrap"
                                                 style={{ backgroundColor: successColor, minHeight: '36px' }}

@@ -11,7 +11,7 @@ import { useThemeColors } from '../../hooks/useThemeColors';
 
 function HomeSection({ title, titleKey, products, seeMoreLink, loading, emptyMessage, emptyMessageKey }) {
     const { t } = useTranslation();
-    const { buttonColor, primaryTextColor } = useThemeColors();
+    const { buttonColor, primaryTextColor, secondaryTextColor } = useThemeColors();
 
     const displayTitle = titleKey ? t(titleKey) : title;
     const displayEmptyMessage = emptyMessageKey ? t(emptyMessageKey) : emptyMessage;
@@ -29,7 +29,46 @@ function HomeSection({ title, titleKey, products, seeMoreLink, loading, emptyMes
     }
 
     if (!products || products.length === 0) {
-        return null; // Don't show empty sections
+        return (
+            <section className="py-8 sm:py-12">
+                <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                    {/* Section Header */}
+                    <div className="flex items-center justify-between mb-6 sm:mb-8">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold" style={{ color: primaryTextColor }}>
+                            {displayTitle}
+                        </h2>
+                    </div>
+
+                    {/* Empty State Message */}
+                    <div className="text-center py-12 sm:py-16 px-4">
+                        <div className="max-w-md mx-auto">
+                            <div className="mb-4">
+                                <svg 
+                                    className="w-16 h-16 mx-auto" 
+                                    style={{ color: buttonColor }} 
+                                    fill="none" 
+                                    stroke="currentColor" 
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path 
+                                        strokeLinecap="round" 
+                                        strokeLinejoin="round" 
+                                        strokeWidth={2} 
+                                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" 
+                                    />
+                                </svg>
+                            </div>
+                            <h3 className="text-xl sm:text-2xl font-semibold mb-3" style={{ color: primaryTextColor }}>
+                                {displayEmptyMessage || t('home.sections.emptyMessage') || 'Books Coming Soon!'}
+                            </h3>
+                            <p className="text-base sm:text-lg mb-6" style={{ color: secondaryTextColor }}>
+                                {t('home.sections.emptyDescription') || 'We are adding amazing books very soon. Stay tuned!'}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        );
     }
 
     return (

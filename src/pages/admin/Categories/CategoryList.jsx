@@ -9,6 +9,8 @@ import { useTranslation } from 'react-i18next';
 import { getCategories, createCategory, deleteCategory } from '../../../services/adminService';
 import Loading from '../../../components/common/Loading';
 import { useThemeColors } from '../../../hooks/useThemeColors';
+import { showError, showSuccess } from '../../../utils/toast';
+import Swal from 'sweetalert2';
 
 function CategoryList() {
     const { t } = useTranslation();
@@ -61,7 +63,7 @@ function CategoryList() {
         e.preventDefault();
 
         if (!formData.name.trim()) {
-            alert('Category name is required');
+            showError('Category name is required');
             return;
         }
 
@@ -75,27 +77,40 @@ function CategoryList() {
                 isActive: true
             });
             setShowAddForm(false);
+            showSuccess('Category created successfully!');
             // Refresh categories
             await fetchCategories();
         } catch (error) {
-            alert(error.response?.data?.message || error.message || 'Failed to create category');
+            showError(error.response?.data?.message || error.message || 'Failed to create category');
         } finally {
             setCreateLoading(false);
         }
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this category?')) {
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: 'You want to delete this category?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Delete',
+            cancelButtonText: 'Cancel',
+        });
+
+        if (!result.isConfirmed) {
             return;
         }
 
         setDeleteLoading(id);
         try {
             await deleteCategory(id);
+            showSuccess('Category deleted successfully!');
             // Refresh categories
             await fetchCategories();
         } catch (error) {
-            alert(error.response?.data?.message || error.message || 'Failed to delete category');
+            showError(error.response?.data?.message || error.message || 'Failed to delete category');
         } finally {
             setDeleteLoading(null);
         }

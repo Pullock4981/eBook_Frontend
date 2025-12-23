@@ -47,10 +47,12 @@ function PDFViewerPage() {
                 const isExternalURL = product.digitalFile.startsWith('http://') || product.digitalFile.startsWith('https://');
 
                 if (isExternalURL) {
-                    // Use backend proxy endpoint
-                    setPdfURL(`${API_BASE_URL}/products/${productId}/pdf-proxy`);
+                    // Use backend proxy endpoint to avoid 401 Unauthorized from Cloudinary
+                    const proxyURL = `${API_BASE_URL}/products/${productId}/pdf-proxy`;
+                    console.log('📄 PDFViewerPage - Using Proxy URL:', proxyURL);
+                    setPdfURL(proxyURL);
                 } else {
-                    // For local files, use direct URL
+                    // For local/relative files, use direct URL
                     setPdfURL(product.digitalFile);
                 }
                 setProductName(product.name || 'PDF');
